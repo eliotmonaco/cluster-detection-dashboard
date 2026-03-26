@@ -11,7 +11,7 @@ function(input, output, session) {
   # Get all data for a particular date
   data <- reactive({
     req(rv$date)
-    get_list_data(dbdata, rv$date)
+    get_db_data(dbdata, rv$date)
   })
 
   # Syndrome list

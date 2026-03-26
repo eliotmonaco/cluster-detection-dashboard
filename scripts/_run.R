@@ -37,7 +37,11 @@ tally <- c(
 )
 
 tally <- paste(
-  c(rep("Data details,", 2), rep("Time series,", 2), rep("Satscan output,", 2)),
+  c(
+    rep("Data details,", 2),
+    rep("Time series,", 2),
+    rep("Satscan output,", 2)
+  ),
   paste0(names(tally), ": ", tally)
 )
 
@@ -51,7 +55,11 @@ writeLines(log, paste0(dir_data, "log.txt"))
 dirs <- list.dirs("data/", full.names = TRUE, recursive = FALSE)
 dirs <- dirs[grepl("^data/an-", dirs)]
 
-dbdata <- combine_all_data(dirs)
+dbdata <- lapply(dirs, \(x) {
+  readRDS(paste0(x, "/processed_data.rds"))
+})
+
+names(dbdata) <- gsub("data/|-", "", dirs)
 
 saveRDS(dbdata, "data/dashboard_data.rds")
 

@@ -1,17 +1,5 @@
 # Get Essence data via API
 
-# library(Rnssp)
-# library(tidyverse)
-# library(setmeup)
-#
-# # Load Essence profile object, needed for `get_api_data()`
-# load("data/myProfile.rda")
-#
-# source("scripts/fn.R")
-# source("scripts/syndromes.R")
-#
-# geo <- readRDS("data/geographic_data.rds")
-
 # Build URLs and pull data ------------------------------------------------
 
 t0 <- Sys.time()
@@ -167,16 +155,18 @@ ts <- lapply(tsraw, \(ls1) {
   })
 })
 
-# Configure
-dd <- lapply(dd, \(ls) {
-  var = c("zip_code", "hospital_name")
+dd$patient <- lapply(dd$patient, \(df) {
+  tryCatch(
+    config_dd(df, geo_var = "zip_code"),
+    error = function(e) e
+  )
+})
 
-  map2(ls, var, \(df, x) {
-    tryCatch(
-      config_dd(df, geo_var = x),
-      error = function(e) e
-    )
-  })
+dd$hospital <- lapply(dd$hospital, \(df) {
+  tryCatch(
+    config_dd(df, geo_var = "hospital_name"),
+    error = function(e) e
+  )
 })
 
 ts <- lapply(ts, \(ls) {
@@ -211,9 +201,4 @@ ess_raw <- list(
 
 writeLines(log, paste0(dir_data, "log.txt"))
 saveRDS(ess_raw, paste0(dir_data, "essence_raw.rds"))
-saveRDS(dd, paste0(dir_data, "essence_data_details.rds"))
-saveRDS(ts, paste0(dir_data, "essence_time_series.rds"))
-saveRDS(dderror, paste0(dir_data, "data_details_deduplication_error.rds"))
-saveRDS(date_range, paste0(dir_data, "date_range.rds"))
-saveRDS(syn, paste0(dir_data, "syndrome_list.rds"))
 

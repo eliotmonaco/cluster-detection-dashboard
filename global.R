@@ -22,12 +22,12 @@ dt <- as.Date(sub("^data/an-", "", dirs))
 
 # Initial syndrome select input list
 synselect1 <- dbdata |>
-  get_list_data(max(dt), "syn") |>
+  get_db_data(max(dt), "syn") |>
   syn_select_list()
 
 # Initial date range input list
 daterng1 <- dbdata |>
-  get_list_data(max(dt), "daterng") |>
+  get_db_data(max(dt), "daterng") |>
   daterange_select_list()
 
 # Spatial data
@@ -37,8 +37,9 @@ geo <- readRDS("data/geographic_data.rds")
 uitext <- list(
   sigp = HTML("Show clusters where p&nbsp;<&nbsp;0.05 only"),
   cctbl = HTML(paste(
-    "Spatiotemporal clusters are detected using SaTScan software. This table",
-    "shows the number of clusters where p&nbsp;<&nbsp;0.05 for each syndrome."
+    "Spatiotemporal clusters are detected using SaTScan<sup>TM</sup> software.",
+    "This table shows the number of clusters where p&nbsp;<&nbsp;0.05 for each",
+    "syndrome."
   )),
   val_loc = paste(
     "Select a cluster on the map or the cluster table to see location details"

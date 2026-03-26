@@ -505,24 +505,10 @@ run_satscan <- function(dir, file, satscan_exe) {
 
 # SHINY DATA CONFIG -------------------------------------------------------
 
-combine_all_data <- function(dirs) {
-  ls <- lapply(dirs, \(d) {
-    syn <- readRDS(paste0(d, "/syndrome_list.rds"))
-    daterng <- readRDS(paste0(d, "/date_range.rds"))
-    ts <- readRDS(paste0(d, "/essence_time_series.rds"))
-    dd <- readRDS(paste0(d, "/essence_data_details.rds"))
-    ss <- readRDS(paste0(d, "/satscan-output/satscan_results.rds"))
-
-    list(syn = syn, daterng = daterng, ts = ts, dd = dd, ss = ss)
-  })
-
-  names(ls) <- gsub("data/|-", "", dirs)
-
-  ls
-}
-
-get_list_data <- function(ls, date, name = NULL) {
+get_db_data <- function(ls, date, name = NULL) {
   ls <- ls[[names(ls)[grepl(gsub("-", "", date), names(ls))]]]
+
+  names(ls) <- c("syn", "daterng", "ts", "dd", "dderr", "ss")
 
   if (!is.null(name)) {
     ls[[name]]

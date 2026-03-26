@@ -1,15 +1,5 @@
 # Run Satscan analyses
 
-# library(rsatscan)
-# library(tidyverse)
-# library(sf)
-# library(setmeup)
-#
-# source("scripts/fn.R")
-#
-# dd <- readRDS(paste0(dir_data, "essence_data_details.rds"))
-# geo <- readRDS("data/geographic_data.rds")
-
 t0 <- Sys.time()
 
 dir_in <- paste0(dir_data, "satscan-input/")
@@ -191,6 +181,15 @@ ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
 
 # Save --------------------------------------------------------------------
 
+procdata <- list(
+  syndromes = syn,
+  date_range = date_range,
+  time_series = ts,
+  data_details = dd,
+  data_details_error = dderror,
+  satscan_results = ssresults
+)
+
 writeLines(log, paste0(dir_data, "log.txt"))
-saveRDS(ssresults, paste0(dir_out, "satscan_results.rds"))
+saveRDS(procdata, paste0(dir_data, "processed_data.rds"))
 
