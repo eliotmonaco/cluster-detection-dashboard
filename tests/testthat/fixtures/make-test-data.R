@@ -1,11 +1,14 @@
 # Create mock data for dashboard functions
 
 library(tidyverse)
+library(rsatscan)
+library(sf)
 
-source("scripts/fn.R")
+source("R/fn.R")
 
 geo <- readRDS("data/geographic_data.rds")
 ansi <- readRDS("data/ansi_state_codes.rds")
+hosp <- readRDS("data/hospital_locations.rds")
 
 syn <- list(
   syn1 = list(
@@ -34,7 +37,7 @@ start_date <- get_start_date(end_date)
 
 date_range <- seq.Date(start_date, end_date, "day")
 
-# Essence time series -----------------------------------------------------
+# Essence time series (raw) -----------------------------------------------
 
 # Variables: `date`, `count`, `color_id`
 
@@ -79,7 +82,7 @@ tsraw <- lapply(list(1, 2), \(x) {
 
 names(tsraw) <- c("patient", "hospital")
 
-# Essence data details ----------------------------------------------------
+# Essence data details (raw) ----------------------------------------------
 
 # Variables: `date`, `time`, `age`, `age_group`, `sex`, `date_of_birth`,
 #   `zip_code`, `patient_state`, `patient_country`, `hospital_name`,
@@ -91,7 +94,7 @@ ddraw <- lapply(list(1, 2), \(x) {
     lambda = list(1:10, 5:20, 50:100),
     seed = list(x),
     zctas = list(geo$zctas$GEOID20),
-    hospitals = list(geo$hosp$hospital_name_geo)
+    hospitals = list(hosp$hospital_name_essence)
   )
 
   ls <- pmap(params, \(dates, end, lambda, seed, zctas, hospitals) {
@@ -229,13 +232,18 @@ ts <- lapply(tsraw, \(ls1) {
 })
 
 # Configure
-dd <- map2(dd, c("zip_code", "hospital_name"), \(ls, x) {
-  lapply(ls, \(df) {
-    tryCatch(
-      config_dd(df, geo_var = x),
-      error = function(e) e
-    )
-  })
+dd$patient <- lapply(dd$patient, \(df) {
+  tryCatch(
+    config_dd(df, geo_var = "zip_code"),
+    error = function(e) e
+  )
+})
+
+dd$hospital <- lapply(dd$hospital, \(df) {
+  tryCatch(
+    config_dd(df, geo_var = "hospital_name"),
+    error = function(e) e
+  )
 })
 
 ts <- lapply(ts, \(ls) {
@@ -246,6 +254,10 @@ ts <- lapply(ts, \(ls) {
     )
   })
 })
+
+config_dd_output <- dd
+
+config_ts_output <- ts
 
 # Separate data from error tables in data details
 dderror <- lapply(dd, \(ls1) {
@@ -262,13 +274,160 @@ dd <- lapply(dd, \(ls1) {
 
 # Satscan output ----------------------------------------------------------
 
+dir_data <- "tests/testthat/fixtures/test-data/"
 
+dir_in <- paste0(dir_data, "satscan-input/")
+dir_out <- paste0(dir_data, "satscan-output/")
 
+dir.create(dir_data)
+dir.create(dir_in)
+dir.create(dir_out)
 
+# Case file: <location ID> <# cases> <date/time>
+imap(dd$patient, \(df, i) {
+  tryCatch(
+    expr = {
+      df <- config_casefile(df, var = "zip_code")
+      write.cas(df, dir_in, paste0(i, "-patient"))
+    },
+    error = function(e) e
+  )
+})
 
+imap(dd$hospital, \(df, i) {
+  tryCatch(
+    expr = {
+      df <- config_casefile(df, var = "hospital_name_geo")
+      write.cas(df, dir_in, paste0(i, "-hospital"))
+    },
+    error = function(e) e
+  )
+})
 
+# Coordinates file: <location ID> <latitude> <longitude>
+geo_file_pat <- geo$zcta_pts |>
+  st_drop_geometry() |>
+  select(zcta, lat, long)
 
+geo_file_hosp <- geo$hosp |>
+  st_drop_geometry() |>
+  select(hospital_name_geo, lat, long)
 
+write.geo(geo_file_pat, dir_in, "zctas")
+write.geo(geo_file_hosp, dir_in, "hospitals")
 
+# Parameter file
+imap(dd, \(ls, i) {
+  imap(ls, \(df, j) {
+    # Set Satscan options to defaults
+    invisible(ss.options(reset = TRUE, version = "10.3"))
 
+    if (is.null(df)) {
+      return(invisible(NULL))
+    }
+
+    if (i == "patient") {
+      cfnm <- paste0(dir_in, "zctas.geo")
+    } else if (i == "hospital") {
+      cfnm <- paste0(dir_in, "hospitals.geo")
+    }
+
+    nm <- paste0(j, "-", i)
+
+    # Configure Satscan options
+    set_ss_opts(
+      casefile = paste0(dir_in, nm, ".cas"),
+      coordfile = cfnm,
+      start = format(min(df$date), "%Y/%m/%d"),
+      end = format(max(df$date), "%Y/%m/%d")
+    )
+
+    write.ss.prm(dir_out, nm)
+  })
+})
+
+# Run Satscan
+ssresults <- imap(dd, \(ls, i) {
+  imap(ls, \(x, j) {
+    nm <- paste0(j, "-", i)
+
+    if (file.exists(paste0(dir_out, nm, ".prm"))) {
+      run_satscan(
+        dir = dir_out,
+        file = nm,
+        satscan_exe = "C:/Program Files/SaTScan/SaTScanBatch64"
+      )
+    } else {
+      NULL
+    }
+  })
+})
+
+# Var names to lowercase
+ssresults <- lapply(ssresults, \(ls) {
+  lapply(ls, \(ls2) {
+    lapply(ls2, \(x) {
+      if (is.data.frame(x)) {
+        colnames(x) <- tolower(colnames(x))
+      }
+
+      x
+    })
+  })
+})
+
+# Join `kc` variable that indicates if a geography is in Kansas City
+ssresults$patient <- lapply(ssresults$patient, \(ls) {
+  imap(ls, \(x, i) {
+    if (is.data.frame(x) && grepl("gis", i)) {
+      x <- x |>
+        left_join(
+          geo$zctas |>
+            st_drop_geometry() |>
+            select(loc_id = GEOID20, kc),
+          by = "loc_id"
+        ) |>
+        relocate(kc, .after = loc_id)
+    }
+
+    x
+  })
+})
+
+ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
+  imap(ls, \(x, i) {
+    if (is.data.frame(x) && grepl("gis", i)) {
+      x <- x |>
+        left_join(
+          geo$hosp |>
+            st_drop_geometry() |>
+            select(loc_id = hospital_name_geo, kc),
+          by = "loc_id"
+        ) |>
+        relocate(kc, .after = loc_id)
+    }
+
+    x
+  })
+})
+
+# Clean up
+unlink(dir_data, recursive = TRUE, force = TRUE)
+
+# Save --------------------------------------------------------------------
+
+testdata <- list(
+  time_series_raw = tsraw,
+  data_details_raw = ddraw,
+  config_ts_output = config_ts_output,
+  config_dd_output = config_dd_output,
+  syndromes = syn,
+  date_range = date_range,
+  time_series = ts,
+  data_details = dd,
+  data_details_error = dderror,
+  satscan_results = ssresults
+)
+
+saveRDS(testdata, "tests/testthat/fixtures/test_data.rds")
 

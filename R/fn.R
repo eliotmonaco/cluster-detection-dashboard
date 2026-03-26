@@ -326,15 +326,19 @@ config_ts <- function(df) {
 
 # SPATIAL DATA ------------------------------------------------------------
 
-get_centroids <- function(sf) {
+get_centroids <- function(sf, id_var) {
   sf |>
-    st_centroid() |>
-    bind_cols(
+    sf::st_centroid() |>
+    dplyr::bind_cols(
       sf |>
-        st_centroid() |>
-        st_coordinates()
+        sf::st_centroid() |>
+        sf::st_coordinates()
     ) |>
-    select(zcta = ZCTA5CE20, long = X, lat = Y)
+    dplyr::select(
+      tidyselect::all_of(id_var),
+      long = X,
+      lat = Y
+    )
 }
 
 # SATSCAN -----------------------------------------------------------------

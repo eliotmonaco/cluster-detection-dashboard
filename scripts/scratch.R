@@ -17,12 +17,12 @@ ansi <- readRDS("data/ansi_state_codes.rds")
 end_date <- Sys.Date()
 
 # Create a directory in `data/` for storing output
-# dir_data <- paste0("data/an-", end_date, "/")
-dir_data <- "data/test/"
+dir_data <- paste0("data/an-", end_date, "/")
+# dir_data <- "data/test/"
 unlink(dir_data, recursive = TRUE, force = TRUE)
 dir.create(dir_data)
 
-source("scripts/fn.R")
+source("R/fn.R")
 source("scripts/syndromes.R")
 syn <- syn[1:2]
 source("scripts/get-ess.R")
@@ -41,11 +41,11 @@ inputdtrng <- daterng1$`One year`
 
 # # Data details
 # dd <- dbdata |>
-#   get_list_data(max(dt), "dd") |>
+#   get_db_data(max(dt), "dd") |>
 #   get_dd_data(inputsyn, inputdtrng)
 
 # Filter Satscan data
-ss <- get_list_data(dbdata, max(dt), "ss")
+ss <- get_db_data(dbdata, max(dt), "ss")
 
 # Filter cluster data
 clustdata <- config_syndrome_data(ss, inputsyn, TRUE)

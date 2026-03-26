@@ -56,7 +56,7 @@ synname <- reactive({
 #       req(rv$date, rv$syn, rv$dtrng)
 #
 #       dbdata |>
-#         get_list_data(rv$date, "dd") |>
+#         get_db_data(rv$date, "dd") |>
 #         get_dd_data(rv$syn, rv$dtrng)
 #     })
 #

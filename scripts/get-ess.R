@@ -155,6 +155,7 @@ ts <- lapply(tsraw, \(ls1) {
   })
 })
 
+# Configure
 dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
     config_dd(df, geo_var = "zip_code"),

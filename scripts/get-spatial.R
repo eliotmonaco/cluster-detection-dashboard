@@ -5,7 +5,7 @@ library(tigris)
 library(tidyverse)
 library(sf)
 
-source("scripts/fn.R")
+source("R/fn.R")
 
 hosp <- readRDS("data/hospital_locations.rds")
 
@@ -60,7 +60,8 @@ ggplot() +
   )
 
 # Get centroids
-zcta_pts <- get_centroids(zctaco)
+zcta_pts <- get_centroids(zctaco, id_var = "ZCTA5CE20") |>
+  rename(zcta = ZCTA5CE20)
 
 # Flag KC ZCTAs
 sf1 <- st_filter(zctamap, kcmap, .predicate = st_intersects)

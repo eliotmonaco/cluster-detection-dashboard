@@ -7,7 +7,7 @@ library(highcharter)
 library(reactable)
 library(leaflet)
 
-source("scripts/fn.R")
+source("R/fn.R")
 source("scripts/syndromes.R")
 
 # Import dashboard data
