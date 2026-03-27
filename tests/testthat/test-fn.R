@@ -38,3 +38,82 @@ test_that("config_ts()", {
   expect_equal(act, exp)
 })
 
+test_that("get_centroids()", {
+  source("R/fn.R", local = TRUE)
+  testdata <- readRDS(test_path("fixtures/test_data.rds"))
+  exp <- testdata$get_centroids_output
+  act <- get_centroids(testdata$get_centroids_input, "NAME")
+  expect_equal(act, exp)
+})
+
+test_that("config_casefile()", {
+  source("R/fn.R", local = TRUE)
+  testdata <- readRDS(test_path("fixtures/test_data.rds"))
+  exp <- testdata$config_casefile_output
+  act <- list()
+  act$patient <- lapply(testdata$data_details$patient, \(df) {
+    config_casefile(df, var = "zip_code")
+  })
+  act$hospital <- lapply(testdata$data_details$hospital, \(df) {
+    config_casefile(df, var = "hospital_name_geo")
+  })
+  expect_equal(act, exp)
+})
+
+test_that("get_db_data() full", {
+  source("R/fn.R", local = TRUE)
+  testdata <- readRDS(test_path("fixtures/test_data.rds"))
+  dbdata <- list(an20260325 = NA)
+  dbdata$an20260326 <- testdata
+  exp <-dbdata$an20260326
+  x <- names(exp)
+  names(exp) <- replace(
+    names(exp),
+    list = c(
+      which(x == "syndromes"), which(x == "date_range"),
+      which(x == "time_series"), which(x == "data_details"),
+      which(x == "data_details_error"), which(x == "satscan_results")
+    ),
+    values = c("syn", "daterng", "ts", "dd", "dderr", "ss")
+  )
+  act <- get_db_data(dbdata, date = "2026-03-26")
+  expect_equal(act, exp)
+})
+
+test_that("get_db_data() single element", {
+  source("R/fn.R", local = TRUE)
+  testdata <- readRDS(test_path("fixtures/test_data.rds"))
+  dbdata <- list(an20260325 = NA)
+  dbdata$an20260326 <- testdata
+  exp <-dbdata$an20260326$syndromes
+  act <- get_db_data(dbdata, date = "2026-03-26", name = "syn")
+  expect_equal(act, exp)
+})
+
+# test_that("()", {
+#   source("R/fn.R", local = TRUE)
+#   testdata <- readRDS(test_path("fixtures/test_data.rds"))
+#   exp <-
+#     act <-
+#     expect_equal(act, exp)
+# })
+#
+# test_that("()", {
+#   source("R/fn.R", local = TRUE)
+#   testdata <- readRDS(test_path("fixtures/test_data.rds"))
+#   exp <-
+#     act <-
+#     expect_equal(act, exp)
+# })
+#
+# test_that("()", {
+#   source("R/fn.R", local = TRUE)
+#   testdata <- readRDS(test_path("fixtures/test_data.rds"))
+#   exp <-
+#     act <-
+#     expect_equal(act, exp)
+# })
+
+
+
+

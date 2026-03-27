@@ -78,7 +78,7 @@ page_navbar(
         numericInput(
           inputId = "zoom",
           label = "Default map zoom level",
-          value = 8,
+          value = 9,
           min = 0
         )
       ),

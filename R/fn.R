@@ -335,7 +335,7 @@ get_centroids <- function(sf, id_var) {
         sf::st_coordinates()
     ) |>
     dplyr::select(
-      tidyselect::all_of(id_var),
+      dplyr::all_of(id_var),
       long = X,
       lat = Y
     )
@@ -345,9 +345,9 @@ get_centroids <- function(sf, id_var) {
 
 config_casefile <- function(df, var) {
   df |>
-    filter(date < max(df$date)) |> # most recent date with complete data
-    count(.data[[var]], date) |>
-    select(all_of(var), n, date)
+    dplyr::filter(date < max(df$date)) |> # most recent date with complete data
+    dplyr::count(.data[[var]], date) |>
+    dplyr::select(dplyr::all_of(var), n, date)
 }
 
 set_ss_opts <- function(casefile, coordfile, start, end) {
@@ -512,7 +512,18 @@ run_satscan <- function(dir, file, satscan_exe) {
 get_db_data <- function(ls, date, name = NULL) {
   ls <- ls[[names(ls)[grepl(gsub("-", "", date), names(ls))]]]
 
-  names(ls) <- c("syn", "daterng", "ts", "dd", "dderr", "ss")
+  x <- names(ls)
+
+  # Replace list names
+  names(ls) <- replace(
+    names(ls),
+    list = c(
+      which(x == "syndromes"), which(x == "date_range"),
+      which(x == "time_series"), which(x == "data_details"),
+      which(x == "data_details_error"), which(x == "satscan_results")
+    ),
+    values = c("syn", "daterng", "ts", "dd", "dderr", "ss")
+  )
 
   if (!is.null(name)) {
     ls[[name]]

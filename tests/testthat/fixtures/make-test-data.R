@@ -283,22 +283,26 @@ dir.create(dir_data)
 dir.create(dir_in)
 dir.create(dir_out)
 
+casefiles <- list()
+
 # Case file: <location ID> <# cases> <date/time>
-imap(dd$patient, \(df, i) {
+casefiles$patient <- imap(dd$patient, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "zip_code")
       write.cas(df, dir_in, paste0(i, "-patient"))
+      df
     },
     error = function(e) e
   )
 })
 
-imap(dd$hospital, \(df, i) {
+casefiles$hospital <- imap(dd$hospital, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "hospital_name_geo")
       write.cas(df, dir_in, paste0(i, "-hospital"))
+      df
     },
     error = function(e) e
   )
@@ -414,6 +418,12 @@ ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
 # Clean up
 unlink(dir_data, recursive = TRUE, force = TRUE)
 
+# Spatial data ------------------------------------------------------------
+
+counties <- kcData::get_kc_sf("county", 2024)
+
+counties_pts <- get_centroids(counties, id_var = "NAME")
+
 # Save --------------------------------------------------------------------
 
 testdata <- list(
@@ -421,6 +431,9 @@ testdata <- list(
   data_details_raw = ddraw,
   config_ts_output = config_ts_output,
   config_dd_output = config_dd_output,
+  get_centroids_input = counties,
+  get_centroids_output = counties_pts,
+  config_casefile_output = casefiles,
   syndromes = syn,
   date_range = date_range,
   time_series = ts,

@@ -32,6 +32,24 @@ source("scripts/satscan.R")
 
 
 
+# Update ssenv parameters to account for the multiple dataset logic.
+
+ssenv$.ss.params <- ssenv$.ss.params[-c(67, 68, 69)] # TEST
+ssenv$.ss.params <- append(
+  ssenv$.ss.params, # TEST
+  c(
+    "[Multiple Data Sets]", # TEST
+    "; multiple data sets purpose type (0=Multivariate, 1=Adjustment)", # TEST
+    "MultipleDataSetsPurposeType=0", # TEST
+    "; case data filename (additional data set 2)", # TEST
+    "CaseFile2=", # TEST
+    "; case data filename (additional data set 3)", # TEST
+    "CaseFile3="
+  ), # TEST
+  after = 66
+) # TEST
+
+
 
 
 
