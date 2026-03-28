@@ -509,6 +509,7 @@ run_satscan <- function(dir, file, satscan_exe) {
 
 # SHINY DATA CONFIG -------------------------------------------------------
 
+# Get data and analysis results for one date from dashboard data
 get_db_data <- function(ls, date, name = NULL) {
   ls <- ls[[names(ls)[grepl(gsub("-", "", date), names(ls))]]]
 
@@ -532,6 +533,7 @@ get_db_data <- function(ls, date, name = NULL) {
   }
 }
 
+# Create list options for syndrome select input
 syn_select_list <- function(ls) {
   ls2 <- as.list(names(ls))
 
@@ -540,35 +542,38 @@ syn_select_list <- function(ls) {
   ls2
 }
 
-daterange_select_list <- function(x) {
+# Create radio button options for date range input
+daterange_select_list <- function(dates) {
+  x <- max(dates)
+
   list(
-    "Two weeks" = as.character(max(x) - 14),
-    "30 days" = as.character(max(x) - 30),
-    "90 days" = as.character(max(x) - 90),
-    "180 days" = as.character(max(x) - 180),
-    "One year" = as.character(max(x) - 365)
+    "Two weeks" = as.character(x - 14),
+    "30 days" = as.character(x - 30),
+    "90 days" = as.character(x - 90),
+    "180 days" = as.character(x - 180),
+    "One year" = as.character(x - 365)
   )
 }
 
-filter_ess <- function(df, d1, d2 = NULL) {
-  if (is.null(d2)) {
-    d2 <- max(df$date)
+# Configure data for Highchart function & data characteristics tables
+filter_ess <- function(df, start, end = NULL) {
+  if (is.null(end)) {
+    end <- max(df$date)
   }
 
   df |>
-    filter(
-      date >= d1,
-      date <= d2
+    dplyr::filter(
+      date >= start,
+      date <= end
     )
 }
 
-# Configure data for Highchart function
 df_to_hc_list <- function(df) {
   list(
     list(
       data = lapply(1:nrow(df), \(r) {
         list(
-          x = datetime_to_timestamp(df[r, "date"]),
+          x = highcharter::datetime_to_timestamp(df[r, "date"]),
           y = df[r, "count"],
           color = df[r, "alert_fill"],
           marker = list(
@@ -584,21 +589,22 @@ df_to_hc_list <- function(df) {
   )
 }
 
-get_ts_data <- function(ls, syndrome, daterange) {
+config_ts_plot_data <- function(ls, syndrome, daterange) {
   lapply(ls, \(ls2) {
     ls2[[syndrome]] |>
-      filter_ess(as.Date(daterange)) |>
+      filter_ess(start = as.Date(daterange)) |>
       df_to_hc_list()
   })
 }
 
-get_dd_data <- function(ls, syndrome, daterange) {
+config_dd_table_data <- function(ls, syndrome, daterange) {
   lapply(ls, \(ls2) {
     ls2[[syndrome]] |>
-      filter_ess(as.Date(daterange))
+      filter_ess(start = as.Date(daterange))
   })
 }
 
+# Summarize data for significant clusters table
 significant_clusters_by_syndrome <- function(ls, syndromes) {
   ls <- lapply(ls, \(ls2) {
     x <- sapply(ls2, \(ls3) {
@@ -782,24 +788,6 @@ ts_plot <- function(ls, title) {
     hc_title(text = title)
 }
 
-# Convert color names and hex colors to RGBA string for CSS
-color2rgba <- function(color, alpha = 1) {
-  if (!grepl("^#", color)) {
-    x <- col2rgb(color)
-    args <- as.list(x)
-    names(args) <- rownames(x)
-    args <- append(args, list(maxColorValue = 255))
-    color <- do.call(rgb, args)
-  }
-
-  rgba <- col2rgb(color) |>
-    as.numeric() |>
-    paste(collapse = ",") |>
-    paste(alpha, sep = ",")
-
-  paste0("rgba(", rgba, ")")
-}
-
 # Create a custom leaflet legend to add to the `html` arg in `addControl()`
 custom_legend_row <- function(ls) {
   if ("class" %in% names(ls)) {
@@ -810,9 +798,10 @@ custom_legend_row <- function(ls) {
   } else {
     icon <- paste0(
       "    <div style = '",
-      "background: ", color2rgba(ls$fill, ls$opac2), "; ",
+      "background: ", setmeup::color_to_css_rgba(ls$fill, ls$opac2), "; ",
       "width:20px; height:20px; ",
-      "border: ", ls$wt, "px solid ", color2rgba(ls$clr, ls$opac1), "; ",
+      "border: ", ls$wt, "px solid ",
+      setmeup::color_to_css_rgba(ls$clr, ls$opac1), "; ",
       "border-radius: ", switch(ls$shp, square = "0%;", circle = "50%;"), "'>",
       "</div>\n"
     )

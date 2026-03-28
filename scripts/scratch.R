@@ -60,7 +60,7 @@ inputdtrng <- daterng1$`One year`
 # # Data details
 # dd <- dbdata |>
 #   get_db_data(max(dt), "dd") |>
-#   get_dd_data(inputsyn, inputdtrng)
+#   config_dd_table_data(inputsyn, inputdtrng)
 
 # Filter Satscan data
 ss <- get_db_data(dbdata, max(dt), "ss")

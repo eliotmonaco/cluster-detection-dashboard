@@ -10,7 +10,7 @@ ts_plot_server <- function(id, rv) {
     # Filter time series data
     ts <- reactive({
       req(data(), rv$syn, rv$dtrng)
-      get_ts_data(data()$ts, rv$syn, rv$dtrng)
+      config_ts_plot_data(data()$ts, rv$syn, rv$dtrng)
     })
 
     # Time series plot (patient location data)
@@ -57,7 +57,7 @@ synname <- reactive({
 #
 #       dbdata |>
 #         get_db_data(rv$date, "dd") |>
-#         get_dd_data(rv$syn, rv$dtrng)
+#         config_dd_table_data(rv$syn, rv$dtrng)
 #     })
 #
 #   })

@@ -26,13 +26,13 @@ function(input, output, session) {
   # Time series data
   ts <- reactive({
     req(data(), rv$syn, rv$dtrng)
-    get_ts_data(data()$ts, rv$syn, rv$dtrng)
+    config_ts_plot_data(data()$ts, rv$syn, rv$dtrng)
   })
 
   # Data details data
   dd <- reactive({
     req(data(), rv$syn, rv$dtrng)
-    get_dd_data(data()$dd, rv$syn, rv$dtrng)
+    config_dd_table_data(data()$dd, rv$syn, rv$dtrng)
   })
 
   # Satscan results
@@ -98,7 +98,7 @@ function(input, output, session) {
       cluster_locations = clustloc()$patient,
       location_boundaries = geo$zctas,
       kc_boundary = geo$city,
-      gp = gp_pat,
+      gp = gp$patient,
       zoom_level = input$zoom
     )
   })
@@ -112,7 +112,7 @@ function(input, output, session) {
       location_boundaries = geo$counties,
       kc_boundary = geo$city,
       hospital_locations = geo$hosp,
-      gp = gp_hosp,
+      gp = gp$hospital,
       zoom_level = input$zoom
     )
   })

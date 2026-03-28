@@ -31,6 +31,22 @@ syn <- list(
   )
 )
 
+syn <- lapply(syn, \(ls) {
+  # Add a name to be used as a title or at the start of a sentence
+  ls <- append(
+    ls,
+    list(paste0(
+      toupper(substr(ls$name, 1, 1)),
+      substr(ls$name, 2, nchar(ls$name))
+    )),
+    after = 0
+  )
+
+  names(ls) <- c("name1", "name2", "queryname", "kr", "apistring")
+
+  ls
+})
+
 end_date <- as.Date("3001-01-02")
 
 start_date <- get_start_date(end_date)
@@ -424,9 +440,95 @@ counties <- kcData::get_kc_sf("county", 2024)
 
 counties_pts <- get_centroids(counties, id_var = "NAME")
 
+# Shiny inputs ------------------------------------------------------------
+
+synlist <- syn_select_list(syn)
+
+datelist <- daterange_select_list(date_range)
+
+# Plot data ---------------------------------------------------------------
+
+# Graphical parameters for cluster map shapes and markers
+gp <- list(
+  patient = list(
+    study = list(
+      name = "Study area (ZCTA)",
+      clr = "#aaa",
+      fill = "#aaa",
+      wt = 2,
+      opac1 = 1,
+      opac2 = .1,
+      shp = "square"
+    ),
+    kc = list(
+      name = "KC boundary",
+      clr = "#024cbf",
+      fill = "#024cbf",
+      wt = 2,
+      opac1 = 1,
+      opac2 = .1,
+      shp = "square"
+    ),
+    clust = list(
+      name = "Syndrome cluster",
+      clr = "red",
+      fill = "red",
+      wt = 2,
+      opac1 = .5,
+      opac2 = .2,
+      shp = "square"
+    )
+  ),
+  hospital = list(
+    study = list(
+      name = "Study area (county)",
+      clr = "#aaa",
+      fill = "#aaa",
+      wt = 2,
+      opac1 = 1,
+      opac2 = .1,
+      shp = "square"
+    ),
+    kc = list(
+      name = "KC boundary",
+      clr = "#024cbf",
+      fill = "#024cbf",
+      wt = 2,
+      opac1 = 1,
+      opac2 = .1,
+      shp = "square"
+    ),
+    hosp = list(
+      name = "Hospital",
+      class = "plus-legend"
+    ),
+    clust = list(
+      name = "Syndrome cluster",
+      clr = "red",
+      fill = "red",
+      wt = 2,
+      opac1 = .5,
+      opac2 = .2,
+      shp = "circle"
+    )
+  )
+)
+
+legend_rows <- lapply(gp, \(ls) {
+  lapply(ls, custom_legend_row)
+})
+
+legend_html <- lapply(legend_rows, custom_legend_combine)
+
 # Save --------------------------------------------------------------------
 
 testdata <- list(
+  syndromes = syn,
+  date_range = date_range,
+  time_series = ts,
+  data_details = dd,
+  data_details_error = dderror,
+  satscan_results = ssresults,
   time_series_raw = tsraw,
   data_details_raw = ddraw,
   config_ts_output = config_ts_output,
@@ -434,12 +536,11 @@ testdata <- list(
   get_centroids_input = counties,
   get_centroids_output = counties_pts,
   config_casefile_output = casefiles,
-  syndromes = syn,
-  date_range = date_range,
-  time_series = ts,
-  data_details = dd,
-  data_details_error = dderror,
-  satscan_results = ssresults
+  syn_select_list_output = synlist,
+  daterange_select_list_output = datelist,
+  graphical_parameters = gp,
+  custom_legend_row_output = legend_rows,
+  custom_legend_combine_output = legend_html
 )
 
 saveRDS(testdata, "tests/testthat/fixtures/test_data.rds")
