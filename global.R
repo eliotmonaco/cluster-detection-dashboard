@@ -7,11 +7,17 @@ library(highcharter)
 library(reactable)
 library(leaflet)
 
-source("R/fn.R")
+source("R/app-fns.R")
 source("scripts/syndromes.R")
 
 # Import dashboard data
 dbdata <- readRDS("data/dashboard_data.rds")
+
+# Import spatial data
+geo <- readRDS("data/geographic_data.rds")
+
+# Import ANSI codes
+ansi <- readRDS("data/ansi_state_codes.rds")
 
 # Data directories
 dirs <- list.dirs("data/", full.names = TRUE, recursive = FALSE)
@@ -29,12 +35,6 @@ synselect1 <- dbdata |>
 daterng1 <- dbdata |>
   get_db_data(max(dt), "daterng") |>
   daterange_select_list()
-
-# Spatial data
-geo <- readRDS("data/geographic_data.rds")
-
-# ANSI codes
-ansi <- readRDS("data/ansi_state_codes.rds")
 
 # UI text
 uitext <- list(

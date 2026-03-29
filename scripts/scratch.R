@@ -22,7 +22,7 @@ dir_data <- paste0("data/an-", end_date, "/")
 unlink(dir_data, recursive = TRUE, force = TRUE)
 dir.create(dir_data)
 
-source("R/fn.R")
+source("R/analysis-fns.R")
 source("scripts/syndromes.R")
 syn <- syn[1:2]
 source("scripts/get-ess.R")
