@@ -53,9 +53,11 @@ ssenv$.ss.params <- append(
 
 
 
-inputsyn <- "noro"
+inputsyn <- "resp"
 
 inputdtrng <- daterng1$`One year`
+
+data <- get_db_data(dbdata, max(dt))
 
 # # Data details
 # dd <- dbdata |>
@@ -63,7 +65,7 @@ inputdtrng <- daterng1$`One year`
 #   config_dd_table_data(inputsyn, inputdtrng)
 
 # Filter Satscan data
-ss <- get_db_data(dbdata, max(dt), "ss")
+ss <- data$ss
 
 # Filter cluster data
 clustdata <- config_syndrome_data(ss, inputsyn, TRUE)
@@ -87,8 +89,8 @@ cluster_map(
   cluster_locations = clustloc$patient,
   location_boundaries = geo$zctas,
   kc_boundary = geo$city,
-  gp = gp_pat,
-  zoom_level = 8
+  gp = gp$patient,
+  zoom_level = 9
 )
 
 # Cluster map (by hospital)
@@ -98,8 +100,8 @@ cluster_map(
   location_boundaries = geo$counties,
   kc_boundary = geo$city,
   hospital_locations = geo$hosp,
-  gp = gp_hosp,
-  zoom_level = 8
+  gp = gp$hospital,
+  zoom_level = 9
 )
 
 # Cluster count table

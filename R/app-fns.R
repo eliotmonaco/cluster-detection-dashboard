@@ -195,10 +195,11 @@ filter_location_geometries <- function(ls, geo, var) {
     return(NULL)
   }
 
+  # For each cluster, get the location geometries in `geo` and take the union
   sf <- lapply(clust$cluster, \(x) {
     sfc <- geo |>
       filter(.data[[var]] %in% loc$loc_id[loc$cluster == x]) |>
-      st_combine()
+      st_union()
 
     st_set_geometry(data.frame(cluster = x), sfc)
   })
@@ -207,7 +208,8 @@ filter_location_geometries <- function(ls, geo, var) {
 
   # Add cluster label for map
   sf |>
-    mutate(lbl = paste("Cluster", cluster))
+    mutate(lbl = paste("Cluster", cluster)) |>
+    relocate(geometry, .after = everything())
 }
 
 # SHINY UI ----------------------------------------------------------------
@@ -371,8 +373,8 @@ cluster_map <- function(
         fillOpacity = gp$clust$opac2,
         label = ~lbl,
         highlightOptions = highlightOptions(
-          opacity = 1,
-          fillOpacity = .5
+          weight = 4,
+          opacity = 1
         )
       )
   } else {
@@ -420,6 +422,31 @@ cluster_map <- function(
       html = legend_html,
       position = "bottomright"
     )
+}
+
+add_cluster_outline <- function(map_id, data, shape_id, shape_id0) {
+  # Remove all cluster outlines
+  map <- leafletProxy(map_id) |>
+    removeShape(
+      layerId = data$lbl
+    )
+
+  # Add outline only if the shape ID is not NULL and if the shape ID has changed
+  if (!is.null(shape_id) && (is.null(shape_id0) || shape_id != shape_id0)) {
+    map |>
+      addPolygons(
+        data = data |>
+          filter(cluster == shape_id),
+        layerId = ~lbl,
+        weight = 4,
+        color = "red",
+        opacity = 1,
+        fillColor = "white",
+        fillOpacity = 0
+      )
+  } else {
+    map
+  }
 }
 
 # TABLES ------------------------------------------------------------------
@@ -603,5 +630,15 @@ location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
     reactable(
       pagination = FALSE
     )
+}
+
+update_cluster_table_id <- function(id) {
+  if (is.null(id)) {
+    NA
+  } else if (is.character(id)) {
+    NA
+  } else {
+    id
+  }
 }
 

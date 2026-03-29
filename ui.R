@@ -106,6 +106,7 @@ page_navbar(
               class = "map-zip-row"
             )
           ),
+          # card(htmlOutput("txt")),
           card(
             card_header("Clusters"),
             reactableOutput("pclust"),
