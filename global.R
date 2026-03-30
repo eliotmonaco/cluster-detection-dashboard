@@ -85,7 +85,7 @@ gp <- list(
       fill = "red",
       wt = 2,
       opac1 = .5,
-      opac2 = .2,
+      opac2 = .1,
       shp = "square"
     )
   ),
@@ -118,7 +118,7 @@ gp <- list(
       fill = "red",
       wt = 2,
       opac1 = .5,
-      opac2 = .2,
+      opac2 = .1,
       shp = "circle"
     )
   )

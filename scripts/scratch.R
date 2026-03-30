@@ -17,8 +17,8 @@ ansi <- readRDS("data/ansi_state_codes.rds")
 end_date <- Sys.Date()
 
 # Create a directory in `data/` for storing output
-dir_data <- paste0("data/an-", end_date, "/")
-# dir_data <- "data/test/"
+# dir_data <- paste0("data/an-", end_date, "/")
+dir_data <- "data/test/"
 unlink(dir_data, recursive = TRUE, force = TRUE)
 dir.create(dir_data)
 
@@ -115,49 +115,6 @@ cluster_table(clustdata$patient$shapeclust)
 # Location data table (by patient)
 location_table(clustdata$patient$gis, id = 1, type = "patient")
 location_table(clustdata$hospital$gis, id = 1, type = "hospital")
-
-
-
-
-
-
-
-ddhosp <- lapply(dd, \(ls) {list_rbind(ls$hospital)}) |>
-  list_rbind()
-
-ddpat <- lapply(dd, \(ls) {list_rbind(ls$patient)}) |>
-  list_rbind()
-
-apply(ddpat, 2, \(x) setmeup::pct(sum(grepl("^none$", x)), nrow(ddpat), 1))
-
-apply(ddhosp, 2, \(x) setmeup::pct(sum(grepl("^none$", x)), nrow(ddhosp), 1))
-
-ddpat |>
-  count(patient_state)
-
-ddpat |>
-  count(patient_country)
-
-ddpat |>
-  count(hospital_name)
-
-ddpat |>
-  count(hospital_state)
-
-ddhosp |>
-  count(patient_state)
-
-ddhosp |>
-  count(patient_country)
-
-ddhosp |>
-  count(hospital_name)
-
-ddhosp |>
-  count(hospital_state)
-
-
-
 
 
 

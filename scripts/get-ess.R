@@ -158,14 +158,22 @@ ts <- lapply(tsraw, \(ls1) {
 # Configure
 dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
-    config_dd(df, geo_var = "zip_code"),
+    expr = {
+      ls <- deduplicate_dd(df, geo_var = "zip_code")
+      ls$data <- config_dd(ls$data)
+      ls
+    },
     error = function(e) e
   )
 })
 
 dd$hospital <- lapply(dd$hospital, \(df) {
   tryCatch(
-    config_dd(df, geo_var = "hospital_name"),
+    expr = {
+      ls <- deduplicate_dd(df, geo_var = "hospital_name")
+      ls$data <- config_dd(ls$data)
+      ls
+    },
     error = function(e) e
   )
 })

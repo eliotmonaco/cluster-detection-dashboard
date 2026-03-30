@@ -106,7 +106,7 @@ page_navbar(
               class = "map-zip-row"
             )
           ),
-          # card(htmlOutput("txt")),
+          # card(htmlOutput("ptxt")), # for checking map & table IDs
           card(
             card_header("Clusters"),
             reactableOutput("pclust"),
@@ -129,6 +129,7 @@ page_navbar(
             )
           ),
           card(
+            # card(htmlOutput("htxt")), # for checking map & table IDs
             card_header("Clusters"),
             reactableOutput("hclust"),
             class = "clust-tbl-row"

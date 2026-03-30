@@ -7,7 +7,6 @@ function(input, output, session) {
   # Initialize map cluster IDs as NULL for validation message to appear in
   # cluster location table even when p-value checkbox is not selected
   rv$pmapid <- NULL; rv$hmapid <- NULL
-  rv$pmapid0 <- NULL; rv$hmapid0 <- NULL
   rv$ptblid <- NA; rv$htblid <- NA
 
   # Get all data for a particular date
@@ -73,11 +72,17 @@ function(input, output, session) {
     syndrome_title_tag(rv$syn, synselect())
   })
 
-  # output$txt <- renderUI({
+  # output$ptxt <- renderUI({
   #   HTML(paste(
-  #     "Current map ID:", rv$pmapid, "<br>",
-  #     "Previous map ID:", rv$pmapid0, "<br>",
+  #     "Map ID:", rv$pmapid, "<br>",
   #     "Table ID:", rv$ptblid
+  #   ))
+  # })
+  #
+  # output$htxt <- renderUI({
+  #   HTML(paste(
+  #     "Map ID:", rv$hmapid, "<br>",
+  #     "Table ID:", rv$htblid
   #   ))
   # })
 
@@ -118,7 +123,6 @@ function(input, output, session) {
     req(clustdata(), clustloc(), rv$syn, input$zoom)
     cluster_map(
       cluster_locations = clustloc()$hospital,
-      cluster_points = clustdata()$hospital$shapegis,
       location_boundaries = geo$counties,
       kc_boundary = geo$city,
       hospital_locations = geo$hosp,
@@ -293,29 +297,27 @@ function(input, output, session) {
     rv$pmapid <- NULL; rv$hmapid <- NULL
   })
 
-  # On map click: update previous map cluster ID, get current map cluster ID,
-  # and update cluster table row selection
+  # On map click update map cluster ID
   observeEvent(input$pmap_shape_click, {
-    rv$pmapid0 <- rv$pmapid
     rv$pmapid <- input$pmap_shape_click$id
-    rv$ptblid <- update_cluster_table_id(rv$pmapid)
-    updateReactable("pclust", selected = rv$ptblid)
   })
 
   observeEvent(input$hmap_shape_click, {
-    rv$hmapid0 <- rv$hmapid
     rv$hmapid <- input$hmap_shape_click$id
-    rv$htblid <- update_cluster_table_id(rv$hmapid)
-    updateReactable("hclust", selected = rv$htblid)
   })
 
-  # When map cluster ID updates, highlight map cluster
+  # When map cluster ID updates, update table ID, update table, and add cluster
+  # outline to map
   observeEvent(rv$pmapid, ignoreNULL = FALSE, {
-    add_cluster_outline("pmap", clustloc()$patient, rv$pmapid, rv$pmapid0)
+    rv$ptblid <- update_cluster_table_id(rv$pmapid)
+    updateReactable("pclust", selected = rv$ptblid)
+    add_cluster_outline("pmap", clustloc()$patient, rv$pmapid)
   })
 
   observeEvent(rv$hmapid, ignoreNULL = FALSE, {
-    add_cluster_outline("hmap", clustloc()$hospital, rv$hmapid, rv$hmapid0)
+    rv$htblid <- update_cluster_table_id(rv$hmapid)
+    updateReactable("hclust", selected = rv$htblid)
+    add_cluster_outline("hmap", clustloc()$hospital, rv$hmapid)
   })
 
   # When cluster table row is selected, update map cluster ID

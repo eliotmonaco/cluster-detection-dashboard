@@ -149,10 +149,16 @@ filter_cluster_data <- function(ls, sig_pval) {
     plvl <- 1.1
   }
 
+  # Filter spatial data by p-value and add labels for map
   lapply(ls[grepl("gis|clust", names(ls))], \(df) {
     df <- df |>
       filter(p_value < plvl) |>
       mutate(lbl = paste("Cluster", cluster))
+
+    if ("geometry" %in% colnames(df)) {
+      df <- df |>
+        relocate(geometry, .after = everything())
+    }
 
     if (nrow(df) == 0) {
       NULL
@@ -172,15 +178,19 @@ config_syndrome_data <- function(ls, syndrome, sig_pval) {
     sig_pval = sig_pval
   )
 
-  if (!is.null(ls$hospital$shapegis)) {
-    # Find clusters with > 1 location and remove from `ls$hospital$shapegis` so
-    # that only single point clusters in this dataset are mapped
-    clusters <- ls$hospital$gis$cluster
+  if (!is.null(ls$hospital$shapeclust)) {
+    # Find clusters with only 1 location
+    clust <- ls$hospital$gis$cluster
 
-    clusters <- unique(clusters[duplicated(clusters)])
+    clust <- clust[!clust %in% clust[duplicated(clust)]]
 
-    ls$hospital$shapegis <- ls$hospital$shapegis |>
-      filter(!cluster %in% clusters)
+    # Expand cluster polygons for visibility on map
+    ls$hospital$shapeclust <- ls$hospital$shapeclust |>
+      mutate(geometry = if_else(
+        cluster %in% clust,
+        st_buffer(geometry, dist = 2000),
+        geometry
+      ))
   }
 
   ls
@@ -325,7 +335,6 @@ custom_legend_combine <- function(ls) {
 # Leaflet map showing study area and syndrome clusters using Satscan output
 cluster_map <- function(
     cluster_locations,
-    cluster_points = NULL,
     location_boundaries,
     kc_boundary,
     hospital_locations = NULL,
@@ -343,6 +352,9 @@ cluster_map <- function(
   ) |>
     setView(lng = center$X, lat = center$Y, zoom = zoom_level) |>
     addProviderTiles("CartoDB.Positron") |>
+    addMapPane("hospital_markers", zIndex = 420) |>
+    addMapPane("cluster_outline", zIndex = 430) |>
+    addMapPane("cluster_locations", zIndex = 440) |>
     addPolygons(
       data = location_boundaries,
       weight = gp$study$wt,
@@ -372,6 +384,7 @@ cluster_map <- function(
         fillColor = gp$clust$fill,
         fillOpacity = gp$clust$opac2,
         label = ~lbl,
+        options = pathOptions(pane = "cluster_locations"),
         highlightOptions = highlightOptions(
           weight = 4,
           opacity = 1
@@ -394,23 +407,8 @@ cluster_map <- function(
       addMarkers(
         data = hospital_locations,
         icon = hospicon,
-        label = ~hospital_name
-      )
-  }
-
-  # Add cluster points
-  if (!is.null(cluster_points) && nrow(cluster_points) != 0) {
-    map <- map |>
-      addCircleMarkers(
-        data = cluster_points,
-        radius = 10,
-        layerId = ~cluster,
-        weight = gp$clust$wt,
-        color = gp$clust$clr,
-        opacity = gp$clust$opac1,
-        fillColor = gp$clust$fill,
-        fillOpacity = gp$clust$opac2,
-        label = ~lbl
+        label = ~hospital_name,
+        options = pathOptions(pane = "hospital_markers")
       )
   }
 
@@ -424,15 +422,15 @@ cluster_map <- function(
     )
 }
 
-add_cluster_outline <- function(map_id, data, shape_id, shape_id0) {
+add_cluster_outline <- function(map_id, data, shape_id) {
   # Remove all cluster outlines
   map <- leafletProxy(map_id) |>
     removeShape(
       layerId = data$lbl
     )
 
-  # Add outline only if the shape ID is not NULL and if the shape ID has changed
-  if (!is.null(shape_id) && (is.null(shape_id0) || shape_id != shape_id0)) {
+  # Add outline only if the shape ID is not NULL
+  if (!is.null(shape_id)) {
     map |>
       addPolygons(
         data = data |>
@@ -441,8 +439,8 @@ add_cluster_outline <- function(map_id, data, shape_id, shape_id0) {
         weight = 4,
         color = "red",
         opacity = 1,
-        fillColor = "white",
-        fillOpacity = 0
+        fill = FALSE,
+        options = pathOptions(pane = "cluster_outline")
       )
   } else {
     map

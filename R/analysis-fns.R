@@ -163,17 +163,10 @@ capture_message <- function(expr) {
   output
 }
 
-# Configure data downloaded from Essence
-config_dd <- function(df, geo_var, ansi_codes = ansi) {
+# Deduplicate and configure data downloaded from Essence
+deduplicate_dd <- function(df, geo_var) {
   df <- df |>
-    dplyr::mutate(
-      row_id = dplyr::row_number(),
-      date = as.Date(date, "%m/%d/%Y"),
-      hospital_name = hospital_name |>
-        stringr::str_to_title() |>
-        gsub(pattern = "\\sOf\\s", replacement = " of "),
-      hospital_name_geo = gsub("\\s", "_", hospital_name)
-    )
+    dplyr::mutate(row_id = dplyr::row_number(), .before = 1)
 
   # Find "exact" duplicates
   dupes <- suppressMessages(setmeup::find_dupes(df, c(
@@ -273,7 +266,13 @@ config_dd <- function(df, geo_var, ansi_codes = ansi) {
     dplyr::rename(n = value) |>
     dplyr::mutate(error_rate = n / nrow(df))
 
-  # Clean values
+  list(
+    data = dplyr::select(df, -row_id),
+    error_rate = errors
+  )
+}
+
+config_dd <- function(df, ansi_codes = ansi) {
   agegp <- c(
     "00-04" = "0-4", "05-17" = "5-17", "18-44" = "18-44",
     "45-64" = "45-64", "65-1000" = "65+", "Unknown" = "Unknown"
@@ -281,8 +280,11 @@ config_dd <- function(df, geo_var, ansi_codes = ansi) {
 
   df <- df |>
     dplyr::mutate(
-      # For some reason this is creating a vector with names, so `unname()`
-      # removes them
+      date = as.Date(date, "%m/%d/%Y"),
+      hospital_name = hospital_name |>
+        stringr::str_to_title() |>
+        gsub(pattern = "\\sOf\\s", replacement = " of "),
+      hospital_name_geo = gsub("\\s", "_", hospital_name),
       age_group = unname(agegp[age_group]),
       age_group = factor(age_group, agegp),
       patient_state2 = unname(ansi_codes[patient_state]),
@@ -293,11 +295,6 @@ config_dd <- function(df, geo_var, ansi_codes = ansi) {
       )
     ) |>
     dplyr::select(-patient_state2)
-
-  list(
-    data = dplyr::select(df, -row_id),
-    error_rate = errors
-  )
 }
 
 config_ts <- function(df) {
