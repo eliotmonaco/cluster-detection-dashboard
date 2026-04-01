@@ -454,9 +454,11 @@ mod_col_labels <- function(x) {
   str_to_sentence(gsub("_", " ", x))
 }
 
+# Data characteristics tables from data details
 dd_table <- function(df, var, replace_nm = NULL) {
   df <- df |>
-    count(.data[[var]])
+    count(.data[[var]]) |>
+    mutate(pct = pct(n, nrow(df)) / 100)
 
   if (!is.null(replace_nm)) {
     df <- df |>
@@ -467,10 +469,45 @@ dd_table <- function(df, var, replace_nm = NULL) {
     rename_with(mod_col_labels) |>
     reactable(
       columns = list(
-        "N" = colDef(format = colFormat(separators = TRUE))
+        "N" = colDef(format = colFormat(separators = TRUE)),
+        "Pct" = colDef(format = colFormat(percent = TRUE))
       ),
       sortable = FALSE,
-      pagination = FALSE
+      pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE,
+      fullWidth = FALSE
+    )
+}
+
+# Syndrome table with query names and KR links
+syndrome_table <- function(ls) {
+  df <- data.frame(
+    syndrome = sapply(ls, \(ls2) ls2$name1),
+    query = sapply(ls, \(ls2) ls2$queryname),
+    kr = sapply(ls, \(ls2) ls2$kr)
+  )
+
+  colnames(df) <- c("Syndrome", "ESSENCE query", "kr")
+
+  make_link <- function(x) {
+    if (x != "") {
+      tags$a(href = x, target = "_blank", "KR page")
+    }
+  }
+
+  df |>
+    reactable(
+      columns = list(
+        kr = colDef(
+          name = "NSSP Knowledge Repository link",
+          cell = make_link
+        )
+      ),
+      rownames = FALSE,
+      pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE
     )
 }
 
@@ -494,7 +531,9 @@ clustcount_table <- function(df) {
   df |>
     reactable(
       columns = list(
-        syndrome = colDef(name = "Syndrome"),
+        syndrome = colDef(
+          name = "Syndrome"
+        ),
         clust_pat = colDef(
           name = "ER visits by patient location",
           style = bold_text,
@@ -513,7 +552,9 @@ clustcount_table <- function(df) {
         )
       ),
       rowStyle = pink_bg,
-      pagination = FALSE
+      pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE
     )
 }
 
@@ -572,6 +613,8 @@ cluster_table <- function(df) {
     reactable(
       columns = compact(col_defs),
       pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE,
       selection = "single",
       onClick = "select"
     )
@@ -595,12 +638,11 @@ location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
 
   if (type == "patient") {
     df <- df |>
-      mutate(loc_id = as.numeric(as.character(loc_id)))
+      mutate(loc_id = as.character(loc_id))
 
-    replace <- c(
-      "ZCTA" = "loc_id",
-      replace
-    )
+    replace <- c("ZCTA" = "loc_id", replace)
+
+    col_defs <- list(ZCTA = colDef(minWidth = 200))
   } else if (type == "hospital") {
     df <- df |>
       mutate(
@@ -609,10 +651,9 @@ location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
           sub(pattern = "\\sOf\\s", replacement = " of ")
       )
 
-    replace <- c(
-      "Hospital" = "loc_id",
-      replace
-    )
+    replace <- c("Hospital" = "loc_id", replace)
+
+    col_defs <- list(Hospital = colDef(minWidth = 200))
   }
 
   df |>
@@ -620,16 +661,21 @@ location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
     filter(cluster == id) |>
     select(loc_id, kc, cluster, loc_obs, loc_exp, loc_ode) |>
     mutate(
+      kc = str_to_sentence(kc),
       loc_exp = round_ties_away(loc_exp, 0),
       loc_ode = round_ties_away(loc_ode, 2)
     ) |>
     arrange(loc_id) |>
     rename(any_of(replace)) |>
     reactable(
-      pagination = FALSE
+      columns = col_defs,
+      pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE
     )
 }
 
+# Get the cluster table ID from the map cluster ID (cannot be NULL)
 update_cluster_table_id <- function(id) {
   if (is.null(id)) {
     NA

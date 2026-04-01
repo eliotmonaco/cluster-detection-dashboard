@@ -140,6 +140,14 @@ page_navbar(
   ),
 
   nav_panel(
+    "Syndromes",
+    layout_sidebar(
+      sidebar = date_input_analysis("date4", dt),
+      card(reactableOutput("syntbl"))
+    )
+  ),
+
+  nav_panel(
     "About",
     card(markdown(readLines("scripts/about.md")))
   )

@@ -40,7 +40,7 @@ daterng1 <- dbdata |>
 uitext <- list(
   sigp = HTML("Show clusters where p&nbsp;<&nbsp;0.05 only"),
   cctbl = HTML(paste(
-    "Spatiotemporal clusters are detected using SaTScan<sup>TM</sup> software.",
+    "Spatiotemporal clusters are detected using SaTScan software.",
     "This table shows the number of clusters where p&nbsp;<&nbsp;0.05 for each",
     "syndrome."
   )),
@@ -76,7 +76,7 @@ gp <- list(
       fill = "#024cbf",
       wt = 2,
       opac1 = 1,
-      opac2 = .1,
+      opac2 = 0,
       shp = "square"
     ),
     clust = list(
@@ -105,7 +105,7 @@ gp <- list(
       fill = "#024cbf",
       wt = 2,
       opac1 = 1,
-      opac2 = .1,
+      opac2 = 0,
       shp = "square"
     ),
     hosp = list(

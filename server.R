@@ -234,6 +234,13 @@ function(input, output, session) {
     )
   })
 
+  ## Syndromes
+
+  output$syntbl <- renderReactable({
+    req(syn())
+    syndrome_table(syn())
+  })
+
   # OBSERVERS ---------------------------------------------------------------
 
   # Update analysis date when any date input is changed
@@ -241,18 +248,28 @@ function(input, output, session) {
     rv$date <- input$date1
     updateDateInput(session, "date2", value = rv$date)
     updateDateInput(session, "date3", value = rv$date)
+    updateDateInput(session, "date4", value = rv$date)
   })
 
   observeEvent(input$date2, {
     rv$date <- input$date2
     updateDateInput(session, "date1", value = rv$date)
     updateDateInput(session, "date3", value = rv$date)
+    updateDateInput(session, "date4", value = rv$date)
   })
 
   observeEvent(input$date3, {
     rv$date <- input$date3
     updateDateInput(session, "date1", value = rv$date)
     updateDateInput(session, "date2", value = rv$date)
+    updateDateInput(session, "date4", value = rv$date)
+  })
+
+  observeEvent(input$date4, {
+    rv$date <- input$date4
+    updateDateInput(session, "date1", value = rv$date)
+    updateDateInput(session, "date2", value = rv$date)
+    updateDateInput(session, "date3", value = rv$date)
   })
 
   # Update syndrome selections when the syndrome list is changed
