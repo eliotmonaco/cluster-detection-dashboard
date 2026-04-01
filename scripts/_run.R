@@ -3,6 +3,7 @@
 library(Rnssp)
 library(tidyverse)
 library(setmeup)
+library(kcData)
 library(rsatscan)
 library(sf)
 

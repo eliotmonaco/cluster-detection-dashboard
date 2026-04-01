@@ -183,7 +183,7 @@ ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
 
 procdata <- list(
   syndromes = syn,
-  date_range = date_range,
+  date_range = ts_range,
   time_series = ts,
   data_details = dd,
   data_details_error = dderror,

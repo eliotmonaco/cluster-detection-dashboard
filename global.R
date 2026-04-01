@@ -49,8 +49,8 @@ uitext <- list(
   ),
   val_clust = "No clusters detected",
   tspat = paste(
-    "This dataset consists of ER visit records for patients residing in Cass,",
-    "Clay, Jackson, and Platte County ZIP codes."
+    "This dataset consists of ER visit records for patients residing in Kansas",
+    "City ZIP codes."
   ),
   tshosp = paste(
     "This dataset consists of ER visit records from hospitals in Cass, Clay,",

@@ -18,21 +18,23 @@ The data displayed on the dashboard can be updated using various controls.
 
 **P-value check box**: Check to display only those clusters with a p-value below 0.05. (Available on Clusters page.)
 
-# ESSENCE data
+## ESSENCE data
 
 Records downloaded from ESSENCE represent emergency room visits and contain information about the reason for the visit, the location, and certain patient characteristics. Patient names and addresses are not included. Records are accessed via API using queries developed by public health experts. The list of queries used to download data for a given date are available on the Syndromes page.
 
 Hospitals in Missouri are required to provide records to ESSENCE within three business days of a visit. Records from out of state hospitals make take longer to receive.
 
-Data can be downloaded from the ESSENCE system based on either the location of the patient or the location of the hospital in the record. This tool uses two datasets, one consisting of records for Kansas City area residents, and one consisting of records from Kansas City area hospitals. Most of the records in these two datasets are the same, but each represents a slightly different population.
+Data can be downloaded from the ESSENCE system based on either the location of the patient or the location of the hospital in the record. This dashboard displays both types of datasets.
 
-- ER visits by patient location: This dataset consists of records in which the patient's residential ZIP code is at least partly within Cass, Clay, Jackson, or Platte County. It includes ER visits to hospitals anywhere in the country by residents of these local ZIP codes. However, most of the visits occur at local hospitals. This is the dataset that most closely represents the stable population over time. (Assignment of ZIP code if a residential ZIP code isn't available?)
+**Data by patient location** consist of records for patients who live in a particular region. Datasets used for cluster analysis include records in which a patient's residential ZIP code is at least partly within Cass, Clay, Jackson, or Platte County. Datasets used for the time series plot include records in which at least 10% of a patient's residential ZIP code is within the Kansas City boundary. Records in these datasets can come from hospitals in any US state. However, most of the visits occur at local hospitals. This is the dataset that most closely reflects the long-term residential population.
 
-- ER visits by hospital location: This dataset consists of records in which the hospital where the patient was seen is located in Cass, Clay, Jackson, or Platte County. It includes ER visits by local residents and non-residents. This dataset should be responsive to changes in the non-resident population, e.g., due to an increase of visitors during the World Cup event series.
+(Assignment of ZIP code if a residential ZIP code isn't available?)
+
+**Data by hospital location** consist of records from hospitals within a particular region. The datasets used for cluster analysis and the time series plot include records in which the hospital where the patient was seen is located in Cass, Clay, Jackson, or Platte County. Patients in these datasets may be both residents and non-residents. Therefore, these datasets should be more responsive to changes in the non-resident population, e.g., due to an increase of visitors during the World Cup events.
     
 ESSENCE data may contain duplicates. An effort is made to deduplicate the data, but there is a potential duplicate error rate (show table).
 
-# SaTScan analysis
+## SaTScan analysis
 
 SaTScan<sup>TM</sup> is a trademark of Martin Kulldorff. The SaTScan<sup>TM</sup> software was developed under the joint auspices of (i) Martin Kulldorff, (ii) the National Cancer Institute, and (iii) Farzad Mostashari of the New York City Department of Health and Mental Hygiene.
 
@@ -40,7 +42,7 @@ SaTScan<sup>TM</sup> is a trademark of Martin Kulldorff. The SaTScan<sup>TM</sup
 - Describe analysis used
 - Provide parameters, start/end dates, etc.
 
-# References/resources
+## References/resources
 
 Greene SK, Peterson ER, Kapell D, Fine AD, Kulldorff M. Daily Reportable Disease Spatiotemporal Cluster Detection, New York City, New York, USA, 2014-2015. Emerg Infect Dis. 2016 Oct;22(10):1808-12. doi: [10.3201/eid2210.160097](https://doi.org/10.3201/eid2210.160097). PMID: [27648777](https://pubmed.ncbi.nlm.nih.gov/27648777/); PMCID: PMC5038417.
 

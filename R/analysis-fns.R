@@ -46,22 +46,11 @@ build_ess_url <- function(
     params_ds <- "datasource=va_hosp"
 
     params_geo <- paste(
-      "geographySystem=hospital",
-      "geography=mocenterpointercc",
-      "geography=mochildrensmercyeastercc",
-      "geography=mochildrensmercynorthlandercc",
-      "geography=mochildrensmercyercc",
-      "geography=moexcelsiorercc",
-      "geography=moleessummitercc",
-      "geography=molibertyercc",
-      "geography=monothkcercc",
-      "geography=moresearchkcercc",
-      "geography=mostlukeseastercc",
-      "geography=mostlukeskcercc",
-      "geography=mostlukesnorthlandkcercc",
-      "geography=mostmarysbluespringsercc",
-      "geography=motrumanlakewoodercc",
-      "geography=motrumanhospitalhillercc",
+      "geographySystem=hospitalregion",
+      "geography=mo_cass",
+      "geography=mo_clay",
+      "geography=mo_jackson",
+      "geography=mo_platte",
       sep = "&"
     )
   } else if (data_source == "patient") {
@@ -112,7 +101,7 @@ get_ess_dd <- function(url, repair_colnames = TRUE) {
     url,
     fromCSV = TRUE,
     col_types = readr::cols(.default = "c"),
-    name_repair = ifelse(repair_colnames, fix_colnames, "unique")
+    name_repair = ifelse(repair_colnames, setmeup::fix_colnames, "unique")
   )
 }
 
@@ -122,7 +111,7 @@ get_ess_ts <- function(url) {
 
   df <- ls$timeSeriesData
 
-  colnames(df) <- fix_colnames(colnames(df))
+  colnames(df) <- setmeup::fix_colnames(colnames(df))
 
   df$date <- as.Date(df$date)
 

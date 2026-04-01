@@ -4,10 +4,12 @@
 
 t0 <- Sys.time()
 
+# Data details: Pulled by both patient location and hospital location. Patient
+# locations are ZCTAs intersecting with Cass, Clay, Jackson, or Platte County.
+# Hospitals are any hospital within those counties.
+
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
-
-date_range <- seq.Date(start_date, end_date, "day")
 
 # Syndrome API strings
 syn_api <- lapply(syn, \(ls) ls$apistring)
@@ -19,9 +21,8 @@ flds <- c(
   "HospitalName", "HospitalState", "VisitNumber", "Patient_ID", "HasBeenE"
 )
 
-# Build URLs for data details and time series outputs by both patient and
-# hospital location (4 total)
-urldd <- list(
+# Build URLs
+url_dd <- list(
   patient = build_ess_url(
     syndrome = syn_api,
     start = start_date,
@@ -41,14 +42,23 @@ urldd <- list(
   )
 )
 
-urlts <- list(
+# Time series: Pulled by both patient location and hospital location. Patient
+# locations are ZCTAs intersecting with Kansas City that have at least 10% of
+# their area within the city. Hospitals are any hospital within Cass, Clay,
+# Jackson, or Platte County.
+
+# Time series date range
+ts_range <- seq.Date(start_date, end_date, "day")
+
+# Build URLs
+url_ts <- list(
   patient = build_ess_url(
     syndrome = syn_api,
     start = start_date,
     end = end_date,
     data_source = "patient",
     output = "ts",
-    zipcodes = geo$zctas$GEOID20
+    zipcodes = geoid$zcta2020
   ),
   hospital = build_ess_url(
     syndrome = syn_api,
@@ -62,7 +72,7 @@ urlts <- list(
 # Get data
 t1 <- Sys.time()
 
-ddraw <- lapply(urldd, \(x) {
+ddraw <- lapply(url_dd, \(x) {
   lapply(x, \(y) {
     tryCatch(
       capture_message(get_ess_dd(y)),
@@ -71,7 +81,7 @@ ddraw <- lapply(urldd, \(x) {
   })
 })
 
-tsraw <- lapply(urlts, \(x) {
+tsraw <- lapply(url_ts, \(x) {
   lapply(x, \(y) {
     tryCatch(
       capture_message(get_ess_ts(y)),
