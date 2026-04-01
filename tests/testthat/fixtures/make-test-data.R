@@ -4,7 +4,8 @@ library(tidyverse)
 library(rsatscan)
 library(sf)
 
-source("R/fn.R")
+source("R/analysis-fns.R")
+source("R/app-fns.R")
 
 geo <- readRDS("data/geographic_data.rds")
 ansi <- readRDS("data/ansi_state_codes.rds")
@@ -248,19 +249,83 @@ ts <- lapply(tsraw, \(ls1) {
 })
 
 # Configure
+# dd$patient <- lapply(dd$patient, \(df) {
+#   tryCatch(
+#     config_dd(df, geo_var = "zip_code"),
+#     error = function(e) e
+#   )
+# })
+#
+# dd$hospital <- lapply(dd$hospital, \(df) {
+#   tryCatch(
+#     config_dd(df, geo_var = "hospital_name"),
+#     error = function(e) e
+#   )
+# })
+
+# dd$patient <- lapply(dd$patient, \(df) {
+#   tryCatch(
+#     expr = {
+#       ls <- deduplicate_dd(df, geo_var = "zip_code")
+#       ls$data <- config_dd(ls$data)
+#       ls
+#     },
+#     error = function(e) e
+#   )
+# })
+#
+# dd$hospital <- lapply(dd$hospital, \(df) {
+#   tryCatch(
+#     expr = {
+#       ls <- deduplicate_dd(df, geo_var = "hospital_name")
+#       ls$data <- config_dd(ls$data)
+#       ls
+#     },
+#     error = function(e) e
+#   )
+# })
+
 dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
-    config_dd(df, geo_var = "zip_code"),
+    expr = {
+      deduplicate_dd(df, geo_var = "zip_code")
+    },
     error = function(e) e
   )
 })
 
 dd$hospital <- lapply(dd$hospital, \(df) {
   tryCatch(
-    config_dd(df, geo_var = "hospital_name"),
+    expr = {
+      deduplicate_dd(df, geo_var = "hospital_name")
+    },
     error = function(e) e
   )
 })
+
+deduplicate_dd_output <- dd
+
+dd$patient <- lapply(dd$patient, \(ls) {
+  tryCatch(
+    expr = {
+      ls$data <- config_dd(ls$data)
+      ls
+    },
+    error = function(e) e
+  )
+})
+
+dd$hospital <- lapply(dd$hospital, \(ls) {
+  tryCatch(
+    expr = {
+      ls$data <- config_dd(ls$data)
+      ls
+    },
+    error = function(e) e
+  )
+})
+
+config_dd_output <- dd
 
 ts <- lapply(ts, \(ls) {
   lapply(ls, \(df) {
@@ -270,8 +335,6 @@ ts <- lapply(ts, \(ls) {
     )
   })
 })
-
-config_dd_output <- dd
 
 config_ts_output <- ts
 
@@ -522,20 +585,19 @@ legend_html <- lapply(legend_rows, custom_legend_combine)
 
 # Save --------------------------------------------------------------------
 
-testdata <- list(
-  syndromes = syn,
-  date_range = date_range,
-  time_series = ts,
-  data_details = dd,
-  data_details_error = dderror,
-  satscan_results = ssresults,
+test_analysis <- list(
   time_series_raw = tsraw,
   data_details_raw = ddraw,
+  deduplicate_dd_output = deduplicate_dd_output,
   config_ts_output = config_ts_output,
   config_dd_output = config_dd_output,
   get_centroids_input = counties,
   get_centroids_output = counties_pts,
-  config_casefile_output = casefiles,
+  data_details = dd,
+  config_casefile_output = casefiles
+)
+
+test_shiny <- list(
   syn_select_list_output = synlist,
   daterange_select_list_output = datelist,
   graphical_parameters = gp,
@@ -543,5 +605,16 @@ testdata <- list(
   custom_legend_combine_output = legend_html
 )
 
-saveRDS(testdata, "tests/testthat/fixtures/test_data.rds")
+test_dashboard <- list(
+  syndromes = syn,
+  date_range = date_range,
+  time_series = ts,
+  data_details = dd,
+  data_details_error = dderror,
+  satscan_results = ssresults
+)
+
+saveRDS(test_analysis, "tests/testthat/fixtures/test_analysis.rds")
+saveRDS(test_shiny, "tests/testthat/fixtures/test_shiny.rds")
+saveRDS(test_dashboard, "tests/testthat/fixtures/test_dashboard.rds")
 
