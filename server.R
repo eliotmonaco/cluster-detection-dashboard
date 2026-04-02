@@ -46,15 +46,15 @@ function(input, output, session) {
   })
 
   # Filter cluster locations for mapping
-  clustloc <- reactive({
+  clustbound <- reactive({
     req(clustdata())
     list(
-      patient = filter_location_geometries(
+      patient = get_cluster_boundaries(
         clustdata()$patient,
         geo = geo$zctas,
         var = "GEOID20"
       ),
-      hospital = filter_location_geometries(
+      hospital = get_cluster_boundaries(
         clustdata()$hospital,
         geo = clustdata()$hospital$shapeclust,
         var = "loc_id"
@@ -108,9 +108,9 @@ function(input, output, session) {
 
   # Cluster map (by patient)
   output$pmap <- renderLeaflet({
-    req(clustdata(), clustloc(), rv$syn, input$zoom)
+    req(clustdata(), clustbound(), rv$syn, input$zoom)
     cluster_map(
-      cluster_locations = clustloc()$patient,
+      cluster_boundaries = clustbound()$patient,
       location_boundaries = geo$zctas,
       kc_boundary = geo$city,
       gp = gp$patient,
@@ -120,9 +120,9 @@ function(input, output, session) {
 
   # Cluster map (by hospital)
   output$hmap <- renderLeaflet({
-    req(clustdata(), clustloc(), rv$syn, input$zoom)
+    req(clustdata(), clustbound(), rv$syn, input$zoom)
     cluster_map(
-      cluster_locations = clustloc()$hospital,
+      cluster_boundaries = clustbound()$hospital,
       location_boundaries = geo$counties,
       kc_boundary = geo$city,
       hospital_locations = geo$hosp,
@@ -328,13 +328,13 @@ function(input, output, session) {
   observeEvent(rv$pmapid, ignoreNULL = FALSE, {
     rv$ptblid <- update_cluster_table_id(rv$pmapid)
     updateReactable("pclust", selected = rv$ptblid)
-    add_cluster_outline("pmap", clustloc()$patient, rv$pmapid)
+    add_cluster_outline("pmap", clustbound()$patient, rv$pmapid)
   })
 
   observeEvent(rv$hmapid, ignoreNULL = FALSE, {
     rv$htblid <- update_cluster_table_id(rv$hmapid)
     updateReactable("hclust", selected = rv$htblid)
-    add_cluster_outline("hmap", clustloc()$hospital, rv$hmapid)
+    add_cluster_outline("hmap", clustbound()$hospital, rv$hmapid)
   })
 
   # When cluster table row is selected, update map cluster ID

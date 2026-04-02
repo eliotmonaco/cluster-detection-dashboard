@@ -46,7 +46,7 @@ daterange_select_list <- function(dates) {
   )
 }
 
-# Configure data for Highchart function & data characteristics tables
+# Configure data for Highchart time series plot
 filter_ess <- function(df, start, end = NULL) {
   if (is.null(end)) {
     end <- max(df$date)
@@ -85,13 +85,6 @@ config_ts_plot_data <- function(ls, syndrome, daterange) {
     ls2[[syndrome]] |>
       filter_ess(start = as.Date(daterange)) |>
       df_to_hc_list()
-  })
-}
-
-config_dd_table_data <- function(ls, syndrome, daterange) {
-  lapply(ls, \(ls2) {
-    ls2[[syndrome]] |>
-      filter_ess(start = as.Date(daterange))
   })
 }
 
@@ -197,7 +190,7 @@ config_syndrome_data <- function(ls, syndrome, sig_pval) {
 }
 
 # Filter location geometries by cluster
-filter_location_geometries <- function(ls, geo, var) {
+get_cluster_boundaries <- function(ls, geo, var) {
   clust <- ls$shapeclust # contains clusters
   loc <- ls$gis # contains locations within each cluster
 
@@ -221,6 +214,57 @@ filter_location_geometries <- function(ls, geo, var) {
     mutate(lbl = paste("Cluster", cluster)) |>
     relocate(geometry, .after = everything())
 }
+
+# Get cluster information
+get_location_ids <- function(df, cluster_id) {
+  # Expects `gis` dataframe from Satscan output
+  df |>
+    dplyr::filter(cluster == cluster_id) |>
+    dplyr::pull(loc_id) |>
+    sort()
+}
+
+get_cluster_dates <- function(df, cluster_id) {
+  # Expects `shapeclust` spatial dataframe from Satscan output
+  df |>
+    sf::st_drop_geometry() |>
+    dplyr::filter(cluster == cluster_id) |>
+    dplyr::select(start_date, end_date) |>
+    as.character() |>
+    as.Date(format = "%Y/%m/%d")
+}
+
+# Configure data for data details tables
+config_dd_table <- function(df, var, loc_var, loc_ids, cluster_dates) {
+  # Summarize all data by `var`
+  smry1 <- df |>
+    dplyr::count(.data[[var]], .drop = FALSE) |>
+    dplyr::mutate(pct = setmeup::pct(n, nrow(df)) / 100)
+
+  # Filter cluster data by location IDs and cluster dates
+  df2 <- df |>
+    dplyr::filter(
+      .data[[loc_var]] %in% loc_ids,
+      date >= cluster_dates[1],
+      date <= cluster_dates[2]
+    )
+
+  # Summarize cluster data by `var`
+  smry2 <- df2 |>
+    dplyr::count(.data[[var]], .drop = FALSE) |>
+    dplyr::mutate(pct = setmeup::pct(n, nrow(df2)) / 100)
+
+  # Join summaries
+  smry1 |>
+    dplyr::full_join(smry2, by = var, suffix = c("_all", "_clust"))
+}
+
+# config_dd_table_data <- function(ls, syndrome, daterange) {
+#   lapply(ls, \(ls2) {
+#     ls2[[syndrome]] |>
+#       filter_ess(start = as.Date(daterange))
+#   })
+# }
 
 # SHINY UI ----------------------------------------------------------------
 
@@ -334,7 +378,7 @@ custom_legend_combine <- function(ls) {
 
 # Leaflet map showing study area and syndrome clusters using Satscan output
 cluster_map <- function(
-    cluster_locations,
+    cluster_boundaries,
     location_boundaries,
     kc_boundary,
     hospital_locations = NULL,
@@ -354,7 +398,7 @@ cluster_map <- function(
     addProviderTiles("CartoDB.Positron") |>
     addMapPane("hospital_markers", zIndex = 420) |>
     addMapPane("cluster_outline", zIndex = 430) |>
-    addMapPane("cluster_locations", zIndex = 440) |>
+    addMapPane("cluster_boundaries", zIndex = 440) |>
     addPolygons(
       data = location_boundaries,
       weight = gp$study$wt,
@@ -373,10 +417,10 @@ cluster_map <- function(
     )
 
   # Add cluster regions
-  if (!is.null(cluster_locations)) {
+  if (!is.null(cluster_boundaries)) {
     map <- map |>
       addPolygons(
-        data = cluster_locations,
+        data = cluster_boundaries,
         layerId = ~cluster,
         weight = gp$clust$wt,
         color = gp$clust$clr,
@@ -384,7 +428,7 @@ cluster_map <- function(
         fillColor = gp$clust$fill,
         fillOpacity = gp$clust$opac2,
         label = ~lbl,
-        options = pathOptions(pane = "cluster_locations"),
+        options = pathOptions(pane = "cluster_boundaries"),
         highlightOptions = highlightOptions(
           weight = 4,
           opacity = 1
@@ -456,21 +500,45 @@ mod_col_labels <- function(x) {
 
 # Data characteristics tables from data details
 dd_table <- function(df, var, replace_nm = NULL) {
-  df <- df |>
-    count(.data[[var]]) |>
-    mutate(pct = pct(n, nrow(df)) / 100)
+  # df <- df |>
+  #   count(.data[[var]]) |>
+  #   mutate(pct = pct(n, nrow(df)) / 100)
 
-  if (!is.null(replace_nm)) {
-    df <- df |>
-      rename(any_of(setNames(var, replace_nm)))
-  }
+  # if (!is.null(replace_nm)) {
+  #   df <- df |>
+  #     rename(any_of(setNames(var, replace_nm)))
+  # }
 
   df |>
-    rename_with(mod_col_labels) |>
+    # rename_with(mod_col_labels) |>
     reactable(
+      columnGroups = list(
+        colGroup(
+          name = "Study area",
+          columns = c("n_all", "pct_all")
+        ),
+        colGroup(
+          name = "Cluster",
+          columns = c("n_clust", "pct_clust")
+        )
+      ),
       columns = list(
-        "N" = colDef(format = colFormat(separators = TRUE)),
-        "Pct" = colDef(format = colFormat(percent = TRUE))
+        "n_all" = colDef(
+          name = "N",
+          format = colFormat(separators = TRUE)
+        ),
+        "pct_all" = colDef(
+          name = "Pct",
+          format = colFormat(percent = TRUE)
+        ),
+        "n_clust" = colDef(
+          name = "N",
+          format = colFormat(separators = TRUE)
+        ),
+        "pct_clust" = colDef(
+          name = "Pct",
+          format = colFormat(percent = TRUE)
+        )
       ),
       sortable = FALSE,
       pagination = FALSE,

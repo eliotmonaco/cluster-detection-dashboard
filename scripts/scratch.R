@@ -71,13 +71,13 @@ ss <- data$ss
 clustdata <- config_syndrome_data(ss, inputsyn, TRUE)
 
 # Filter cluster locations
-clustloc <- list(
-  patient = filter_location_geometries(
+clustbound <- list(
+  patient = get_cluster_boundaries(
     clustdata$patient,
     geo = geo$zctas,
     var = "GEOID20"
   ),
-  hospital = filter_location_geometries(
+  hospital = get_cluster_boundaries(
     clustdata$hospital,
     geo = clustdata$hospital$shapeclust,
     var = "loc_id"
@@ -86,7 +86,7 @@ clustloc <- list(
 
 # Cluster map (by patient)
 cluster_map(
-  cluster_locations = clustloc$patient,
+  cluster_boundaries = clustbound$patient,
   location_boundaries = geo$zctas,
   kc_boundary = geo$city,
   gp = gp$patient,
@@ -95,7 +95,7 @@ cluster_map(
 
 # Cluster map (by hospital)
 cluster_map(
-  cluster_locations = clustloc$hospital,
+  cluster_boundaries = clustbound$hospital,
   cluster_points = clustdata$hospital$shapegis,
   location_boundaries = geo$counties,
   kc_boundary = geo$city,
@@ -115,6 +115,26 @@ cluster_table(clustdata$patient$shapeclust)
 # Location data table (by patient)
 location_table(clustdata$patient$gis, id = 1, type = "patient")
 location_table(clustdata$hospital$gis, id = 1, type = "hospital")
+
+
+
+ids <- get_location_ids(clustdata$patient$gis, cluster_id = 1)
+dates <- get_cluster_dates(clustdata$patient$shapeclust, cluster_id = 1)
+
+df <- config_dd_table(
+  data$dd$patient[[inputsyn]],
+  var = "sex",
+  loc_var = "zip_code",
+  loc_ids = ids,
+  cluster_dates = dates
+)
+
+# Data details table
+dd_table(df)
+
+
+
+
 
 
 
