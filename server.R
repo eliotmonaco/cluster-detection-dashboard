@@ -30,12 +30,6 @@ function(input, output, session) {
     config_ts_plot_data(data()$ts, rv$syn, rv$dtrng)
   })
 
-  # Data details data
-  dd <- reactive({
-    req(data(), rv$syn, rv$dtrng)
-    config_dd_table_data(data()$dd, rv$syn, rv$dtrng)
-  })
-
   # Satscan results
   ss <- reactive(data()$ss)
 
@@ -137,62 +131,50 @@ function(input, output, session) {
 
   ### By patient location
 
-  output$ddtblp1 <- renderReactable({
-    dd_table(dd()$patient, "sex")
+  output$ddpsex <- renderReactable({
+    data()$dd |>
+      filter_data_details(source = "patient", syndrome = rv$syn) |>
+      assemble_dd_summaries(
+        cluster_data = clustdata(),
+        var = "sex",
+        source = "patient"
+      ) |>
+      dd_table(var = "sex")
   })
 
-  output$ddtblp2 <- renderReactable({
-    dd_table(dd()$patient, "age_group")
-  })
-
-  output$ddtblp3 <- renderReactable({
-    dd_table(dd()$patient, "patient_state")
-  })
-
-  output$ddtblp4 <- renderReactable({
-    dd_table(dd()$patient, "patient_country")
-  })
-
-  output$ddtblp5 <- renderReactable({
-    dd_table(dd()$patient, "hospital_name")
-  })
-
-  output$ddtblp6 <- renderReactable({
-    dd_table(dd()$patient, "hospital_state")
-  })
-
-  output$ddtblp7 <- renderReactable({
-    dd_table(dd()$patient, "has_been_e", "has been emergency")
+  output$ddpage <- renderReactable({
+    data()$dd |>
+      filter_data_details(source = "patient", syndrome = rv$syn) |>
+      assemble_dd_summaries(
+        cluster_data = clustdata(),
+        var = "age_group",
+        source = "patient"
+      ) |>
+      dd_table(var = "age_group")
   })
 
   ### By hospital location
 
-  output$ddtblh1 <- renderReactable({
-    dd_table(dd()$hospital, "sex")
+  output$ddhsex <- renderReactable({
+    data()$dd |>
+      filter_data_details(source = "hospital", syndrome = rv$syn) |>
+      assemble_dd_summaries(
+        cluster_data = clustdata(),
+        var = "sex",
+        source = "hospital"
+      ) |>
+      dd_table(var = "sex")
   })
 
-  output$ddtblh2 <- renderReactable({
-    dd_table(dd()$hospital, "age_group")
-  })
-
-  output$ddtblh3 <- renderReactable({
-    dd_table(dd()$hospital, "patient_state")
-  })
-
-  output$ddtblh4 <- renderReactable({
-    dd_table(dd()$hospital, "patient_country")
-  })
-
-  output$ddtblh5 <- renderReactable({
-    dd_table(dd()$hospital, "hospital_name")
-  })
-
-  output$ddtblh6 <- renderReactable({
-    dd_table(dd()$hospital, "hospital_state")
-  })
-
-  output$ddtblh7 <- renderReactable({
-    dd_table(dd()$hospital, "has_been_e", "has been emergency")
+  output$ddhage <- renderReactable({
+    data()$dd |>
+      filter_data_details(source = "hospital", syndrome = rv$syn) |>
+      assemble_dd_summaries(
+        cluster_data = clustdata(),
+        var = "age_group",
+        source = "hospital"
+      ) |>
+      dd_table(var = "age_group")
   })
 
   ## Clusters

@@ -3,6 +3,7 @@
 library(Rnssp)
 library(tidyverse)
 library(setmeup)
+library(kcData)
 library(rsatscan)
 library(sf)
 
@@ -24,7 +25,7 @@ dir.create(dir_data)
 
 source("R/analysis-fns.R")
 source("scripts/syndromes.R")
-syn <- syn[1:2]
+syn <- syn[c(1, 22)]
 source("scripts/get-ess.R")
 source("scripts/satscan.R")
 
@@ -55,7 +56,7 @@ ssenv$.ss.params <- append(
 
 inputsyn <- "resp"
 
-inputdtrng <- daterng1$`One year`
+# inputdtrng <- daterng1$`One year`
 
 data <- get_db_data(dbdata, max(dt))
 
@@ -118,24 +119,19 @@ location_table(clustdata$hospital$gis, id = 1, type = "hospital")
 
 
 
-ids <- get_location_ids(clustdata$patient$gis, cluster_id = 1)
-dates <- get_cluster_dates(clustdata$patient$shapeclust, cluster_id = 1)
 
-df <- config_dd_table(
-  data$dd$patient[[inputsyn]],
+
+
+# inputsyn <- "resp"
+
+df <- assemble_dd_summaries(
+  data_details = filter_data_details(data$dd, "patient", inputsyn),
+  cluster_data = clustdata,
   var = "sex",
-  loc_var = "zip_code",
-  loc_ids = ids,
-  cluster_dates = dates
+  source = "patient"
 )
 
-# Data details table
-dd_table(df)
-
-
-
-
-
+dd_table(df, "sex")
 
 
 

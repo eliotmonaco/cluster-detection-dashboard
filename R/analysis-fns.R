@@ -262,10 +262,12 @@ deduplicate_dd <- function(df, geo_var) {
 }
 
 config_dd <- function(df, ansi_codes = ansi) {
-  agegp <- c(
+  agecat <- c(
     "00-04" = "0-4", "05-17" = "5-17", "18-44" = "18-44",
     "45-64" = "45-64", "65-1000" = "65+", "Unknown" = "Unknown"
   )
+
+  sexcat <- c("F" = "Female", "M" = "Male", "U" = "Unknown/Other")
 
   df <- df |>
     dplyr::mutate(
@@ -274,8 +276,12 @@ config_dd <- function(df, ansi_codes = ansi) {
         stringr::str_to_title() |>
         gsub(pattern = "\\sOf\\s", replacement = " of "),
       hospital_name_geo = gsub("\\s", "_", hospital_name),
-      age_group = unname(agegp[age_group]),
-      age_group = factor(age_group, agegp),
+      age_group = unname(agecat[age_group]),
+      age_group = dplyr::if_else(age_group %in% agecat, age_group, agecat[6]),
+      age_group = factor(age_group, agecat),
+      sex = unname(sexcat[sex]),
+      sex = dplyr::if_else(sex %in% sexcat, sex, sexcat[3]),
+      sex = factor(sex, sexcat),
       patient_state2 = unname(ansi_codes[patient_state]),
       patient_state = dplyr::if_else(
         grepl("[[:alpha:]]", patient_state),

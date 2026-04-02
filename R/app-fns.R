@@ -215,56 +215,15 @@ get_cluster_boundaries <- function(ls, geo, var) {
     relocate(geometry, .after = everything())
 }
 
-# Get cluster information
-get_location_ids <- function(df, cluster_id) {
-  # Expects `gis` dataframe from Satscan output
-  df |>
-    dplyr::filter(cluster == cluster_id) |>
-    dplyr::pull(loc_id) |>
-    sort()
+filter_data_details <- function(
+  ls,
+  source = c("hospital", "patient"),
+  syndrome
+) {
+  source <- match.arg(source)
+
+  ls[[source]][[syndrome]]
 }
-
-get_cluster_dates <- function(df, cluster_id) {
-  # Expects `shapeclust` spatial dataframe from Satscan output
-  df |>
-    sf::st_drop_geometry() |>
-    dplyr::filter(cluster == cluster_id) |>
-    dplyr::select(start_date, end_date) |>
-    as.character() |>
-    as.Date(format = "%Y/%m/%d")
-}
-
-# Configure data for data details tables
-config_dd_table <- function(df, var, loc_var, loc_ids, cluster_dates) {
-  # Summarize all data by `var`
-  smry1 <- df |>
-    dplyr::count(.data[[var]], .drop = FALSE) |>
-    dplyr::mutate(pct = setmeup::pct(n, nrow(df)) / 100)
-
-  # Filter cluster data by location IDs and cluster dates
-  df2 <- df |>
-    dplyr::filter(
-      .data[[loc_var]] %in% loc_ids,
-      date >= cluster_dates[1],
-      date <= cluster_dates[2]
-    )
-
-  # Summarize cluster data by `var`
-  smry2 <- df2 |>
-    dplyr::count(.data[[var]], .drop = FALSE) |>
-    dplyr::mutate(pct = setmeup::pct(n, nrow(df2)) / 100)
-
-  # Join summaries
-  smry1 |>
-    dplyr::full_join(smry2, by = var, suffix = c("_all", "_clust"))
-}
-
-# config_dd_table_data <- function(ls, syndrome, daterange) {
-#   lapply(ls, \(ls2) {
-#     ls2[[syndrome]] |>
-#       filter_ess(start = as.Date(daterange))
-#   })
-# }
 
 # SHINY UI ----------------------------------------------------------------
 
@@ -496,56 +455,6 @@ add_cluster_outline <- function(map_id, data, shape_id) {
 # Modify column labels
 mod_col_labels <- function(x) {
   str_to_sentence(gsub("_", " ", x))
-}
-
-# Data characteristics tables from data details
-dd_table <- function(df, var, replace_nm = NULL) {
-  # df <- df |>
-  #   count(.data[[var]]) |>
-  #   mutate(pct = pct(n, nrow(df)) / 100)
-
-  # if (!is.null(replace_nm)) {
-  #   df <- df |>
-  #     rename(any_of(setNames(var, replace_nm)))
-  # }
-
-  df |>
-    # rename_with(mod_col_labels) |>
-    reactable(
-      columnGroups = list(
-        colGroup(
-          name = "Study area",
-          columns = c("n_all", "pct_all")
-        ),
-        colGroup(
-          name = "Cluster",
-          columns = c("n_clust", "pct_clust")
-        )
-      ),
-      columns = list(
-        "n_all" = colDef(
-          name = "N",
-          format = colFormat(separators = TRUE)
-        ),
-        "pct_all" = colDef(
-          name = "Pct",
-          format = colFormat(percent = TRUE)
-        ),
-        "n_clust" = colDef(
-          name = "N",
-          format = colFormat(separators = TRUE)
-        ),
-        "pct_clust" = colDef(
-          name = "Pct",
-          format = colFormat(percent = TRUE)
-        )
-      ),
-      sortable = FALSE,
-      pagination = FALSE,
-      highlight = TRUE,
-      compact = TRUE,
-      fullWidth = FALSE
-    )
 }
 
 # Syndrome table with query names and KR links
