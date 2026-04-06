@@ -42,7 +42,7 @@ function(input, output, session) {
     hosp_loc = NULL, gp = gp$patient
   )
   cluster_map_server(
-    "hosp", rv, src = "hospital", loc = rv$clustdata$hospital$shapeclust,
+    "hosp", rv, src = "hospital", loc = rv$clustdata_hospital$shapeclust,
     var = "loc_id", loc_bnd = geo$counties,
     hosp_loc = geo$hosp, gp = gp$hospital
   )

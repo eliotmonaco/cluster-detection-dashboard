@@ -1,14 +1,10 @@
 # Functions for data details tables
 
 # ls = `data_details` list from dashboard data
-filter_data_details <- function(
-    ls,
-    source = c("hospital", "patient"),
-    syndrome
-) {
-  source <- match.arg(source)
+filter_data_details <- function(ls, src = c("hospital", "patient"), syndrome) {
+  src <- match.arg(src)
 
-  ls[[source]][[syndrome]]
+  ls[[src]][[syndrome]]
 }
 
 # df = `gis` dataframe from Satscan output
@@ -61,30 +57,30 @@ assemble_dd_summaries <- function(
   data_details,
   cluster_data,
   var,
-  source = c("hospital", "patient")
+  src = c("hospital", "patient")
 ) {
-  source <- match.arg(source)
+  src <- match.arg(src)
 
   smry1 <- dd_full_summary(data_details, var)
 
-  cluster_ids <- cluster_data[[source]]$shapeclust$cluster
+  cluster_ids <- cluster_data$shapeclust$cluster
 
   # Return smry1 if no clusters were detected
   if (length(cluster_ids) == 0) {
     return(smry1)
   }
 
-  if (source == "hospital") {
+  if (src == "hospital") {
     locvar <- "hospital_name_geo"
-  } else if (source == "patient") {
+  } else if (src == "patient") {
     locvar <- "zip_code"
   }
 
   # Summarize data for each cluster
   smry_clust <- lapply(cluster_ids, \(x) {
-    location_ids <- get_location_ids(cluster_data[[source]]$gis, x)
+    location_ids <- get_location_ids(cluster_data$gis, x)
 
-    dates <- get_cluster_dates(cluster_data[[source]]$shapeclust, x)
+    dates <- get_cluster_dates(cluster_data$shapeclust, x)
 
     dd_cluster_summary(
       data_details,

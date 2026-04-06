@@ -45,25 +45,37 @@ cluster_table_server <- function(id, rv, src) {
 
     # Cluster data for maps and data details
     clustdata <- reactive({
-      config_syndrome_data(
-        rv$data$satscan_results,
-        syndrome = rv$syn,
+      # config_syndrome_data(
+      #   rv$data$satscan_results,
+      #   syndrome = rv$syn,
+      #   sig_pval = rv$pval
+      # )
+      ls <- filter_cluster_data(
+        rv$data$satscan_results[[src]][[rv$syn]],
         sig_pval = rv$pval
       )
+
+      if (src == "hospital") {
+        expand_point_clusters(ls)
+      } else {
+        ls
+      }
     })
 
     observe({
-      rv$clustdata <- clustdata()
+      rv[[paste0("clustdata_", src)]] <- clustdata()
     })
 
     # Cluster table
     output$clusttbl <- renderReactable({
       validate(need(
-        rv$clustdata[[src]]$shapeclust,
+        # rv$clustdata[[src]]$shapeclust,
+        clustdata()$shapeclust,
         "No clusters detected"
       ))
 
-      cluster_table(rv$clustdata[[src]]$shapeclust)
+      # cluster_table(rv$clustdata[[src]]$shapeclust)
+      cluster_table(clustdata()$shapeclust)
     })
 
     # When cluster table row is selected, update map cluster ID
@@ -97,9 +109,10 @@ location_table_server <- function(id, rv, src) {
       ))
 
       location_table(
-        rv$clustdata[[src]]$gis,
+        # rv$clustdata[[src]]$gis,
+        rv[[paste0("clustdata_", src)]]$gis,
         id = rv[[map_id]],
-        type = src
+        src = src
       )
     })
   })
@@ -122,7 +135,8 @@ cluster_map_server <- function(id, rv, src, loc, var, loc_bnd, hosp_loc, gp) {
     # Cluster boundary data for maps
     clustbound <- reactive({
       get_cluster_boundaries(
-        rv$clustdata[[src]],
+        # rv$clustdata[[src]],
+        rv[[paste0("clustdata_", src)]],
         locations = loc,
         var = var
       )

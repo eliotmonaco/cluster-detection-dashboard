@@ -73,24 +73,45 @@ filter_cluster_data <- function(ls, sig_pval) {
   })
 }
 
-config_syndrome_data <- function(ls, syndrome, sig_pval) {
-  ls <- lapply(
-    list(
-      patient = ls$patient[[syndrome]],
-      hospital = ls$hospital[[syndrome]]
-    ),
-    filter_cluster_data,
-    sig_pval = sig_pval
-  )
+# config_syndrome_data <- function(ls, syndrome, sig_pval) {
+#   ls <- lapply(
+#     list(
+#       patient = ls$patient[[syndrome]],
+#       hospital = ls$hospital[[syndrome]]
+#     ),
+#     filter_cluster_data,
+#     sig_pval = sig_pval
+#   )
+#
+#   # Point expansion for single location clusters
+#   if (!is.null(ls$hospital$shapeclust)) {
+#     # Find clusters with only 1 location
+#     clust <- ls$hospital$gis$cluster
+#
+#     clust <- clust[!clust %in% clust[duplicated(clust)]]
+#
+#     # Expand cluster polygons for visibility on map
+#     ls$hospital$shapeclust <- ls$hospital$shapeclust |>
+#       mutate(geometry = if_else(
+#         cluster %in% clust,
+#         st_buffer(geometry, dist = 2000),
+#         geometry
+#       ))
+#   }
+#
+#   ls
+# }
 
-  if (!is.null(ls$hospital$shapeclust)) {
+# Point expansion for single location clusters
+expand_point_clusters <- function(ls) {
+  if (!is.null(ls$shapeclust)) {
     # Find clusters with only 1 location
-    clust <- ls$hospital$gis$cluster
+    clust <- ls$gis$cluster
 
     clust <- clust[!clust %in% clust[duplicated(clust)]]
 
     # Expand cluster polygons for visibility on map
-    ls$hospital$shapeclust <- ls$hospital$shapeclust |>
+    ls$shapeclust <- ls$shapeclust |>
       mutate(geometry = if_else(
         cluster %in% clust,
         st_buffer(geometry, dist = 2000),
@@ -247,12 +268,12 @@ cluster_table <- function(df) {
 }
 
 # Table with location data for a given cluster
-location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
+location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
   if (is.null(id)) {
     return(NULL)
   }
 
-  type <- match.arg(type)
+  src <- match.arg(src)
 
   replace <- c(
     "In KC" = "kc",
@@ -262,14 +283,14 @@ location_table <- function(df, id = NULL, type = c("patient", "hospital")) {
     "Obs/exp" = "loc_ode"
   )
 
-  if (type == "patient") {
+  if (src == "patient") {
     df <- df |>
       mutate(loc_id = as.character(loc_id))
 
     replace <- c("ZCTA" = "loc_id", replace)
 
     col_defs <- list(ZCTA = colDef(minWidth = 200))
-  } else if (type == "hospital") {
+  } else if (src == "hospital") {
     df <- df |>
       mutate(
         loc_id = gsub("_", " ", loc_id) |>

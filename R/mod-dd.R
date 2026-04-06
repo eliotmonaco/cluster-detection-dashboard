@@ -13,13 +13,13 @@ dd_server <- function(id, rv, src, var) {
     data <- reactive({
       rv$data$data_details |>
         filter_data_details(
-          source = src,
+          src = src,
           syndrome = rv$syn
         ) |>
         assemble_dd_summaries(
-          cluster_data = rv$clustdata,
+          cluster_data = rv[[paste0("clustdata_", src)]],
           var = var,
-          source = src
+          src = src
         )
     })
 
