@@ -7,8 +7,16 @@ library(highcharter)
 library(reactable)
 library(leaflet)
 
-source("R/app-fns.R")
 source("scripts/syndromes.R")
+source("R/mod-inputs.R")
+source("R/mod-clust.R")
+source("R/mod-dd.R")
+source("R/mod-ts.R")
+source("R/fn-inputs.R")
+source("R/fn-clust-map.R")
+source("R/fn-tbls.R")
+source("R/fn-dd.R")
+source("R/fn-ts.R")
 
 # Import dashboard data
 dbdata <- readRDS("data/dashboard_data.rds")
@@ -19,35 +27,29 @@ geo <- readRDS("data/geographic_data.rds")
 # Import ANSI codes
 ansi <- readRDS("data/ansi_state_codes.rds")
 
-# Data directories
+# Date input choices
 dirs <- list.dirs("data/", full.names = TRUE, recursive = FALSE)
+
 dirs <- dirs[grepl("^data/an-", dirs)]
 
-# Analysis date input list
-dt <- as.Date(sub("^data/an-", "", dirs))
+date_input_choices <- as.Date(sub("^data/an-", "", dirs))
 
-# Initial syndrome select input list
-synselect1 <- dbdata |>
-  get_db_data(max(dt), "syn") |>
+# Syndrome input choices (initial)
+syn_input_choices <- dbdata |>
+  get_db_data(max(date_input_choices), "syndromes") |>
   syn_select_list()
 
-# Initial date range input list
-daterng1 <- dbdata |>
-  get_db_data(max(dt), "daterng") |>
-  daterange_select_list()
+# Time series input choices
+ts_input_choices <- list(
+  "Two weeks" = "14",
+  "30 days" = "30",
+  "90 days" = "90",
+  "180 days" = "180",
+  "One year" = "365"
+)
 
 # UI text
 uitext <- list(
-  sigp = HTML("Show clusters where p&nbsp;<&nbsp;0.05 only"),
-  cctbl = HTML(paste(
-    "Spatiotemporal clusters are detected using SaTScan software.",
-    "This table shows the number of clusters where p&nbsp;<&nbsp;0.05 for each",
-    "syndrome."
-  )),
-  val_loc = paste(
-    "Select a cluster on the map or the cluster table to see location details"
-  ),
-  val_clust = "No clusters detected",
   tspat = paste(
     "This dataset consists of ER visit records for patients residing in Kansas",
     "City ZIP codes."

@@ -1,331 +1,108 @@
 function(input, output, session) {
 
+  # INPUTS ------------------------------------------------------------------
+
+  # Data selection
+  data_select_server("clust", rv)
+  data_select_server("dd", rv)
+  data_select_server("ts", rv)
+  data_select_server("syn", rv)
+
+  # Syndrome selection
+  syn_select_server("clust", rv)
+  syn_select_server("dd", rv)
+  syn_select_server("ts", rv)
+
+  # P-value selection
+  pval_select_server("clust", rv)
+
+  # Map zoom level selection
+  zoom_select_server("clust", rv)
+
+  # Days selection
+  days_select_server("ts", rv)
+
   # REACTIVES ---------------------------------------------------------------
 
   rv <- reactiveValues()
 
   # Initialize map cluster IDs as NULL for validation message to appear in
   # cluster location table even when p-value checkbox is not selected
-  rv$pmapid <- NULL; rv$hmapid <- NULL
-  rv$ptblid <- NA; rv$htblid <- NA
 
-  # Get all data for a particular date
-  data <- reactive({
-    req(rv$date)
-    get_db_data(dbdata, rv$date)
-  })
-
-  # Syndrome list
-  syn <- reactive(data()$syn)
-
-  # Input choices for syndromes
-  synselect <- reactive(syn_select_list(syn()))
-
-  # Input choices for date range
-  daterng <- reactive(daterange_select_list(data()$daterng))
-
-  # Time series data
-  ts <- reactive({
-    req(data(), rv$syn, rv$dtrng)
-    config_ts_plot_data(data()$ts, rv$syn, rv$dtrng)
-  })
-
-  # Satscan results
-  ss <- reactive(data()$ss)
-
-  # Filter cluster data
-  clustdata <- reactive({
-    req(rv$syn)
-    config_syndrome_data(ss(), rv$syn, input$sigp)
-  })
-
-  # Filter cluster locations for mapping
-  clustbound <- reactive({
-    req(clustdata())
-    list(
-      patient = get_cluster_boundaries(
-        clustdata()$patient,
-        geo = geo$zctas,
-        var = "GEOID20"
-      ),
-      hospital = get_cluster_boundaries(
-        clustdata()$hospital,
-        geo = clustdata()$hospital$shapeclust,
-        var = "loc_id"
-      )
-    )
-  })
+  # rv <- reactiveValues(
+  #   # data = get_db_data(dbdata, max(date_input_choices)),
+  #   # syn = syn_input_choices[[1]],
+  #   # synselect = get_db_data(dbdata, max(date_input_choices), "syndromes") |>
+  #   #   syn_select_list(),
+  #   map_id_patient = NULL,
+  #   map_id_hospital = NULL,
+  #   tbl_id_patient = NA,
+  #   tbl_id_hospital = NA
+  # )
 
   # TEXT --------------------------------------------------------------------
 
   output$titlesyn1 <- renderUI({
-    syndrome_title_tag(rv$syn, synselect())
+    syndrome_title_tag(rv$syn, rv$synselect)
   })
 
   output$titlesyn2 <- renderUI({
-    syndrome_title_tag(rv$syn, synselect())
+    syndrome_title_tag(rv$syn, rv$synselect)
   })
 
   # output$ptxt <- renderUI({
   #   HTML(paste(
-  #     "Map ID:", rv$pmapid, "<br>",
-  #     "Table ID:", rv$ptblid
+  #     "Input value:", input$clust_map_shape_click$id, "<br>",
+  #     "Map ID:", rv$map_id_patient, "<br>",
+  #     "Table ID:", rv$tbl_id_patient
   #   ))
   # })
   #
   # output$htxt <- renderUI({
   #   HTML(paste(
-  #     "Map ID:", rv$hmapid, "<br>",
-  #     "Table ID:", rv$htblid
+  #     "Input value:", input$clust_map_shape_click$id, "<br>",
+  #     "Map ID:", rv$map_id_hospital, "<br>",
+  #     "Table ID:", rv$tbl_id_hospital
   #   ))
   # })
 
   # PLOTS -------------------------------------------------------------------
 
-  # Line plot: time series by patient
-  output$tspat <- renderHighchart({
-    req(ts()$patient, synselect())
-    ts_plot(
-      ts()$patient,
-      title = names(synselect())[which(synselect() == rv$syn)]
-    )
-  })
+  # Time series
+  ts_plot_server("pat", rv, "patient")
+  ts_plot_server("hosp", rv, "hospital")
 
-  # Line plot: time series by hospital
-  output$tshosp <- renderHighchart({
-    req(ts()$hospital, synselect())
-    ts_plot(
-      ts()$hospital,
-      title = names(synselect())[which(synselect() == rv$syn)]
-    )
-  })
-
-  # Cluster map (by patient)
-  output$pmap <- renderLeaflet({
-    req(clustdata(), clustbound(), rv$syn, input$zoom)
-    cluster_map(
-      cluster_boundaries = clustbound()$patient,
-      location_boundaries = geo$zctas,
-      kc_boundary = geo$city,
-      gp = gp$patient,
-      zoom_level = input$zoom
-    )
-  })
-
-  # Cluster map (by hospital)
-  output$hmap <- renderLeaflet({
-    req(clustdata(), clustbound(), rv$syn, input$zoom)
-    cluster_map(
-      cluster_boundaries = clustbound()$hospital,
-      location_boundaries = geo$counties,
-      kc_boundary = geo$city,
-      hospital_locations = geo$hosp,
-      gp = gp$hospital,
-      zoom_level = input$zoom
-    )
-  })
+  # Cluster maps
+  cluster_map_server(
+    "pat", rv, src = "patient", loc = geo$zctas,
+    var = "GEOID20", loc_bnd = geo$zctas,
+    hosp_loc = NULL, gp = gp$patient
+  )
+  cluster_map_server(
+    "hosp", rv, src = "hospital", loc = rv$clustdata$hospital$shapeclust,
+    var = "loc_id", loc_bnd = geo$counties,
+    hosp_loc = geo$hosp, gp = gp$hospital
+  )
 
   # TABLES ------------------------------------------------------------------
 
-  ## Data characteristics
+  # Clusters
+  cluster_overview_server("clust", rv)
+  cluster_table_server("pat", rv, "patient")
+  cluster_table_server("hosp", rv, "hospital")
+  location_table_server("pat", rv, "patient")
+  location_table_server("hosp", rv, "hospital")
 
-  ### By patient location
+  # Data details
+  dd_server("pat-sex", rv, "patient", "sex")
+  dd_server("pat-age", rv, "patient", "age_group")
+  dd_server("hosp-sex", rv, "hospital", "sex")
+  dd_server("hosp-age", rv, "hospital", "age_group")
 
-  output$ddpsex <- renderReactable({
-    data()$dd |>
-      filter_data_details(source = "patient", syndrome = rv$syn) |>
-      assemble_dd_summaries(
-        cluster_data = clustdata(),
-        var = "sex",
-        source = "patient"
-      ) |>
-      dd_table(var = "sex")
-  })
-
-  output$ddpage <- renderReactable({
-    data()$dd |>
-      filter_data_details(source = "patient", syndrome = rv$syn) |>
-      assemble_dd_summaries(
-        cluster_data = clustdata(),
-        var = "age_group",
-        source = "patient"
-      ) |>
-      dd_table(var = "age_group")
-  })
-
-  ### By hospital location
-
-  output$ddhsex <- renderReactable({
-    data()$dd |>
-      filter_data_details(source = "hospital", syndrome = rv$syn) |>
-      assemble_dd_summaries(
-        cluster_data = clustdata(),
-        var = "sex",
-        source = "hospital"
-      ) |>
-      dd_table(var = "sex")
-  })
-
-  output$ddhage <- renderReactable({
-    data()$dd |>
-      filter_data_details(source = "hospital", syndrome = rv$syn) |>
-      assemble_dd_summaries(
-        cluster_data = clustdata(),
-        var = "age_group",
-        source = "hospital"
-      ) |>
-      dd_table(var = "age_group")
-  })
-
-  ## Clusters
-
-  # Cluster count table
-  output$clustct <- renderReactable({
-    ss() |>
-      significant_clusters_by_syndrome(syndromes = syn()) |>
-      clustcount_table()
-  })
-
-  # Cluster data tables
-  output$pclust <- renderReactable({
-    validate(need(clustdata()$patient$shapeclust, uitext$val_clust))
-    cluster_table(clustdata()$patient$shapeclust)
-  })
-
-  output$hclust <- renderReactable({
-    validate(need(clustdata()$hospital$shapeclust, uitext$val_clust))
-    cluster_table(clustdata()$hospital$shapeclust)
-  })
-
-  # Location data tables
-  output$ploc <- renderReactable({
-    validate(need(rv$pmapid, uitext$val_loc))
-    location_table(
-      clustdata()$patient$gis,
-      id = rv$pmapid,
-      type = "patient"
-    )
-  })
-
-  output$hloc <- renderReactable({
-    validate(need(rv$hmapid, uitext$val_loc))
-    location_table(
-      clustdata()$hospital$gis,
-      id = rv$hmapid,
-      type = "hospital"
-    )
-  })
-
-  ## Syndromes
-
+  # Syndromes
   output$syntbl <- renderReactable({
-    req(syn())
-    syndrome_table(syn())
-  })
-
-  # OBSERVERS ---------------------------------------------------------------
-
-  # Update analysis date when any date input is changed
-  observeEvent(input$date1, {
-    rv$date <- input$date1
-    updateDateInput(session, "date2", value = rv$date)
-    updateDateInput(session, "date3", value = rv$date)
-    updateDateInput(session, "date4", value = rv$date)
-  })
-
-  observeEvent(input$date2, {
-    rv$date <- input$date2
-    updateDateInput(session, "date1", value = rv$date)
-    updateDateInput(session, "date3", value = rv$date)
-    updateDateInput(session, "date4", value = rv$date)
-  })
-
-  observeEvent(input$date3, {
-    rv$date <- input$date3
-    updateDateInput(session, "date1", value = rv$date)
-    updateDateInput(session, "date2", value = rv$date)
-    updateDateInput(session, "date4", value = rv$date)
-  })
-
-  observeEvent(input$date4, {
-    rv$date <- input$date4
-    updateDateInput(session, "date1", value = rv$date)
-    updateDateInput(session, "date2", value = rv$date)
-    updateDateInput(session, "date3", value = rv$date)
-  })
-
-  # Update syndrome selections when the syndrome list is changed
-  observeEvent(synselect(), {
-    updateSelectInput(session, "syn1", choices = synselect(), selected = rv$syn)
-    updateSelectInput(session, "syn2", choices = synselect(), selected = rv$syn)
-    updateSelectInput(session, "syn3", choices = synselect(), selected = rv$syn)
-  })
-
-  # Update syndrome selections when any relevant select input is changed
-  observeEvent(input$syn1, {
-    rv$syn <- input$syn1
-    updateSelectInput(session, "syn2", selected = rv$syn)
-    updateSelectInput(session, "syn3", selected = rv$syn)
-  })
-
-  observeEvent(input$syn2, {
-    rv$syn <- input$syn2
-    updateSelectInput(session, "syn1", selected = rv$syn)
-    updateSelectInput(session, "syn3", selected = rv$syn)
-  })
-
-  observeEvent(input$syn3, {
-    rv$syn <- input$syn3
-    updateSelectInput(session, "syn2", selected = rv$syn)
-    updateSelectInput(session, "syn3", selected = rv$syn)
-  })
-
-  # Update date range selections when any relevant select input is changed
-  observeEvent(input$dtrng1, {
-    rv$dtrng <- input$dtrng1
-    updateRadioButtons(session, "dtrng2", selected = rv$dtrng)
-  })
-
-  observeEvent(input$dtrng2, {
-    rv$dtrng <- input$dtrng2
-    updateRadioButtons(session, "dtrng1", selected = rv$dtrng)
-  })
-
-  # Reset map cluster ID as NULL when a new syndrome is selected
-  observeEvent(rv$syn, {
-    rv$pmapid <- NULL; rv$hmapid <- NULL
-  })
-
-  # On map click update map cluster ID
-  observeEvent(input$pmap_shape_click, {
-    rv$pmapid <- input$pmap_shape_click$id
-  })
-
-  observeEvent(input$hmap_shape_click, {
-    rv$hmapid <- input$hmap_shape_click$id
-  })
-
-  # When map cluster ID updates, update table ID, update table, and add cluster
-  # outline to map
-  observeEvent(rv$pmapid, ignoreNULL = FALSE, {
-    rv$ptblid <- update_cluster_table_id(rv$pmapid)
-    updateReactable("pclust", selected = rv$ptblid)
-    add_cluster_outline("pmap", clustbound()$patient, rv$pmapid)
-  })
-
-  observeEvent(rv$hmapid, ignoreNULL = FALSE, {
-    rv$htblid <- update_cluster_table_id(rv$hmapid)
-    updateReactable("hclust", selected = rv$htblid)
-    add_cluster_outline("hmap", clustbound()$hospital, rv$hmapid)
-  })
-
-  # When cluster table row is selected, update map cluster ID
-  observeEvent(getReactableState("pclust"), {
-    rv$pmapid <- getReactableState("pclust", name = "selected")
-  })
-
-  observeEvent(getReactableState("hclust"), {
-    rv$hmapid <- getReactableState("hclust", name = "selected")
+    req(rv$data$syn)
+    syndrome_table(rv$data$syn)
   })
 
 }

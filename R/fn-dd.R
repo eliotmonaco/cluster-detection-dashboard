@@ -1,5 +1,16 @@
 # Functions for data details tables
 
+# ls = `data_details` list from dashboard data
+filter_data_details <- function(
+    ls,
+    source = c("hospital", "patient"),
+    syndrome
+) {
+  source <- match.arg(source)
+
+  ls[[source]][[syndrome]]
+}
+
 # df = `gis` dataframe from Satscan output
 get_location_ids <- function(df, cluster_id) {
   df |>
