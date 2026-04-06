@@ -1,5 +1,6 @@
 # Modules for cluster tables and maps
 
+# Cluster count table on overview tab
 cluster_overview_ui <- function(id) {
   card(
     p(HTML(paste(
@@ -29,6 +30,7 @@ cluster_overview_server <- function(id, rv) {
   })
 }
 
+# Cluster table
 cluster_table_ui <- function(id) {
   card(
     card_header("Clusters"),
@@ -71,6 +73,7 @@ cluster_table_server <- function(id, rv, src) {
   })
 }
 
+# Cluster locations table
 location_table_ui <- function(id) {
   card(
     card_header("Locations in cluster"),
@@ -102,6 +105,7 @@ location_table_server <- function(id, rv, src) {
   })
 }
 
+# Cluster map
 cluster_map_ui <- function(id) {
   card(
     leafletOutput(NS(id, "clustmap")),
@@ -158,6 +162,20 @@ cluster_map_server <- function(id, rv, src, loc, var, loc_bnd, hosp_loc, gp) {
         data = clustbound(),
         shape_id = rv[[map_id]]
       )
+    })
+  })
+}
+
+# Syndrome heading
+syn_heading_ui <- function(id) {
+  htmlOutput(NS(id, "synheader"))
+}
+
+syn_heading_server <- function(id, rv) {
+  moduleServer(id, function(input, output, session) {
+    # Syndrome heading on clusters page
+    output$synheader <- renderUI({
+      syndrome_title_tag(rv$syn, rv$synselect)
     })
   })
 }

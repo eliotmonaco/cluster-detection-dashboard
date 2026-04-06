@@ -20,7 +20,7 @@ page_navbar(
         ),
         nav_panel(
           "Clusters by patient location",
-          htmlOutput("titlesyn1"),
+          syn_heading_ui("pat"),
           layout_column_wrap(
             cluster_map_ui("pat"),
             location_table_ui("pat")
@@ -30,7 +30,7 @@ page_navbar(
         ),
         nav_panel(
           "Clusters by hospital location",
-          htmlOutput("titlesyn2"),
+          syn_heading_ui("hosp"),
           layout_column_wrap(
             cluster_map_ui("hosp"),
             location_table_ui("hosp")
@@ -72,8 +72,8 @@ page_navbar(
         syn_select_ui("ts", syn_input_choices),
         days_select_ui("ts", ts_input_choices)
       ),
-      ts_plot_ui("pat", "ER visits by patient location"),
-      ts_plot_ui("hosp", "ER visits by hospital location")
+      ts_plot_ui("pat", uitext$ts$pat$hd, uitext$ts$pat$ft),
+      ts_plot_ui("hosp", uitext$ts$hosp$hd, uitext$ts$hosp$ft)
     )
   ),
 
@@ -83,7 +83,7 @@ page_navbar(
       sidebar = sidebar(
         data_select_ui("syn", date_input_choices)
       ),
-      card(reactableOutput("syntbl"))
+      syn_info_table_ui("syn")
     )
   ),
 

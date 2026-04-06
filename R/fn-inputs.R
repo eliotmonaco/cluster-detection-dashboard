@@ -20,8 +20,3 @@ syn_select_list <- function(ls) {
   ls2
 }
 
-# ....
-syndrome_title_tag <- function(x, ls) {
-  tags$h3(names(ls)[which(ls == x)], class = "cluster-tab-title")
-}
-

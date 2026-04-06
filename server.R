@@ -1,5 +1,7 @@
 function(input, output, session) {
 
+  rv <- reactiveValues()
+
   # INPUTS ------------------------------------------------------------------
 
   # Data selection
@@ -22,49 +24,10 @@ function(input, output, session) {
   # Days selection
   days_select_server("ts", rv)
 
-  # REACTIVES ---------------------------------------------------------------
-
-  rv <- reactiveValues()
-
-  # Initialize map cluster IDs as NULL for validation message to appear in
-  # cluster location table even when p-value checkbox is not selected
-
-  # rv <- reactiveValues(
-  #   # data = get_db_data(dbdata, max(date_input_choices)),
-  #   # syn = syn_input_choices[[1]],
-  #   # synselect = get_db_data(dbdata, max(date_input_choices), "syndromes") |>
-  #   #   syn_select_list(),
-  #   map_id_patient = NULL,
-  #   map_id_hospital = NULL,
-  #   tbl_id_patient = NA,
-  #   tbl_id_hospital = NA
-  # )
-
   # TEXT --------------------------------------------------------------------
 
-  output$titlesyn1 <- renderUI({
-    syndrome_title_tag(rv$syn, rv$synselect)
-  })
-
-  output$titlesyn2 <- renderUI({
-    syndrome_title_tag(rv$syn, rv$synselect)
-  })
-
-  # output$ptxt <- renderUI({
-  #   HTML(paste(
-  #     "Input value:", input$clust_map_shape_click$id, "<br>",
-  #     "Map ID:", rv$map_id_patient, "<br>",
-  #     "Table ID:", rv$tbl_id_patient
-  #   ))
-  # })
-  #
-  # output$htxt <- renderUI({
-  #   HTML(paste(
-  #     "Input value:", input$clust_map_shape_click$id, "<br>",
-  #     "Map ID:", rv$map_id_hospital, "<br>",
-  #     "Table ID:", rv$tbl_id_hospital
-  #   ))
-  # })
+  syn_heading_server("pat", rv)
+  syn_heading_server("hosp", rv)
 
   # PLOTS -------------------------------------------------------------------
 
@@ -100,9 +63,22 @@ function(input, output, session) {
   dd_server("hosp-age", rv, "hospital", "age_group")
 
   # Syndromes
-  output$syntbl <- renderReactable({
-    req(rv$data$syn)
-    syndrome_table(rv$data$syn)
-  })
+  syn_info_table_server("syn", rv)
+
+  # TESTING -----------------------------------------------------------------
+
+  # output$ptxt <- renderUI({
+  #   HTML(paste(
+  #     "Map ID:", rv$map_id_patient, "<br>",
+  #     "Table ID:", rv$tbl_id_patient
+  #   ))
+  # })
+  #
+  # output$htxt <- renderUI({
+  #   HTML(paste(
+  #     "Map ID:", rv$map_id_hospital, "<br>",
+  #     "Table ID:", rv$tbl_id_hospital
+  #   ))
+  # })
 
 }
