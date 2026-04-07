@@ -53,10 +53,19 @@ imap(dd, \(ls, i) {
       return(invisible(NULL))
     }
 
+    # Select relevant coordinates file
     if (i == "patient") {
       cfnm <- paste0(dir_in, "zctas.geo")
     } else if (i == "hospital") {
       cfnm <- paste0(dir_in, "hospitals.geo")
+    }
+
+    # Replace dates with NA if there were no visits in the period
+    if (nrow(df) == 0) {
+      mindate <- NA; maxdate <- NA
+    } else {
+      mindate <- format(min(df$date), "%Y/%m/%d")
+      maxdate <- format(max(df$date), "%Y/%m/%d")
     }
 
     nm <- paste0(j, "-", i)
@@ -65,8 +74,8 @@ imap(dd, \(ls, i) {
     set_ss_opts(
       casefile = paste0(dir_in, nm, ".cas"),
       coordfile = cfnm,
-      start = format(min(df$date), "%Y/%m/%d"),
-      end = format(max(df$date), "%Y/%m/%d")
+      start = mindate,
+      end = maxdate
     )
 
     write.ss.prm(dir_out, nm)

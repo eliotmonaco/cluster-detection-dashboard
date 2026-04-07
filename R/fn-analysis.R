@@ -71,6 +71,7 @@ build_ess_url <- function(
     "percentParam=noPercent",
     "detector=probrepswitch",
     "timeResolution=daily",
+    "hasBeenE=1",
     sep = "&"
   )
 
@@ -336,8 +337,14 @@ get_centroids <- function(sf, id_var) {
 # SATSCAN -----------------------------------------------------------------
 
 config_casefile <- function(df, var) {
+  if (nrow(df) == 0) {
+    maxdate <- NA
+  } else {
+    maxdate <- max(df$date)
+  }
+
   df |>
-    dplyr::filter(date < max(df$date)) |> # most recent date with complete data
+    dplyr::filter(date < maxdate) |> # most recent date with complete data
     dplyr::count(.data[[var]], date) |>
     dplyr::select(dplyr::all_of(var), n, date)
 }
