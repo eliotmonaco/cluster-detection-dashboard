@@ -47,7 +47,7 @@ write.geo(geo_file_hosp, dir_in, "hospitals")
 imap(dd, \(ls, i) {
   imap(ls, \(df, j) {
     # Set Satscan options to defaults
-    invisible(ss.options(reset = TRUE, version = "10.3"))
+    invisible(ss.options(reset = TRUE))
 
     if (is.null(df)) {
       return(invisible(NULL))

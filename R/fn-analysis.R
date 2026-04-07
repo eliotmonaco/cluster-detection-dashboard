@@ -93,7 +93,7 @@ build_ess_url <- function(
 }
 
 get_start_date <- function(end_date) {
-  end_date - lubridate::years(1) - lubridate::days(1)
+  end_date - lubridate::years(1)
 }
 
 # Wrapper for `Rnssp::get_api_data()` to pull data details
@@ -370,17 +370,10 @@ set_ss_opts <- function(casefile, coordfile, start, end) {
     OutputShapefiles = "y",
     OutputCartesianGraph = "n",
     MostLikelyClusterEachCentroidDBase = "n",
-    # MostLikelyClusterCaseInfoEachCentroidDBase = "n",
-    # CensusAreasReportedClustersDBase = "n",
-    # IncludeRelativeRisksCensusAreasDBase = "n",
 
     # Data Checking
     StudyPeriodCheckType = 1, # relaxed bounds
     GeographicalCoordinatesCheckType = 1, # relaxed coordinates
-
-    # # Locations network
-    # LocationsNetworkFilename = "", # NETWORK FILE USED IN NYC STUDY
-    # UseLocationsNetworkFile = "y",
 
     # Spatial Window
     MaxSpatialSizeInPopulationAtRisk = 50,
@@ -395,10 +388,6 @@ set_ss_opts <- function(casefile, coordfile, start, end) {
 
     # Inference
     MonteCarloReps = 999,
-    ProspectiveStartDate = "1900/01/01",
-
-    # Cluster Drilldown
-    DrilldownClusterCutoff = 0.05, # DIFFERENTLY WORDED - SAME PARAM?
 
     # Miscellaneous Analysis
     ProspectiveFrequencyType = 1, # daily
@@ -413,23 +402,7 @@ set_ss_opts <- function(casefile, coordfile, start, end) {
     # Temporal output
     OutputTemporalGraphHTML = "y",
     TemporalGraphReportType = 2, # report only significant clusters
-    TemporalGraphSignificanceCutoff = 1, # cluster p-value cutoff for reporting
-    # tutorial uses 0.01, but this results in
-    # an error when running `satscan()`
-
-    # Other output (PARAMS NOT AVAILABLE)
-    # ClusterSignificanceByRecurrence = "y",
-    # ClusterSignificanceRecurrenceCutoff = 100,
-    # ClusterSignificanceRecurrenceCutoffType = 3,
-    # ClusterSignificanceByPvalue = "n",
-    # ClusterSignificancePvalueCutoff, = 0.05
-
-    # Line list (PARAMS NOT AVAILABLE)
-    # LineListCaseFile = "n",
-    # LineListHeaderCaseFile = "n",
-    # LineListEventCache = "...\input files\event_cache.txt",
-    # EventGroupKML = "y",
-    # EventGroupByKML = "disease_status_final",
+    TemporalGraphSignificanceCutoff = 1,
 
     # Run Options
     LogRunToHistoryFile = "n"
