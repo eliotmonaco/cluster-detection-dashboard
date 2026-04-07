@@ -14,7 +14,7 @@ ts_plot_server <- function(id, rv, src) {
     data <- reactive({
       config_ts_plot_data(
         rv$data$time_series,
-        source = src,
+        src = src,
         syndrome = rv$syn,
         n_days = rv$days
       )

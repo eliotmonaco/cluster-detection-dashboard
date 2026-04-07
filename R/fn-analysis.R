@@ -479,3 +479,26 @@ run_satscan <- function(dir, file, satscan_exe) {
   structure(ls, class = "satscan")
 }
 
+config_ss_locations <- function(df, geo) {
+  df |>
+    dplyr::left_join(geo, by = "loc_id") |>
+    dplyr::relocate(kc, .after = loc_id)
+}
+
+classify_clusters <- function(x) {
+  cut(
+    x,
+    breaks = c(0, 100, 365, 5 * 365, 100 * 365, Inf),
+    labels = c("very weak", "weak", "moderate", "strong", "very strong"),
+    right = FALSE
+  )
+}
+
+config_ss_spatial <- function(df) {
+  df |>
+    dplyr::mutate(
+      strength = classify_clusters(recurr_int),
+      .after = recurr_int
+    )
+}
+

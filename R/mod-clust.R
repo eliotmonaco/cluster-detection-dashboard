@@ -3,11 +3,14 @@
 # Cluster count table on overview tab
 cluster_overview_ui <- function(id) {
   card(
-    p(HTML(paste(
-      "Spatiotemporal clusters are detected using SaTScan software.",
-      "This table shows the number of clusters where p&nbsp;<&nbsp;0.05 for",
-      "each syndrome."
-    ))),
+    p(
+      "Number of clusters detected for each syndrome",
+      style = "text-align:center;font-size:1.4rem;"
+    ),
+    p(
+      "Clusters are grouped by the strength of the recurrence interval",
+      style = "text-align:center;font-size:1.2rem;margin-bottom:16px;"
+    ),
     reactableOutput(NS(id, "clustct")),
     class = "overview-tbl"
   )
@@ -15,17 +18,18 @@ cluster_overview_ui <- function(id) {
 
 cluster_overview_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
-    # Cluster count table data
-    clust_count_table <- reactive({
-      significant_clusters_by_syndrome(
+    # Cluster counts
+    clust_counts <- reactive({
+      summarize_syndrome_clusters(
         rv$data$satscan_results,
-        syndromes = rv$data$syndromes
+        syndromes = rv$data$syndromes,
+        ri_min = rv$ri
       )
     })
 
     # Cluster count table
     output$clustct <- renderReactable({
-      clustcount_table(clust_count_table())
+      cluster_count_table(clust_counts())
     })
   })
 }
@@ -45,14 +49,9 @@ cluster_table_server <- function(id, rv, src) {
 
     # Cluster data for maps and data details
     clustdata <- reactive({
-      # config_syndrome_data(
-      #   rv$data$satscan_results,
-      #   syndrome = rv$syn,
-      #   sig_pval = rv$pval
-      # )
       ls <- filter_cluster_data(
         rv$data$satscan_results[[src]][[rv$syn]],
-        sig_pval = rv$pval
+        ri_min = rv$ri
       )
 
       if (src == "hospital") {
@@ -69,12 +68,10 @@ cluster_table_server <- function(id, rv, src) {
     # Cluster table
     output$clusttbl <- renderReactable({
       validate(need(
-        # rv$clustdata[[src]]$shapeclust,
         clustdata()$shapeclust,
         "No clusters detected"
       ))
 
-      # cluster_table(rv$clustdata[[src]]$shapeclust)
       cluster_table(clustdata()$shapeclust)
     })
 
@@ -109,7 +106,6 @@ location_table_server <- function(id, rv, src) {
       ))
 
       location_table(
-        # rv$clustdata[[src]]$gis,
         rv[[paste0("clustdata_", src)]]$gis,
         id = rv[[map_id]],
         src = src
@@ -135,7 +131,6 @@ cluster_map_server <- function(id, rv, src, loc, var, loc_bnd, hosp_loc, gp) {
     # Cluster boundary data for maps
     clustbound <- reactive({
       get_cluster_boundaries(
-        # rv$clustdata[[src]],
         rv[[paste0("clustdata_", src)]],
         locations = loc,
         var = var

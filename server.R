@@ -15,8 +15,8 @@ function(input, output, session) {
   syn_select_server("dd", rv)
   syn_select_server("ts", rv)
 
-  # P-value selection
-  pval_select_server("clust", rv)
+  # Recurrence interval selection
+  ri_select_server("clust", rv)
 
   # Map zoom level selection
   zoom_select_server("clust", rv)

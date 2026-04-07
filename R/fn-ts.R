@@ -25,15 +25,15 @@ df_to_hc_list <- function(df) {
 # Configure data for time series plot
 config_ts_plot_data <- function(
   ls,
-  source = c("hospital", "patient"),
+  src = c("hospital", "patient"),
   syndrome,
   n_days
 ) {
-  source <- match.arg(source)
+  src <- match.arg(src)
 
-  df <- ls[[source]][[syndrome]]
+  df <- ls[[src]][[syndrome]]
 
-  start <- max(df$date) - as.numeric(n_days)
+  start <- max(df$date) - n_days
 
   df |>
     dplyr::filter(date >= start) |>

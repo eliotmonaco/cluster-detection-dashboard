@@ -1,32 +1,40 @@
 # Functions for syndrome, cluster, and cluster location tables
 
 # Summarize data for significant clusters table
-significant_clusters_by_syndrome <- function(ls, syndromes) {
+summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
+  # Count clusters by strength level for each syndrome
   ls <- lapply(ls, \(ls2) {
-    x <- sapply(ls2, \(ls3) {
+    ct <- lapply(ls2, \(ls3) {
       if (is.data.frame(ls3$shapeclust)) {
         ls3$shapeclust |>
           st_drop_geometry() |>
-          filter(p_value < .05) |>
-          nrow()
+          count(strength, .drop = FALSE) |>
+          mutate(strength = gsub("\\s", "_", strength)) |>
+          column_to_rownames("strength") |>
+          t() |>
+          as.data.frame()
       } else if (length(ls3) == 0) {
-        NA
+        data.frame(
+          very_weak = NA, weak = NA, moderate = NA,
+          strong = NA, very_strong = NA
+        )
       } else if (is.na(ls3$shapeclust)) {
-        0
+        data.frame(
+          very_weak = 0, weak = 0, moderate = 0,
+          strong = 0, very_strong = 0
+        )
       }
     })
 
-    data.frame(
-      abbr = names(x),
-      clusters = x
-    )
+    list_rbind(ct, names_to = "abbr")
   })
 
+  # Join patient and hospital dataframes and syndrome names
   df <- ls$patient |>
-    rename(clust_pat = clusters) |>
-    bind_cols(
-      ls$hospital |>
-        select(clust_hosp = clusters)
+    left_join(
+      ls$hospital,
+      by = "abbr",
+      suffix = c("_pat", "_hosp")
     ) |>
     left_join(
       data.frame(
@@ -35,29 +43,96 @@ significant_clusters_by_syndrome <- function(ls, syndromes) {
       ),
       by = "abbr"
     ) |>
-    select(syndrome, clust_pat, clust_hosp)
+    select(syndrome, everything(), -abbr)
 
-  df
+  # Keep counts above the recurrence interval minimum
+  if (ri_min > 1) {
+    lvl <- list(
+      "very_weak" = 1,
+      "weak" = 2,
+      "moderate" = 3,
+      "strong" = 4,
+      "very_strong" = 5
+    )
+
+    lvl <- lvl[lvl < ri_min]
+
+    p <- paste(paste0("^", names(lvl)), collapse = "|")
+
+    vars <- colnames(df)[!grepl(p, colnames(df))]
+
+    df[, vars]
+  } else {
+    df
+  }
 }
 
-# Filter cluster and location data by p-value for a syndrome
-filter_cluster_data <- function(ls, sig_pval) {
+# Table showing the number of clusters detected for each syndrome
+cluster_count_table <- function(df) {
+  mod_col_labels <- function(x) {
+    x |>
+      gsub(pattern = "_pat|_hosp", replacement = "") |>
+      gsub(pattern = "_", replacement = " ") |>
+      str_to_title()
+  }
+
+  bold_text <- function(x) {
+    if (!is.na(x) && x > 0) {
+      list(fontWeight = "bold")
+    }
+  }
+
+  # pink_bg <- function(r) {
+  #   x <- df[r, "clust_pat"]
+  #   y <- df[r, "clust_hosp"]
+  #
+  #   if ((!is.na(x) && x > 0) | (!is.na(y) && y > 0)) {
+  #     list(background = "#fcc7c7")
+  #   }
+  # }
+
+  col_defs <- lapply(colnames(df), \(x) {
+    if (x == "syndrome") {
+      colDef(name = mod_col_labels(x))
+    } else {
+      colDef(name = mod_col_labels(x), style = bold_text)
+    }
+  })
+
+  names(col_defs) <- colnames(df)
+
+  df |>
+    reactable(
+      columnGroups = list(
+        colGroup(
+          name = "ER visits by patient location",
+          columns = colnames(df)[grepl("_pat$", colnames(df))]
+        ),
+        colGroup(
+          name = "ER visits by hospital location",
+          columns = colnames(df)[grepl("_hosp$", colnames(df))]
+        )
+      ),
+      columns = col_defs,
+      # rowStyle = pink_bg,
+      pagination = FALSE,
+      highlight = TRUE,
+      compact = TRUE
+    )
+}
+
+# Filter cluster and location data by recurrence interval for a syndrome
+filter_cluster_data <- function(ls, ri_min) {
   if (!is.data.frame(ls$shapeclust) || nrow(ls$shapeclust) == 0) {
     ls$gis <- NULL; ls$shapeclust <- NULL; ls$shapegis <- NULL
 
     return(ls)
   }
 
-  if (sig_pval) {
-    plvl <- .05
-  } else {
-    plvl <- 1.1
-  }
-
   # Filter spatial data by p-value and add labels for map
   lapply(ls[grepl("gis|clust", names(ls))], \(df) {
     df <- df |>
-      filter(p_value < plvl) |>
+      filter(as.numeric(strength) >= ri_min) |>
       mutate(lbl = paste("Cluster", cluster))
 
     if ("geometry" %in% colnames(df)) {
@@ -72,35 +147,6 @@ filter_cluster_data <- function(ls, sig_pval) {
     }
   })
 }
-
-# config_syndrome_data <- function(ls, syndrome, sig_pval) {
-#   ls <- lapply(
-#     list(
-#       patient = ls$patient[[syndrome]],
-#       hospital = ls$hospital[[syndrome]]
-#     ),
-#     filter_cluster_data,
-#     sig_pval = sig_pval
-#   )
-#
-#   # Point expansion for single location clusters
-#   if (!is.null(ls$hospital$shapeclust)) {
-#     # Find clusters with only 1 location
-#     clust <- ls$hospital$gis$cluster
-#
-#     clust <- clust[!clust %in% clust[duplicated(clust)]]
-#
-#     # Expand cluster polygons for visibility on map
-#     ls$hospital$shapeclust <- ls$hospital$shapeclust |>
-#       mutate(geometry = if_else(
-#         cluster %in% clust,
-#         st_buffer(geometry, dist = 2000),
-#         geometry
-#       ))
-#   }
-#
-#   ls
-# }
 
 # Point expansion for single location clusters
 expand_point_clusters <- function(ls) {
@@ -158,53 +204,6 @@ syndrome_table <- function(ls) {
     )
 }
 
-# Table showing the number of clusters detected for each syndrome
-clustcount_table <- function(df) {
-  bold_text <- function(x) {
-    if (!is.na(x) && x > 0) {
-      list(fontWeight = "bold")
-    }
-  }
-
-  pink_bg <- function(r) {
-    x <- df[r, "clust_pat"]
-    y <- df[r, "clust_hosp"]
-
-    if ((!is.na(x) && x > 0) | (!is.na(y) && y > 0)) {
-      list(background = "#fcc7c7")
-    }
-  }
-
-  df |>
-    reactable(
-      columns = list(
-        syndrome = colDef(
-          name = "Syndrome"
-        ),
-        clust_pat = colDef(
-          name = "ER visits by patient location",
-          style = bold_text,
-          na = "-"
-        ),
-        clust_hosp = colDef(
-          name = "ER visits by hospital location",
-          style = bold_text,
-          na = "-"
-        )
-      ),
-      columnGroups = list(
-        colGroup(
-          name = "Number of clusters",
-          columns = c("clust_pat", "clust_hosp")
-        )
-      ),
-      rowStyle = pink_bg,
-      pagination = FALSE,
-      highlight = TRUE,
-      compact = TRUE
-    )
-}
-
 # Table with cluster data
 cluster_table <- function(df) {
   if (is.null(df)) {
@@ -223,7 +222,7 @@ cluster_table <- function(df) {
     st_drop_geometry() |>
     select(
       cluster, start_date, end_date, number_loc, test_stat, p_value,
-      recurr_int, observed, expected, ode
+      recurr_int, strength, observed, expected, ode
     ) |>
     mutate(
       across(
@@ -235,6 +234,7 @@ cluster_table <- function(df) {
         ~ round_ties_away(.x, 2)
       ),
       p_value = signif(p_value, 1),
+      strength = str_to_sentence(strength),
       expected = round_ties_away(expected, 0)
     ) |>
     rename_with(mod_col_labels) |>

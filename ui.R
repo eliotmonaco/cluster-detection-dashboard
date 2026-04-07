@@ -10,7 +10,7 @@ page_navbar(
       sidebar = sidebar(
         data_select_ui("clust", date_input_choices),
         syn_select_ui("clust", syn_input_choices),
-        pval_select_ui("clust"),
+        ri_select_ui("clust", ri_input_choices),
         zoom_select_ui("clust")
       ),
       navset_tab(

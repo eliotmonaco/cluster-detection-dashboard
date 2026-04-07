@@ -83,7 +83,7 @@ imap(dd, \(ls, i) {
 })
 
 # Run Satscan
-ssresults <- imap(dd, \(ls, i) {
+ssresults_raw <- imap(dd, \(ls, i) {
   imap(ls, \(x, j) {
     nm <- paste0(j, "-", i)
 
@@ -108,8 +108,8 @@ log <- readLines(paste0(dir_data, "log.txt"))
 
 dur <- t1 - t0
 
-# Find warnings or error messages in `ssresults$cmd_output`
-msg <- imap(unlist(ssresults, recursive = FALSE), \(ls, i) {
+# Find warnings or error messages in `ssresults_raw$cmd_output`
+msg <- imap(unlist(ssresults_raw, recursive = FALSE), \(ls, i) {
   if (any(grepl("^Warning|^Error", ls$cmd_output))) {
     m <- c(
       paste("-", i),
@@ -141,7 +141,7 @@ log <- c(
 # Configure ---------------------------------------------------------------
 
 # Var names to lowercase
-ssresults <- lapply(ssresults, \(ls) {
+ssresults <- lapply(ssresults_raw, \(ls) {
   lapply(ls, \(ls2) {
     lapply(ls2, \(x) {
       if (is.data.frame(x)) {
@@ -157,14 +157,15 @@ ssresults <- lapply(ssresults, \(ls) {
 ssresults$patient <- lapply(ssresults$patient, \(ls) {
   imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
-      x <- x |>
-        left_join(
-          geo$zctas |>
-            st_drop_geometry() |>
-            select(loc_id = GEOID20, kc),
-          by = "loc_id"
-        ) |>
-        relocate(kc, .after = loc_id)
+      geo <- geo$zctas |>
+        st_drop_geometry() |>
+        select(loc_id = GEOID20, kc)
+
+      x <- config_ss_locations(x, geo = geo)
+    }
+
+    if (is.data.frame(x) && grepl("gis|clust", i)) {
+      x <- config_ss_spatial(x)
     }
 
     x
@@ -174,14 +175,15 @@ ssresults$patient <- lapply(ssresults$patient, \(ls) {
 ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
   imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
-      x <- x |>
-        left_join(
-          geo$hosp |>
-            st_drop_geometry() |>
-            select(loc_id = hospital_name_geo, kc),
-          by = "loc_id"
-        ) |>
-        relocate(kc, .after = loc_id)
+      geo <- geo$hosp |>
+        st_drop_geometry() |>
+        select(loc_id = hospital_name_geo, kc)
+
+      x <- config_ss_locations(x, geo = geo)
+    }
+
+    if (is.data.frame(x) && grepl("gis|clust", i)) {
+      x <- config_ss_spatial(x)
     }
 
     x

@@ -42,6 +42,10 @@ SaTScan<sup>TM</sup> is a trademark of Martin Kulldorff. The SaTScan<sup>TM</sup
 - Describe analysis used
 - Provide parameters, start/end dates, etc.
 
+### Recurrence interval
+
+>Consider an RI of 100 to < 365 days as a weak cluster, an RI of 365 days to < 5 years as a moderate cluster, an RI of 5 to < 100 years as a strong cluster, and an RI of ≥ 100 years as a very strong cluster. (Levin-Rector et al. 2024)
+
 ## References/resources
 
 Greene SK, Peterson ER, Kapell D, Fine AD, Kulldorff M. Daily Reportable Disease Spatiotemporal Cluster Detection, New York City, New York, USA, 2014-2015. Emerg Infect Dis. 2016 Oct;22(10):1808-12. doi: [10.3201/eid2210.160097](https://doi.org/10.3201/eid2210.160097). PMID: [27648777](https://pubmed.ncbi.nlm.nih.gov/27648777/); PMCID: PMC5038417.

@@ -70,19 +70,20 @@ syn_select_server <- function(id, rv) {
   })
 }
 
-# P-value selection
-pval_select_ui <- function(id) {
-  checkboxInput(
-    inputId = NS(id, "pval"),
-    label = HTML("Show clusters where p&nbsp;<&nbsp;0.05 only"),
-    value = TRUE
+# Recurrence interval selection
+ri_select_ui <- function(id, choices) {
+  radioButtons(
+    inputId = NS(id, "ri"),
+    label = "Select the minimum recurrence interval",
+    choices = choices,
+    selected = choices[[2]]
   )
 }
 
-pval_select_server <- function(id, rv) {
+ri_select_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     observe({
-      rv$pval <- input$pval
+      rv$ri <- as.numeric(input$ri)
     })
   })
 }
@@ -117,7 +118,7 @@ days_select_ui <- function(id, choices) {
 days_select_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     observe({
-      rv$days <- input$days
+      rv$days <- as.numeric(input$days)
     })
   })
 }
