@@ -74,7 +74,7 @@ syn_select_server <- function(id, rv) {
 ri_select_ui <- function(id, choices) {
   radioButtons(
     inputId = NS(id, "ri"),
-    label = "Select the minimum recurrence interval",
+    label = "Minimum recurrence interval",
     choices = choices,
     selected = choices[[2]]
   )
@@ -84,6 +84,10 @@ ri_select_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     observe({
       rv$ri <- as.numeric(input$ri)
+    })
+
+    observeEvent(rv$ri, {
+      updateRadioButtons(session, "ri", selected = rv$ri)
     })
   })
 }

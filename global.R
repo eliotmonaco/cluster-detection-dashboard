@@ -57,6 +57,12 @@ ri_input_choices <- list(
   "Very strong (≥ 100 years)" = 5
 )
 
+# Recurrence interval colors
+ri_colors <- adjustcolor(
+  colorRampPalette(c("yellow", "orange", "red"))(5),
+  alpha.f = .35
+)
+
 # UI text
 uitext <- list(
   ts = list(

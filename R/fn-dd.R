@@ -107,61 +107,57 @@ assemble_dd_summaries <- function(
 
 # Data characteristics tables from data details
 dd_table <- function(df, var, replace_nm = NULL) {
-  # if (!is.null(replace_nm)) {
-  #   df <- df |>
-  #     rename(any_of(setNames(var, replace_nm)))
-  # }
-
-  # `columnGroups` argument in `reactable()`
-  colgroups1 <- list(colGroup(name = "Study area", columns = c("n", "pct")))
+  # Configure column groups
+  col_groups1 <- list(colGroup(name = "Study area", columns = c("n", "pct")))
 
   cols <- colnames(df)[grepl("\\d$", colnames(df))]
 
   if (length(cols) != 0) {
-    colgroups2 <- lapply(1:(length(cols) / 2), \(x) {
+    col_groups2 <- lapply(1:(length(cols) / 2), \(x) {
       colGroup(
         name = paste("Cluster", x),
         columns = cols[grepl(x, cols)]
       )
     })
   } else {
-    colgroups2 <- NULL
+    col_groups2 <- NULL
   }
 
-  colgroups <- c(colgroups1, colgroups2)
+  col_groups <- c(col_groups1, col_groups2)
 
-  # `columns` argument in `reactable()`
+  # Format columns
   cols <- colnames(df)[grepl("^n\\d*$", colnames(df))]
 
-  coldefs1 <- lapply(cols, \(x) {
+  col_defs1 <- lapply(cols, \(x) {
     colDef(name = "N", format = colFormat(separators = TRUE))
   })
 
-  names(coldefs1) <- cols
+  names(col_defs1) <- cols
 
   cols <- colnames(df)[grepl("^pct\\d*$", colnames(df))]
 
-  coldefs2 <- lapply(cols, \(x) {
+  col_defs2 <- lapply(cols, \(x) {
     colDef(name = "Pct", format = colFormat(percent = TRUE))
   })
 
-  names(coldefs2) <- cols
+  names(col_defs2) <- cols
 
-  coldefs3 <- list(colDef(name = mod_col_labels(var)))
+  col_defs3 <- list(colDef(name = mod_col_labels(var)))
 
-  names(coldefs3) <- var
+  names(col_defs3) <- var
 
-  coldefs <- c(coldefs1, coldefs2, coldefs3)
+  col_defs <- c(col_defs1, col_defs2, col_defs3)
 
   df |>
     reactable(
-      columnGroups = colgroups,
-      columns = coldefs,
+      columnGroups = col_groups,
+      columns = col_defs,
       sortable = FALSE,
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
-      fullWidth = FALSE
+      fullWidth = FALSE,
+      theme = reactableTheme(borderColor = "#ddd")
     )
 }
 

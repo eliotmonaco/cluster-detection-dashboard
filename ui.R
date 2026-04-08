@@ -48,6 +48,7 @@ page_navbar(
       sidebar = sidebar(
         data_select_ui("dd", date_input_choices),
         syn_select_ui("dd", syn_input_choices),
+        ri_select_ui("dd", ri_input_choices)
       ),
       navset_tab(
         nav_panel(

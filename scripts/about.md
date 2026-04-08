@@ -16,7 +16,7 @@ The data displayed on the dashboard can be updated using various controls.
 
 **Date range**: Select the time range for the data displayed. (Available on Time series and Data characteristics pages.)
 
-**P-value check box**: Check to display only those clusters with a p-value below 0.05. (Available on Clusters page.)
+**Minimum recurrence interval**: Select a recurrence interval to filter the clusters shown in the overview and cluster tabs. (Available on Clusters page.)
 
 ## ESSENCE data
 

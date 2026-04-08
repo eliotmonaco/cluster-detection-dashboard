@@ -29,7 +29,10 @@ cluster_overview_server <- function(id, rv) {
 
     # Cluster count table
     output$clustct <- renderReactable({
-      cluster_count_table(clust_counts())
+      cluster_count_table(
+        clust_counts(),
+        colors = ri_colors
+      )
     })
   })
 }
@@ -72,7 +75,10 @@ cluster_table_server <- function(id, rv, src) {
         "No clusters detected"
       ))
 
-      cluster_table(clustdata()$shapeclust)
+      cluster_table(
+        clustdata()$shapeclust,
+        colors = ri_colors
+      )
     })
 
     # When cluster table row is selected, update map cluster ID

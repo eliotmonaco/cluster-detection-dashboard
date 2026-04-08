@@ -68,7 +68,8 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
 }
 
 # Table showing the number of clusters detected for each syndrome
-cluster_count_table <- function(df) {
+cluster_count_table <- function(df, colors) {
+  # Function to rename columns
   mod_col_labels <- function(x) {
     x |>
       gsub(pattern = "_pat|_hosp", replacement = "") |>
@@ -76,26 +77,34 @@ cluster_count_table <- function(df) {
       str_to_title()
   }
 
-  bold_text <- function(x) {
-    if (!is.na(x) && x > 0) {
-      list(fontWeight = "bold")
-    }
-  }
+  # Number of RI strength columns in `df`
+  n <- (ncol(df) - 1) / 2
 
-  # pink_bg <- function(r) {
-  #   x <- df[r, "clust_pat"]
-  #   y <- df[r, "clust_hosp"]
-  #
-  #   if ((!is.na(x) && x > 0) | (!is.na(y) && y > 0)) {
-  #     list(background = "#fcc7c7")
-  #   }
-  # }
+  # Cell background colors
+  colors <- colors[(6 - n):5]
 
-  col_defs <- lapply(colnames(df), \(x) {
+  colors <- c(NA, colors, colors)
+
+  # Style columns
+  col_defs <- map2(colnames(df), colors, \(x, y) {
     if (x == "syndrome") {
-      colDef(name = mod_col_labels(x))
+      colDef(
+        name = mod_col_labels(x),
+        sticky = "left",
+        style = list(borderRight = "1px solid #ddd")
+      )
     } else {
-      colDef(name = mod_col_labels(x), style = bold_text)
+      colDef(
+        name = mod_col_labels(x),
+        style = function(n) {
+          if (!is.na(n) && n > 0) {
+            list(
+              fontWeight = "bold",
+              background = y
+            )
+          }
+        }
+      )
     }
   })
 
@@ -114,10 +123,10 @@ cluster_count_table <- function(df) {
         )
       ),
       columns = col_defs,
-      # rowStyle = pink_bg,
       pagination = FALSE,
       highlight = TRUE,
-      compact = TRUE
+      compact = TRUE,
+      theme = reactableTheme(borderColor = "#ddd")
     )
 }
 
@@ -205,11 +214,12 @@ syndrome_table <- function(ls) {
 }
 
 # Table with cluster data
-cluster_table <- function(df) {
+cluster_table <- function(df, colors) {
   if (is.null(df)) {
     return(NULL)
   }
 
+  # Var name replacements
   replace <- c(
     "Locations" = "Number loc",
     "Test statistic" = "Test stat",
@@ -218,6 +228,7 @@ cluster_table <- function(df) {
     "Obs/exp" = "Ode"
   )
 
+  # Configure data
   df <- df |>
     st_drop_geometry() |>
     select(
@@ -240,6 +251,26 @@ cluster_table <- function(df) {
     rename_with(mod_col_labels) |>
     rename(any_of(replace))
 
+  # Function to style `Strength` column
+  fn <- function(clr) {
+    function(value) {
+      if (value == "Very weak") {
+        list(background = clr[1])
+      } else if (value == "Weak") {
+        list(background = clr[2])
+      } else if (value == "Moderate") {
+        list(background = clr[3])
+      } else if (value == "Strong") {
+        list(background = clr[4])
+      } else if (value == "Very strong") {
+        list(background = clr[5])
+      }
+    }
+  }
+
+  cell_style <- fn(colors)
+
+  # Style columns
   col_defs <- lapply(colnames(df), \(x) {
     if (x %in% c("P-value", "RI (days)")) {
       # Format as scientific notation
@@ -251,6 +282,8 @@ cluster_table <- function(df) {
     } else if (is.numeric(df[[x]])) {
       # Use comma separators
       colDef(format = colFormat(separators = TRUE))
+    } else if (x == "Strength") {
+      colDef(style = cell_style)
     }
   })
 
@@ -263,7 +296,8 @@ cluster_table <- function(df) {
       highlight = TRUE,
       compact = TRUE,
       selection = "single",
-      onClick = "select"
+      onClick = "select",
+      theme = reactableTheme(borderColor = "#ddd")
     )
 }
 
@@ -275,6 +309,7 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
 
   src <- match.arg(src)
 
+  # Var name replacements
   replace <- c(
     "In KC" = "kc",
     "Cluster" = "cluster",
@@ -283,6 +318,7 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
     "Obs/exp" = "loc_ode"
   )
 
+  # Data source-specific adjustments and styling
   if (src == "patient") {
     df <- df |>
       mutate(loc_id = as.character(loc_id))
@@ -303,7 +339,8 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
     col_defs <- list(Hospital = colDef(minWidth = 200))
   }
 
-  df |>
+  # Configure data
+  df <- df |>
     st_drop_geometry() |>
     filter(cluster == id) |>
     select(loc_id, kc, cluster, loc_obs, loc_exp, loc_ode) |>
@@ -313,12 +350,15 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
       loc_ode = round_ties_away(loc_ode, 2)
     ) |>
     arrange(loc_id) |>
-    rename(any_of(replace)) |>
+    rename(any_of(replace))
+
+  df |>
     reactable(
       columns = col_defs,
       pagination = FALSE,
       highlight = TRUE,
-      compact = TRUE
+      compact = TRUE,
+      theme = reactableTheme(borderColor = "#ddd")
     )
 }
 

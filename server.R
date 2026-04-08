@@ -17,6 +17,7 @@ function(input, output, session) {
 
   # Recurrence interval selection
   ri_select_server("clust", rv)
+  ri_select_server("dd", rv)
 
   # Map zoom level selection
   zoom_select_server("clust", rv)
