@@ -126,25 +126,35 @@ dd_table <- function(df, var, replace_nm = NULL) {
   col_groups <- c(col_groups1, col_groups2)
 
   # Format columns
+  col_defs1 <- list(colDef(
+    name = mod_col_labels(var),
+    sticky = "left"
+  ))
+
+  names(col_defs1) <- var
+
   cols <- colnames(df)[grepl("^n\\d*$", colnames(df))]
 
-  col_defs1 <- lapply(cols, \(x) {
-    colDef(name = "N", format = colFormat(separators = TRUE))
-  })
-
-  names(col_defs1) <- cols
-
-  cols <- colnames(df)[grepl("^pct\\d*$", colnames(df))]
-
   col_defs2 <- lapply(cols, \(x) {
-    colDef(name = "Pct", format = colFormat(percent = TRUE))
+    colDef(
+      name = "N",
+      format = colFormat(separators = TRUE),
+      style = list(borderLeft = "1px solid #ddd")
+    )
   })
 
   names(col_defs2) <- cols
 
-  col_defs3 <- list(colDef(name = mod_col_labels(var)))
+  cols <- colnames(df)[grepl("^pct\\d*$", colnames(df))]
 
-  names(col_defs3) <- var
+  col_defs3 <- lapply(cols, \(x) {
+    colDef(
+      name = "Pct",
+      format = colFormat(percent = TRUE)
+    )
+  })
+
+  names(col_defs3) <- cols
 
   col_defs <- c(col_defs1, col_defs2, col_defs3)
 

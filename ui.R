@@ -53,11 +53,13 @@ page_navbar(
       navset_tab(
         nav_panel(
           "Data by patient location",
+          card(markdown(readLines("scripts/dd.md"))),
           dd_ui("pat-sex", "Sex"),
           dd_ui("pat-age", "Age group")
         ),
         nav_panel(
           "Data by hospital location",
+          card(markdown(readLines("scripts/dd.md"))),
           dd_ui("hosp-sex", "Sex"),
           dd_ui("hosp-age", "Age group")
         )
