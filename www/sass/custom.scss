@@ -22,6 +22,10 @@ $icon-hosp-fg: #7AB317;
   padding-right: 1rem;
 }
 
+.syn-select-input .selectize-input.items.full .syn-icon {
+  margin-left: 0 !important;
+}
+
 /* Cards */
 .card {
   --bs-card-cap-bg: #626f7d;

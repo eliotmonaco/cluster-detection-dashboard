@@ -34,11 +34,6 @@ dirs <- dirs[grepl("^data/an-", dirs)]
 
 date_input_choices <- as.Date(sub("^data/an-", "", dirs))
 
-# Syndrome input choices (initial)
-syn_input_choices <- dbdata |>
-  get_db_data(max(date_input_choices), "syndromes") |>
-  syn_select_list()
-
 # Time series input choices
 ts_input_choices <- list(
   "Two weeks" = "14",
@@ -58,9 +53,26 @@ ri_input_choices <- list(
 )
 
 # Recurrence interval colors
-ri_colors <- adjustcolor(
+ri_bg_color <- adjustcolor(
   colorRampPalette(c("yellow", "orange", "red"))(5),
-  alpha.f = .35
+  green.f = .85, blue.f = .85
+)
+
+ri_text_color <- c(rep("black", 3), rep("white", 2))
+
+# Syndrome input choices (initial)
+syn_input_choices <- dbdata |>
+  get_db_data(max(date_input_choices), "syndromes") |>
+  get_syn_choices()
+
+syn_strength <- dbdata |>
+  get_db_data(max(date_input_choices), "satscan_results") |>
+  get_syn_cluster_strength()
+
+syn_input_choices <- add_ri_icons(
+  syn = syn_input_choices,
+  str = syn_strength,
+  colors = ri_bg_color
 )
 
 # UI text

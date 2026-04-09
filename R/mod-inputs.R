@@ -34,32 +34,63 @@ data_select_server <- function(id, rv) {
 }
 
 # Syndrome selection
-syn_select_ui <- function(id, choices) {
-  selectInput(
-    inputId = NS(id, "syn"),
-    label = "Syndrome",
-    choices = choices,
-    multiple = FALSE
+syn_select_ui <- function(id, choices, icons) {
+  div(
+    selectizeInput(
+      inputId = NS(id, "syn"),
+      label = "Syndrome",
+      choices = choices,
+      multiple = FALSE,
+      options = list(
+        render = I("{
+        item: function(item, escape) {
+          return (
+            '<div style=\"display:flex; flex-wrap:nowrap;'
+            + 'align-items:baseline;\">' + item.label + '</div>'
+          );
+        },
+        option: function(item, escape) {
+          return (
+            '<div style=\"display:flex; flex-wrap:nowrap;'
+            + 'align-items:baseline;\">' + item.label + '</div>'
+          );
+        }
+      }")
+      )
+    ),
+    class = "syn-select-input"
   )
 }
 
-syn_select_server <- function(id, rv) {
+syn_select_server <- function(id, rv, color) {
   moduleServer(id, function(input, output, session) {
     observe({
       rv$syn <- input$syn
     })
 
     # Get syndrome list when data is updated
-    synselect <- reactive({
-      syn_select_list(rv$data$syndromes)
+    synlist <- reactive({
+      get_syn_choices(rv$data$syndromes)
     })
 
-    # Update syndrome selections when syndrome list changes
-    observeEvent(synselect(), {
-      rv$synselect <- synselect()
+    # Get syndrome list with icons for syndrome input
+    synchoices <- reactive({
+      add_ri_icons(
+        syn = synlist(),
+        str = get_syn_cluster_strength(rv$data$satscan_results),
+        colors = ri_bg_color
+      )
+    })
 
+    observeEvent(synlist(), {
+      rv$synlist <- synlist()
+    })
+
+    # Update syndrome choices when syndrome list changes
+    observeEvent(synchoices(), {
       updateSelectInput(
-        session, "syn", choices = rv$synselect, selected = rv$syn
+        session, "syn",
+        choices = synchoices(), selected = rv$syn
       )
     })
 

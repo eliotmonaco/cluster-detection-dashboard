@@ -505,7 +505,7 @@ counties_pts <- get_centroids(counties, id_var = "NAME")
 
 # Shiny inputs ------------------------------------------------------------
 
-synlist <- syn_select_list(syn)
+synlist <- get_syn_choices(syn)
 
 datelist <- daterange_select_list(date_range)
 

@@ -68,7 +68,7 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
 }
 
 # Table showing the number of clusters detected for each syndrome
-cluster_count_table <- function(df, colors) {
+cluster_count_table <- function(df, bg_color, text_color) {
   # Function to rename columns
   mod_col_labels <- function(x) {
     x |>
@@ -78,29 +78,30 @@ cluster_count_table <- function(df, colors) {
   }
 
   # Number of RI strength columns in `df`
-  n <- (ncol(df) - 1) / 2
+  n <- 6 - ((ncol(df) - 1) / 2)
 
-  # Cell background colors
-  colors <- colors[(6 - n):5]
+  # Colors
+  bg_color <- c(NA, bg_color[n:5], bg_color[n:5])
 
-  colors <- c(NA, colors, colors)
+  text_color <- c(NA, text_color[n:5], text_color[n:5])
 
   # Style columns
-  col_defs <- map2(colnames(df), colors, \(x, y) {
-    if (x == "syndrome") {
+  col_defs <- mapply(colnames(df), bg_color, text_color, FUN = \(nm, bg, txt) {
+    if (nm == "syndrome") {
       colDef(
-        name = mod_col_labels(x),
+        name = mod_col_labels(nm),
         sticky = "left",
         style = list(borderRight = "1px solid #ddd")
       )
     } else {
       colDef(
-        name = mod_col_labels(x),
+        name = mod_col_labels(nm),
         style = function(n) {
           if (!is.na(n) && n > 0) {
             list(
               fontWeight = "bold",
-              background = y
+              background = bg,
+              color = txt
             )
           }
         }
@@ -214,7 +215,7 @@ syndrome_table <- function(ls) {
 }
 
 # Table with cluster data
-cluster_table <- function(df, colors) {
+cluster_table <- function(df, bg_color, text_color) {
   if (is.null(df)) {
     return(NULL)
   }
@@ -252,23 +253,23 @@ cluster_table <- function(df, colors) {
     rename(any_of(replace))
 
   # Function to style `Strength` column
-  fn <- function(clr) {
+  fn <- function(bg, txt) {
     function(value) {
       if (value == "Very weak") {
-        list(background = clr[1])
+        list(background = bg[1], color = txt[1])
       } else if (value == "Weak") {
-        list(background = clr[2])
+        list(background = bg[2], color = txt[2])
       } else if (value == "Moderate") {
-        list(background = clr[3])
+        list(background = bg[3], color = txt[3])
       } else if (value == "Strong") {
-        list(background = clr[4])
+        list(background = bg[4], color = txt[4])
       } else if (value == "Very strong") {
-        list(background = clr[5])
+        list(background = bg[5], color = txt[5])
       }
     }
   }
 
-  cell_style <- fn(colors)
+  cell_style <- fn(bg_color, text_color)
 
   # Style columns
   col_defs <- lapply(colnames(df), \(x) {

@@ -11,9 +11,9 @@ function(input, output, session) {
   data_select_server("syn", rv)
 
   # Syndrome selection
-  syn_select_server("clust", rv)
-  syn_select_server("dd", rv)
-  syn_select_server("ts", rv)
+  syn_select_server("clust", rv, ri_bg_color)
+  syn_select_server("dd", rv, ri_bg_color)
+  syn_select_server("ts", rv, ri_bg_color)
 
   # Recurrence interval selection
   ri_select_server("clust", rv)

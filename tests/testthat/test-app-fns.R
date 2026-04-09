@@ -30,11 +30,11 @@ test_that("get_db_data() single element", {
   expect_equal(act, exp)
 })
 
-test_that("syn_select_list()", {
+test_that("get_syn_choices()", {
   source("R/app-fns.R", local = TRUE)
   testdata1 <- readRDS(test_path("fixtures/test_dashboard.rds"))
   testdata2 <- readRDS(test_path("fixtures/test_shiny.rds"))
-  act <- syn_select_list(testdata1$syndromes)
+  act <- get_syn_choices(testdata1$syndromes)
   exp <- testdata2$syn_select_list_output
   expect_equal(act, exp)
 })

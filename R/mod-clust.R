@@ -31,7 +31,8 @@ cluster_overview_server <- function(id, rv) {
     output$clustct <- renderReactable({
       cluster_count_table(
         clust_counts(),
-        colors = ri_colors
+        bg_color = ri_bg_color,
+        text_color = ri_text_color
       )
     })
   })
@@ -77,7 +78,8 @@ cluster_table_server <- function(id, rv, src) {
 
       cluster_table(
         clustdata()$shapeclust,
-        colors = ri_colors
+        bg_color = ri_bg_color,
+        text_color = ri_text_color
       )
     })
 
@@ -190,7 +192,7 @@ syn_heading_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     # Syndrome heading on clusters page
     output$synheader <- renderUI({
-      syndrome_title_tag(rv$syn, rv$synselect)
+      syndrome_title_tag(rv$syn, rv$synlist)
     })
   })
 }
