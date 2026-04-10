@@ -82,3 +82,18 @@ add_ri_icons <- function(syn, str, colors) {
   ls2
 }
 
+# Wrap an input label in `bslib::tooltip()`
+input_tooltip <- function(label, tooltip_text) {
+  bslib::tooltip(
+    list(
+      label,
+      fontawesome::fa(
+        "circle-question", fill = "#007bc2",
+        height = ".7em", vertical_align = "top"
+      )
+    ),
+    tooltip_text,
+    placement = "right"
+  )
+}
+

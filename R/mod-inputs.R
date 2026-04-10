@@ -4,7 +4,14 @@
 data_select_ui <- function(id, choices) {
   dateInput(
     inputId = NS(id, "date"),
-    label = "Analysis date",
+    label = input_tooltip(
+      "Analysis date",
+      paste(
+        "Data is downloaded and analyses are run daily. Changing the analysis",
+        "date will change the dataset and analysis results that are displayed",
+        "on the dashboard."
+      )
+    ),
     value = max(choices),
     min = min(choices),
     max = max(choices)
@@ -38,7 +45,14 @@ syn_select_ui <- function(id, choices, icons) {
   div(
     selectizeInput(
       inputId = NS(id, "syn"),
-      label = "Syndrome",
+      label = input_tooltip(
+        "Syndrome",
+        paste(
+          "The dropdown list contains the syndromes available for the current",
+          "analysis date. The icon color indicates the maximum recurrence",
+          "interval strength of any clusters detected for a given syndrome."
+        )
+      ),
       choices = choices,
       multiple = FALSE,
       options = list(
@@ -105,7 +119,13 @@ syn_select_server <- function(id, rv, color) {
 ri_select_ui <- function(id, choices) {
   radioButtons(
     inputId = NS(id, "ri"),
-    label = "Minimum recurrence interval",
+    label = input_tooltip(
+      "Minimum recurrence interval",
+      paste(
+        "The recurrence interval (RI) is a measure of the likelihood of a",
+        "cluster. A higher RI indicates a higher likelihood and vice versa."
+      )
+    ),
     choices = choices,
     selected = choices[[2]]
   )

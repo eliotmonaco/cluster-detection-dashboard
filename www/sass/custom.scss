@@ -2,7 +2,7 @@
 $icon-hosp-bg: #FFFFFF;
 $icon-hosp-fg: #7AB317;
 
-/* Navigation bar */
+/* NAVBAR */
 
 .navbar {
   --bs-navbar-color: white;
@@ -12,6 +12,8 @@ $icon-hosp-fg: #7AB317;
   --bs-navbar-brand-color: white;
   --bs-navbar-brand-hover-color: #FFFFFFAA;
 }
+
+/* SIDEBAR */
 
 .bslib-sidebar-layout > .sidebar {
   --_sidebar-bg: #79baf130;
@@ -24,6 +26,18 @@ $icon-hosp-fg: #7AB317;
 
 .syn-select-input .selectize-input.items.full .syn-icon {
   margin-left: 0 !important;
+}
+
+/* Tooltip */
+.tooltip-inner {
+  text-align: left;
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.tooltip.show {
+  opacity: 1;
 }
 
 /* Cards */
