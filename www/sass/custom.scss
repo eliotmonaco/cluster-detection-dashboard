@@ -2,7 +2,7 @@
 $icon-hosp-bg: #FFFFFF;
 $icon-hosp-fg: #7AB317;
 
-/* NAVBAR */
+/* ---NAVBAR--- */
 
 .navbar {
   --bs-navbar-color: white;
@@ -13,22 +13,22 @@ $icon-hosp-fg: #7AB317;
   --bs-navbar-brand-hover-color: #FFFFFFAA;
 }
 
-/* SIDEBAR */
+/* ---SIDEBAR--- */
 
-.bslib-sidebar-layout > .sidebar {
-  --_sidebar-bg: #79baf130;
+/* Prevent selected item from overlapping with dropdown arrow */
+.selectize-input.items.full.has-options.has-items > .syn-flex-container > .syn-text {
+  padding-right: 1.5rem;
 }
 
-/* Select input: prevent item from overlapping with dropdown arrow */
-.selectize-input.items.has-options.full.has-items > .item {
-  padding-right: 1rem;
+/* Hide the input element which on loading makes the input box too big */
+.selectize-input.items.full.has-options.has-items > input {
+  display: none !important;
 }
 
 .syn-select-input .selectize-input.items.full .syn-icon {
   margin-left: 0 !important;
 }
 
-/* Tooltip */
 .tooltip-inner {
   text-align: left;
   color: black;
@@ -39,6 +39,8 @@ $icon-hosp-fg: #7AB317;
 .tooltip.show {
   opacity: 1;
 }
+
+/* ---BODY--- */
 
 /* Cards */
 .card {

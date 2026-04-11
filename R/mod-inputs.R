@@ -9,7 +9,7 @@ data_select_ui <- function(id, choices) {
       paste(
         "Data is downloaded and analyses are run daily. Changing the analysis",
         "date will change the dataset and analysis results that are displayed",
-        "on the dashboard."
+        "throughout the dashboard."
       )
     ),
     value = max(choices),
@@ -48,19 +48,20 @@ syn_select_ui <- function(id, choices, icons) {
       label = input_tooltip(
         "Syndrome",
         paste(
-          "The dropdown list contains the syndromes available for the current",
-          "analysis date. The icon color indicates the maximum recurrence",
-          "interval strength of any clusters detected for a given syndrome."
+          "This list contains the syndromes available for the selected",
+          "analysis date. The circle color indicates the maximum recurrence",
+          "interval level of any clusters that have been detected for a given",
+          "syndrome."
         )
       ),
       choices = choices,
-      multiple = FALSE,
       options = list(
         render = I("{
         item: function(item, escape) {
           return (
-            '<div style=\"display:flex; flex-wrap:nowrap;'
-            + 'align-items:baseline;\">' + item.label + '</div>'
+            '<div class=\"syn-flex-container\" '
+            + 'style=\"display:flex; flex-wrap:nowrap; align-items:baseline;\">'
+            + item.label + '</div>'
           );
         },
         option: function(item, escape) {
@@ -120,10 +121,13 @@ ri_select_ui <- function(id, choices) {
   radioButtons(
     inputId = NS(id, "ri"),
     label = input_tooltip(
-      "Minimum recurrence interval",
+      "Minimum recurrence interval (RI)",
       paste(
-        "The recurrence interval (RI) is a measure of the likelihood of a",
-        "cluster. A higher RI indicates a higher likelihood and vice versa."
+        "The recurrence interval (RI) reflects the frequency that a cluster",
+        "of the observed likelihood would occur by chance. An RI of 100 days",
+        "indicates that a false positive is expected once in 100 days, while",
+        "an RI of 100 years indicates that a false positive is expected once",
+        "in 100 years."
       )
     ),
     choices = choices,
@@ -165,7 +169,10 @@ zoom_select_server <- function(id, rv) {
 days_select_ui <- function(id, choices) {
   radioButtons(
     inputId = NS(id, "days"),
-    label = "Date range",
+    label = input_tooltip(
+      "Date range",
+      "Choose the amount of time to display in the time series."
+    ),
     choices = choices
   )
 }

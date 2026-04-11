@@ -33,7 +33,7 @@ config_ts_plot_data <- function(
 
   df <- ls[[src]][[syndrome]]
 
-  start <- max(df$date) - n_days
+  start <- max(df$date) - n_days + 1
 
   df |>
     dplyr::filter(date >= start) |>

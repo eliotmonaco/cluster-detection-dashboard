@@ -97,3 +97,12 @@ input_tooltip <- function(label, tooltip_text) {
   )
 }
 
+# Custom sidebar
+sidebar <- function(...) {
+  bslib::sidebar(
+    ...,
+    width = 310,
+    bg = "#e4f3ff"
+  )
+}
+

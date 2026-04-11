@@ -46,9 +46,9 @@ ts_input_choices <- list(
 # Recurrence interval input choices
 ri_input_choices <- list(
   "Very weak (< 100 days)" = 1,
-  "Weak (≥ 100 days)" = 2,
-  "Moderate (≥ 1 year)" = 3,
-  "Strong (≥ 5 years)" = 4,
+  "Weak (100 days to < 1 year)" = 2,
+  "Moderate (1 year to < 5 years)" = 3,
+  "Strong (5 years to < 100 years)" = 4,
   "Very strong (≥ 100 years)" = 5
 )
 
