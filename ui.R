@@ -92,7 +92,10 @@ page_navbar(
 
   nav_panel(
     "About",
-    card(markdown(readLines("scripts/about.md")))
+    tags$div(
+      includeMarkdown("scripts/about.md"),
+      style = "width:980px; margin:auto"
+    )
   )
 
 )

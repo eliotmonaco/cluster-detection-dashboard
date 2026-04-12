@@ -94,3 +94,14 @@ $icon-hosp-fg: #7AB317;
   margin-top: 20px;
   margin-bottom: 0;
 }
+
+/* Example markdown table (About page) */
+.md-casefile-table table {
+  margin: auto;
+}
+
+.md-casefile-table th, .md-casefile-table td {
+  border-bottom: 1px solid black;
+  padding: 5px 10px;
+}
+
