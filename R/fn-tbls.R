@@ -90,6 +90,7 @@ cluster_count_table <- function(df, bg_color, text_color) {
     if (nm == "syndrome") {
       colDef(
         name = mod_col_labels(nm),
+        minWidth = 150,
         sticky = "left",
         style = list(borderRight = "1px solid #ddd")
       )

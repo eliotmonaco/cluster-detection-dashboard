@@ -118,20 +118,23 @@ syn_select_server <- function(id, rv, color) {
 
 # Recurrence interval selection
 ri_select_ui <- function(id, choices) {
-  radioButtons(
-    inputId = NS(id, "ri"),
-    label = input_tooltip(
-      "Minimum recurrence interval (RI)",
-      paste(
-        "The recurrence interval (RI) reflects the frequency that a cluster",
-        "of the observed likelihood would occur by chance. An RI of 100 days",
-        "indicates that a false positive is expected once in 100 days, while",
-        "an RI of 100 years indicates that a false positive is expected once",
-        "in 100 years."
-      )
+  div(
+    radioButtons(
+      inputId = NS(id, "ri"),
+      label = input_tooltip(
+        "Minimum recurrence interval (RI)",
+        paste(
+          "The recurrence interval (RI) reflects the frequency that a cluster",
+          "of the observed likelihood would occur by chance. An RI of 100 days",
+          "indicates that a false positive is expected once in 100 days, while",
+          "an RI of 100 years indicates that a false positive is expected once",
+          "in 100 years."
+        )
+      ),
+      choices = choices,
+      selected = choices[[2]]
     ),
-    choices = choices,
-    selected = choices[[2]]
+    class = "ri-select-input"
   )
 }
 

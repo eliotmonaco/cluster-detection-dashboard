@@ -15,6 +15,17 @@ $icon-hosp-fg: #7AB317;
 
 /* ---SIDEBAR--- */
 
+.tooltip-inner {
+  text-align: left;
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
 /* Prevent selected item from overlapping with dropdown arrow */
 .selectize-input.items.full.has-options.has-items > .syn-flex-container > .syn-text {
   padding-right: 1.5rem;
@@ -29,15 +40,25 @@ $icon-hosp-fg: #7AB317;
   margin-left: 0 !important;
 }
 
-.tooltip-inner {
-  text-align: left;
-  color: black;
-  background-color: white;
-  border: 1px solid black;
+/* RI input radio button background colors */
+.ri-select-input .shiny-options-group > .radio:nth-child(1) input {
+  background-color: #18D6CBFF;
 }
 
-.tooltip.show {
-  opacity: 1;
+.ri-select-input .shiny-options-group > .radio:nth-child(2) input {
+  background-color: #78FE5AFF;
+}
+
+.ri-select-input .shiny-options-group > .radio:nth-child(3) input {
+  background-color: #E1DD37FF;
+}
+
+.ri-select-input .shiny-options-group > .radio:nth-child(4) input {
+  background-color: #FB8022FF;
+}
+
+.ri-select-input .shiny-options-group > .radio:nth-child(5) input {
+  background-color: #C42503FF;
 }
 
 /* ---BODY--- */

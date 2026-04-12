@@ -53,12 +53,9 @@ ri_input_choices <- list(
 )
 
 # Recurrence interval colors
-ri_bg_color <- adjustcolor(
-  colorRampPalette(c("yellow", "orange", "red"))(5),
-  green.f = .85, blue.f = .85
-)
+ri_bg_color <- viridisLite::turbo(5, begin = .3, end = .9)
 
-ri_text_color <- c(rep("black", 3), rep("white", 2))
+ri_text_color <- contrast_color(ri_bg_color)
 
 # Syndrome input choices (initial)
 syn_input_choices <- dbdata |>
