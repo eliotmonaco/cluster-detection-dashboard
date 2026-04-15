@@ -2,15 +2,15 @@
 
 # Summarize data for significant clusters table
 summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
-  # Count clusters by strength level for each syndrome
+  # Count clusters by RI level for each syndrome
   ls <- lapply(ls, \(ls2) {
     ct <- lapply(ls2, \(ls3) {
       if (is.data.frame(ls3$shapeclust)) {
         ls3$shapeclust |>
           st_drop_geometry() |>
-          count(strength, .drop = FALSE) |>
-          mutate(strength = gsub("\\s", "_", strength)) |>
-          column_to_rownames("strength") |>
+          count(ri_level, .drop = FALSE) |>
+          mutate(ri_level = gsub("\\s", "_", ri_level)) |>
+          column_to_rownames("ri_level") |>
           t() |>
           as.data.frame()
       } else if (length(ls3) == 0) {
@@ -77,7 +77,7 @@ cluster_count_table <- function(df, bg_color, text_color) {
       str_to_title()
   }
 
-  # Number of RI strength columns in `df`
+  # Number of RI level columns in `df`
   n <- 6 - ((ncol(df) - 1) / 2)
 
   # Colors
@@ -143,7 +143,7 @@ filter_cluster_data <- function(ls, ri_min) {
   # Filter spatial data by p-value and add labels for map
   lapply(ls[grepl("gis|clust", names(ls))], \(df) {
     df <- df |>
-      filter(as.numeric(strength) >= ri_min) |>
+      filter(as.numeric(ri_level) >= ri_min) |>
       mutate(lbl = paste("Cluster", cluster))
 
     if ("geometry" %in% colnames(df)) {
@@ -227,6 +227,7 @@ cluster_table <- function(df, bg_color, text_color) {
     "Test statistic" = "Test stat",
     "P-value" = "P value",
     "RI (days)" = "Recurr int",
+    "RI level" = "Ri level",
     "Obs/exp" = "Ode"
   )
 
@@ -235,7 +236,7 @@ cluster_table <- function(df, bg_color, text_color) {
     st_drop_geometry() |>
     select(
       cluster, start_date, end_date, number_loc, test_stat, p_value,
-      recurr_int, strength, observed, expected, ode
+      recurr_int, ri_level, observed, expected, ode
     ) |>
     mutate(
       across(
@@ -247,13 +248,13 @@ cluster_table <- function(df, bg_color, text_color) {
         ~ round_ties_away(.x, 2)
       ),
       p_value = signif(p_value, 1),
-      strength = str_to_sentence(strength),
+      ri_level = str_to_sentence(ri_level),
       expected = round_ties_away(expected, 0)
     ) |>
     rename_with(mod_col_labels) |>
     rename(any_of(replace))
 
-  # Function to style `Strength` column
+  # Function to style `ri_level` column
   fn <- function(bg, txt) {
     function(value) {
       if (value == "Very weak") {
@@ -284,7 +285,7 @@ cluster_table <- function(df, bg_color, text_color) {
     } else if (is.numeric(df[[x]])) {
       # Use comma separators
       colDef(format = colFormat(separators = TRUE))
-    } else if (x == "Strength") {
+    } else if (x == "RI level") {
       colDef(style = cell_style)
     }
   })

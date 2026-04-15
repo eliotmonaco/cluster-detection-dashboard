@@ -20,9 +20,9 @@ get_syn_choices <- function(ls) {
   syn
 }
 
-# Create a list with the highest strength of cluster for each syndrome
+# Create a list with the max RI level of any cluster for each syndrome
 # ls = satscan results
-get_syn_cluster_strength <- function(ls) {
+get_max_ri_level <- function(ls) {
   # Get `shapeclust` dataframe for each syndrome
   ss <- lapply(ls, \(src) {
     lapply(src, \(syn) {
@@ -33,23 +33,23 @@ get_syn_cluster_strength <- function(ls) {
   # Within each syndrome, combine the dataframes from each source
   ss <- map2(ss$patient, ss$hospital, rbind)
 
-  # Get the max RI strength for each syndrome
+  # Get the max RI level for each syndrome
   lapply(ss, \(df) {
     if (is.data.frame(df)) {
       row <- suppressWarnings(
         which(df$recurr_int == max(df$recurr_int))[1]
       )
 
-      as.character(df[row, "strength"])
+      as.character(df[row, "ri_level"])
     } else {
       NA
     }
   })
 }
 
-# Create icons indicating the RI strength for the syndrome input list
+# Create icons indicating the max RI level for the syndrome input list
 # syn = syndrome input choice list
-# str = output of `get_syn_cluster_strength()`
+# str = output of `get_max_ri_level()`
 add_ri_icons <- function(syn, str, colors) {
   ls <- mapply(str, names(syn), FUN = \(x, y) {
     syn_html <- paste(

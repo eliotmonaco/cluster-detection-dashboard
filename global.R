@@ -64,7 +64,7 @@ syn_input_choices <- dbdata |>
 
 syn_strength <- dbdata |>
   get_db_data(max(date_input_choices), "satscan_results") |>
-  get_syn_cluster_strength()
+  get_max_ri_level()
 
 syn_input_choices <- add_ri_icons(
   syn = syn_input_choices,

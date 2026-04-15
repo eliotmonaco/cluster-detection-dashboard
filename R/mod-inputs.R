@@ -92,7 +92,7 @@ syn_select_server <- function(id, rv, color) {
     synchoices <- reactive({
       add_ri_icons(
         syn = synlist(),
-        str = get_syn_cluster_strength(rv$data$satscan_results),
+        str = get_max_ri_level(rv$data$satscan_results),
         colors = ri_bg_color
       )
     })

@@ -497,7 +497,7 @@ classify_clusters <- function(x) {
 config_ss_spatial <- function(df) {
   df |>
     dplyr::mutate(
-      strength = classify_clusters(recurr_int),
+      ri_level = classify_clusters(recurr_int),
       .after = recurr_int
     )
 }

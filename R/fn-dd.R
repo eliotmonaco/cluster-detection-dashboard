@@ -65,6 +65,10 @@ assemble_dd_summaries <- function(
 
   cluster_ids <- cluster_data$shapeclust$cluster
 
+  ri_levels <- gsub("\\s", "_", cluster_data$shapeclust$ri_level)
+
+  sfx <- paste0(cluster_ids, "_(", ri_levels, ")")
+
   # Return smry1 if no clusters were detected
   if (length(cluster_ids) == 0) {
     return(smry1)
@@ -96,7 +100,7 @@ assemble_dd_summaries <- function(
 
   colnames(smry2) <- c(
     var,
-    do.call(paste0, expand.grid(c("n", "pct"), seq_along(smry_clust)))
+    do.call(paste0, expand.grid(c("n", "pct"), sfx))
   )
 
   # Join full summary to cluster summaries
@@ -106,17 +110,37 @@ assemble_dd_summaries <- function(
 }
 
 # Data characteristics tables from data details
-dd_table <- function(df, var, replace_nm = NULL) {
+dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
+  # Assign RI levels as names to `color`
+  color <- setNames(
+    color,
+    c("very_weak", "weak", "moderate", "strong", "very_strong")
+  )
+
   # Configure column groups
   col_groups1 <- list(colGroup(name = "Study area", columns = c("n", "pct")))
 
-  cols <- colnames(df)[grepl("\\d$", colnames(df))]
+  cols <- colnames(df)[grepl("\\d", colnames(df))]
+
+  nm <- sub("^n", "", colnames(df)[grepl("^n\\d", colnames(df))])
 
   if (length(cols) != 0) {
-    col_groups2 <- lapply(1:(length(cols) / 2), \(x) {
+    col_groups2 <- lapply(nm, \(x) {
+      n <- stringr::str_extract(x, "\\d*")
+
+      ri_lvl <- stringr::str_extract(x, "(?<=\\().*(?=\\))")
+
+      bg <- as.character(color[ri_lvl])
+
+      clr <- contrast_color(bg)
+
       colGroup(
-        name = paste("Cluster", x),
-        columns = cols[grepl(x, cols)]
+        name = gsub("_", " ", paste("Cluster", x)),
+        columns = cols[grepl(n, cols)],
+        headerStyle = list(
+          backgroundColor = bg,
+          color = clr
+        )
       )
     })
   } else {
@@ -133,7 +157,7 @@ dd_table <- function(df, var, replace_nm = NULL) {
 
   names(col_defs1) <- var
 
-  cols <- colnames(df)[grepl("^n\\d*$", colnames(df))]
+  cols <- colnames(df)[grepl("^n\\d*(_|$)", colnames(df))]
 
   col_defs2 <- lapply(cols, \(x) {
     colDef(
@@ -145,7 +169,7 @@ dd_table <- function(df, var, replace_nm = NULL) {
 
   names(col_defs2) <- cols
 
-  cols <- colnames(df)[grepl("^pct\\d*$", colnames(df))]
+  cols <- colnames(df)[grepl("^pct\\d*(_|$)", colnames(df))]
 
   col_defs3 <- lapply(cols, \(x) {
     colDef(

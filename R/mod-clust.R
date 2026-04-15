@@ -8,7 +8,7 @@ cluster_overview_ui <- function(id) {
       style = "text-align:center;font-size:1.4rem;"
     ),
     p(
-      "Clusters are grouped by the strength of the recurrence interval (RI)",
+      "Clusters are grouped by recurrence interval (RI)",
       style = "text-align:center;font-size:1.2rem;margin-bottom:16px;"
     ),
     reactableOutput(NS(id, "clustct")),
