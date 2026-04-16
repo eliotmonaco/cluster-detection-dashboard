@@ -117,9 +117,10 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
     c("very_weak", "weak", "moderate", "strong", "very_strong")
   )
 
-  # Configure column groups
+  # Configure column groups: Study area
   col_groups1 <- list(colGroup(name = "Study area", columns = c("n", "pct")))
 
+  # Configure column groups: Clusters
   cols <- colnames(df)[grepl("\\d", colnames(df))]
 
   nm <- sub("^n", "", colnames(df)[grepl("^n\\d", colnames(df))])
@@ -149,7 +150,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
 
   col_groups <- c(col_groups1, col_groups2)
 
-  # Format columns
+  # Format columns: Main variable
   col_defs1 <- list(colDef(
     name = mod_col_labels(var),
     sticky = "left"
@@ -157,6 +158,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
 
   names(col_defs1) <- var
 
+  # Format columns: N
   cols <- colnames(df)[grepl("^n\\d*(_|$)", colnames(df))]
 
   col_defs2 <- lapply(cols, \(x) {
@@ -169,12 +171,18 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
 
   names(col_defs2) <- cols
 
+  # Format columns: Pct
   cols <- colnames(df)[grepl("^pct\\d*(_|$)", colnames(df))]
+
+  orange_pal <- function(x) {
+    rgb(colorRamp(c("#fff", "#ffb54d"))(x), maxColorValue = 255)
+  }
 
   col_defs3 <- lapply(cols, \(x) {
     colDef(
       name = "Pct",
-      format = colFormat(percent = TRUE)
+      format = colFormat(percent = TRUE),
+      style = function(value) list(background = orange_pal(value))
     )
   })
 
