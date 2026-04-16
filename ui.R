@@ -1,5 +1,5 @@
 page_navbar(
-  title = "Kansas City Syndrome Tracker",
+  title = "KC Active Cluster Detection Dashboard",
   id = "nav",
   theme = bs_theme("navbar-bg" = "#0d3769") |>
     bs_add_rules(sass::sass_file("www/sass/custom.scss")),

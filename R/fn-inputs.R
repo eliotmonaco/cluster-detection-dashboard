@@ -58,7 +58,7 @@ add_ri_icons <- function(syn, str, colors) {
       "margin: 0 5px;'></div><div class='syn-text'>%s</div>"
     )
 
-    border <- "#aaa"
+    border <- "#8D959E"
 
     if (is.na(x)) {
       sprintf(syn_html, "white", border, y)
