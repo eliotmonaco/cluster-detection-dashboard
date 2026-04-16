@@ -11,21 +11,21 @@ dir.create(dir_out)
 # Satscan analysis --------------------------------------------------------
 
 # Case file: <location ID> <# cases> <date/time>
-imap(dd$patient, \(df, i) {
+purrr::imap(dd$patient, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "zip_code")
-      write.cas(df, dir_in, paste0(i, "-patient"))
+      rsatscan::write.cas(df, dir_in, paste0(i, "-patient"))
     },
     error = function(e) e
   )
 })
 
-imap(dd$hospital, \(df, i) {
+purrr::imap(dd$hospital, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "hospital_name_geo")
-      write.cas(df, dir_in, paste0(i, "-hospital"))
+      rsatscan::write.cas(df, dir_in, paste0(i, "-hospital"))
     },
     error = function(e) e
   )
@@ -33,21 +33,21 @@ imap(dd$hospital, \(df, i) {
 
 # Coordinates file: <location ID> <latitude> <longitude>
 geo_file_pat <- geo$zcta_pts |>
-  st_drop_geometry() |>
-  select(zcta, lat, long)
+  sf::st_drop_geometry() |>
+  dplyr::select(zcta, lat, long)
 
 geo_file_hosp <- geo$hosp |>
-  st_drop_geometry() |>
-  select(hospital_name_geo, lat, long)
+  sf::st_drop_geometry() |>
+  dplyr::select(hospital_name_geo, lat, long)
 
-write.geo(geo_file_pat, dir_in, "zctas")
-write.geo(geo_file_hosp, dir_in, "hospitals")
+rsatscan::write.geo(geo_file_pat, dir_in, "zctas")
+rsatscan::write.geo(geo_file_hosp, dir_in, "hospitals")
 
 # Parameter file
-imap(dd, \(ls, i) {
-  imap(ls, \(df, j) {
+purrr::imap(dd, \(ls, i) {
+  purrr::imap(ls, \(df, j) {
     # Set Satscan options to defaults
-    invisible(ss.options(reset = TRUE))
+    invisible(rsatscan::ss.options(reset = TRUE))
 
     if (is.null(df)) {
       return(invisible(NULL))
@@ -83,8 +83,8 @@ imap(dd, \(ls, i) {
 })
 
 # Run Satscan
-ssresults_raw <- imap(dd, \(ls, i) {
-  imap(ls, \(x, j) {
+ssresults_raw <- purrr::imap(dd, \(ls, i) {
+  purrr::imap(ls, \(x, j) {
     nm <- paste0(j, "-", i)
 
     if (file.exists(paste0(dir_out, nm, ".prm"))) {
@@ -109,18 +109,18 @@ log <- readLines(paste0(dir_data, "log.txt"))
 dur <- t1 - t0
 
 # Find warnings or error messages in `ssresults_raw$cmd_output`
-msg <- imap(unlist(ssresults_raw, recursive = FALSE), \(ls, i) {
+msg <- purrr::imap(unlist(ssresults_raw, recursive = FALSE), \(ls, i) {
   if (any(grepl("^Warning|^Error", ls$cmd_output))) {
     m <- c(
       paste("-", i),
-      paste("   ", gsub("\n", "\n    ", str_wrap(ls$cmd_output, 80)))
+      paste("   ", gsub("\n", "\n    ", stringr::str_wrap(ls$cmd_output, 80)))
     )
 
     m[!grepl("^\\s*$", m)]
   }
 })
 
-if (length(compact(msg)) == 0) {
+if (length(purrr::compact(msg)) == 0) {
   logmsg <- "CMD warning/error output: None"
 } else {
   logmsg <- c("CMD warning/error output:\n", unlist(msg))
@@ -132,7 +132,7 @@ log <- c(
   paste("Started at", format(t0, "%I:%M %p")),
   paste(
     "Computation time:",
-    round_ties_away(as.numeric(dur), 2),
+    setmeup::round_ties_away(as.numeric(dur), 2),
     units(dur), "\n"
   ),
   logmsg
@@ -155,17 +155,17 @@ ssresults <- lapply(ssresults_raw, \(ls) {
 
 # Join `kc` variable that indicates if a geography is in Kansas City
 ssresults$patient <- lapply(ssresults$patient, \(ls) {
-  imap(ls, \(x, i) {
+  purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
       geo <- geo$zctas |>
-        st_drop_geometry() |>
-        select(loc_id = GEOID20, kc)
+        sf::st_drop_geometry() |>
+        dplyr::select(loc_id = GEOID20, kc)
 
-      x <- config_ss_locations(x, geo = geo)
+      x <- config_ss_locations(x, geo = geo) # join in/out of KC var
     }
 
     if (is.data.frame(x) && grepl("gis|clust", i)) {
-      x <- config_ss_spatial(x)
+      x <- config_ss_spatial(x) # assign RI level
     }
 
     x
@@ -173,17 +173,17 @@ ssresults$patient <- lapply(ssresults$patient, \(ls) {
 })
 
 ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
-  imap(ls, \(x, i) {
+  purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
       geo <- geo$hosp |>
-        st_drop_geometry() |>
-        select(loc_id = hospital_name_geo, kc)
+        sf::st_drop_geometry() |>
+        dplyr::select(loc_id = hospital_name_geo, kc)
 
-      x <- config_ss_locations(x, geo = geo)
+      x <- config_ss_locations(x, geo = geo) # join in/out of KC var
     }
 
     if (is.data.frame(x) && grepl("gis|clust", i)) {
-      x <- config_ss_spatial(x)
+      x <- config_ss_spatial(x) # assign RI level
     }
 
     x

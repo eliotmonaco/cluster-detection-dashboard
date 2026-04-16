@@ -3,7 +3,7 @@
 dd_ui <- function(id, header) {
   card(
     card_header(header),
-    reactableOutput(NS(id, "ddtable"))
+    reactable::reactableOutput(NS(id, "ddtable"))
   )
 }
 
@@ -24,7 +24,7 @@ dd_server <- function(id, rv, src, var) {
     })
 
     # Data details table
-    output$ddtable <- renderReactable({
+    output$ddtable <- reactable::renderReactable({
       dd_table(data(), var = var)
     })
   })

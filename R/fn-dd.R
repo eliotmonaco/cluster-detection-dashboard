@@ -118,7 +118,10 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   )
 
   # Configure column groups: Study area
-  col_groups1 <- list(colGroup(name = "Study area", columns = c("n", "pct")))
+  col_groups1 <- list(reactable::colGroup(
+    name = "Study area",
+    columns = c("n", "pct")
+  ))
 
   # Configure column groups: Clusters
   cols <- colnames(df)[grepl("\\d", colnames(df))]
@@ -133,9 +136,9 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
 
       bg <- as.character(color[ri_lvl])
 
-      clr <- contrast_color(bg)
+      clr <- setmeup::contrast_color(bg)
 
-      colGroup(
+      reactable::colGroup(
         name = gsub("_", " ", paste("Cluster", x)),
         columns = cols[grepl(n, cols)],
         headerStyle = list(
@@ -151,7 +154,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   col_groups <- c(col_groups1, col_groups2)
 
   # Format columns: Main variable
-  col_defs1 <- list(colDef(
+  col_defs1 <- list(reactable::colDef(
     name = mod_col_labels(var),
     sticky = "left"
   ))
@@ -162,9 +165,9 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   cols <- colnames(df)[grepl("^n\\d*(_|$)", colnames(df))]
 
   col_defs2 <- lapply(cols, \(x) {
-    colDef(
+    reactable::colDef(
       name = "N",
-      format = colFormat(separators = TRUE),
+      format = reactable::colFormat(separators = TRUE),
       style = list(borderLeft = "1px solid #ddd")
     )
   })
@@ -179,9 +182,9 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   }
 
   col_defs3 <- lapply(cols, \(x) {
-    colDef(
+    reactable::colDef(
       name = "Pct",
-      format = colFormat(percent = TRUE),
+      format = reactable::colFormat(percent = TRUE),
       style = function(value) list(background = orange_pal(value))
     )
   })
@@ -191,7 +194,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   col_defs <- c(col_defs1, col_defs2, col_defs3)
 
   df |>
-    reactable(
+    reactable::reactable(
       columnGroups = col_groups,
       columns = col_defs,
       sortable = FALSE,
@@ -199,7 +202,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
       highlight = TRUE,
       compact = TRUE,
       fullWidth = FALSE,
-      theme = reactableTheme(borderColor = "#ddd")
+      theme = reactable::reactableTheme(borderColor = "#ddd")
     )
 }
 

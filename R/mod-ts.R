@@ -3,7 +3,7 @@
 ts_plot_ui <- function(id, header, footer) {
   card(
     card_header(header),
-    highchartOutput(NS(id, "tsplot")),
+    highcharter::highchartOutput(NS(id, "tsplot")),
     p(footer)
   )
 }
@@ -21,7 +21,7 @@ ts_plot_server <- function(id, rv, src) {
     })
 
     # Time series plot
-    output$tsplot <- renderHighchart({
+    output$tsplot <- highcharter::renderHighchart({
       ts_plot(
         data(),
         title = rv$data$syndromes[[rv$syn]]$name1

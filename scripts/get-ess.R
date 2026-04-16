@@ -58,7 +58,7 @@ url_ts <- list(
     end = end_date,
     data_source = "patient",
     output = "ts",
-    zipcodes = geoid$zcta2020
+    zipcodes = kcData::geoid$zcta2020
   ),
   hospital = build_ess_url(
     syndrome = syn_api,
@@ -121,7 +121,7 @@ df <- data.frame(
 )
 
 # Make a table easy to read in a text file
-df <- readable_table(df, 30)
+df <- setmeup::readable_table(df, 30)
 
 tf <- tempfile(fileext = ".txt")
 
@@ -143,7 +143,7 @@ log <- c(
   paste("Started at", format(t0, "%I:%M %p")),
   paste(
     "Download time:",
-    round_ties_away(as.numeric(dur), 2),
+    setmeup::round_ties_away(as.numeric(dur), 2),
     units(dur), "\n"
   ),
   log,

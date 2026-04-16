@@ -1,6 +1,8 @@
 library(shiny)
 library(bslib)
-library(tidyverse)
+library(dplyr)
+library(purrr)
+library(stringr)
 library(setmeup)
 library(sf)
 library(highcharter)
@@ -55,7 +57,7 @@ ri_input_choices <- list(
 # Recurrence interval colors
 ri_bg_color <- viridisLite::turbo(5, begin = .3, end = .9)
 
-ri_text_color <- contrast_color(ri_bg_color)
+ri_text_color <- setmeup::contrast_color(ri_bg_color)
 
 # Syndrome input choices (initial)
 syn_input_choices <- dbdata |>

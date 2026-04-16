@@ -31,7 +31,7 @@ get_max_ri_level <- function(ls) {
   })
 
   # Within each syndrome, combine the dataframes from each source
-  ss <- map2(ss$patient, ss$hospital, rbind)
+  ss <- purrr::map2(ss$patient, ss$hospital, rbind)
 
   # Get the max RI level for each syndrome
   lapply(ss, \(df) {

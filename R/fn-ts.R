@@ -42,18 +42,18 @@ config_ts_plot_data <- function(
 
 # Time series plot
 ts_plot <- function(ls, title) {
-  highchart() |>
-    hc_add_series_list(ls) |>
-    hc_xAxis(
+  highcharter::highchart() |>
+    highcharter::hc_add_series_list(ls) |>
+    highcharter::hc_xAxis(
       type = "datetime",
       title = list(text = "Date"),
       labels = list(format = "{value:%b %d}")
     ) |>
-    hc_yAxis(
+    highcharter::hc_yAxis(
       title = list(text = "Count")
     ) |>
-    hc_legend(enabled = FALSE) |>
-    hc_tooltip(formatter = JS(
+    highcharter::hc_legend(enabled = FALSE) |>
+    highcharter::hc_tooltip(formatter = htmlwidgets::JS(
       "function() {
         const dt = new Date(this.x);
         return dt.toDateString() + '<br>' +
@@ -61,6 +61,6 @@ ts_plot <- function(ls, title) {
         `Alert status: <b>${this.point.alert_status}</b>`;
       }"
     )) |>
-    hc_title(text = title)
+    highcharter::hc_title(text = title)
 }
 

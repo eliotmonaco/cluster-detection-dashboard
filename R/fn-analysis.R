@@ -153,7 +153,7 @@ capture_message <- function(expr) {
   output
 }
 
-# Deduplicate and configure data downloaded from Essence
+# Deduplicate data details data
 deduplicate_dd <- function(df, geo_var) {
   df <- df |>
     dplyr::mutate(row_id = dplyr::row_number(), .before = 1)
@@ -262,6 +262,7 @@ deduplicate_dd <- function(df, geo_var) {
   )
 }
 
+# Configure data details data
 config_dd <- function(df, ansi_codes = ansi) {
   agecat <- c(
     "00-04" = "0-4", "05-17" = "5-17", "18-44" = "18-44",
@@ -293,6 +294,7 @@ config_dd <- function(df, ansi_codes = ansi) {
     dplyr::select(-patient_state2)
 }
 
+# Configure time series data
 config_ts <- function(df) {
   # Add alert status, color, symbol, and radius
   lvl <- c("Normal", "Warning", "Anomaly")
@@ -350,7 +352,7 @@ config_casefile <- function(df, var) {
 }
 
 set_ss_opts <- function(casefile, coordfile, start, end) {
-  ss.options(list(
+  rsatscan::ss.options(list(
     # Input
     CaseFile = casefile,
     PrecisionCaseTimes = 3, # day
@@ -479,13 +481,15 @@ run_satscan <- function(dir, file, satscan_exe) {
   structure(ls, class = "satscan")
 }
 
+# Configure Satscan output with cluster locations
 config_ss_locations <- function(df, geo) {
   df |>
     dplyr::left_join(geo, by = "loc_id") |>
     dplyr::relocate(kc, .after = loc_id)
 }
 
-classify_clusters <- function(x) {
+# Assign recurrence interval level to clusters (see Levin-Rector 2004)
+assign_ri_level <- function(x) {
   cut(
     x,
     breaks = c(0, 100, 365, 5 * 365, 100 * 365, Inf),
@@ -494,10 +498,11 @@ classify_clusters <- function(x) {
   )
 }
 
+# Configure spatial data in Satscan results
 config_ss_spatial <- function(df) {
   df |>
     dplyr::mutate(
-      ri_level = classify_clusters(recurr_int),
+      ri_level = assign_ri_level(recurr_int),
       .after = recurr_int
     )
 }

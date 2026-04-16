@@ -1,11 +1,10 @@
 # Create dashboard data
 
 library(Rnssp)
-library(tidyverse)
-library(setmeup)
-library(kcData)
 library(rsatscan)
-library(sf)
+library(dplyr)
+library(purrr)
+library(setmeup)
 
 # Load Essence profile object, needed for `get_api_data()`
 load("data/myProfile.rda")

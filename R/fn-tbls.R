@@ -7,10 +7,10 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
     ct <- lapply(ls2, \(ls3) {
       if (is.data.frame(ls3$shapeclust)) {
         ls3$shapeclust |>
-          st_drop_geometry() |>
-          count(ri_level, .drop = FALSE) |>
-          mutate(ri_level = gsub("\\s", "_", ri_level)) |>
-          column_to_rownames("ri_level") |>
+          sf::st_drop_geometry() |>
+          dplyr::count(ri_level, .drop = FALSE) |>
+          dplyr::mutate(ri_level = gsub("\\s", "_", ri_level)) |>
+          tibble::column_to_rownames("ri_level") |>
           t() |>
           as.data.frame()
       } else if (length(ls3) == 0) {
@@ -26,24 +26,24 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
       }
     })
 
-    list_rbind(ct, names_to = "abbr")
+    purrr::list_rbind(ct, names_to = "abbr")
   })
 
   # Join patient and hospital dataframes and syndrome names
   df <- ls$patient |>
-    left_join(
+    dplyr::left_join(
       ls$hospital,
       by = "abbr",
       suffix = c("_pat", "_hosp")
     ) |>
-    left_join(
+    dplyr::left_join(
       data.frame(
         syndrome = sapply(syndromes, \(ls) ls$name1),
         abbr = names(syndromes)
       ),
       by = "abbr"
     ) |>
-    select(syndrome, everything(), -abbr)
+    dplyr::select(syndrome, dplyr::everything(), -abbr)
 
   # Keep counts above the recurrence interval minimum
   if (ri_min > 1) {
@@ -74,7 +74,7 @@ cluster_count_table <- function(df, bg_color, text_color) {
     x |>
       gsub(pattern = "_pat|_hosp", replacement = "") |>
       gsub(pattern = "_", replacement = " ") |>
-      str_to_title()
+      stringr::str_to_title()
   }
 
   # Number of RI level columns in `df`
@@ -88,14 +88,14 @@ cluster_count_table <- function(df, bg_color, text_color) {
   # Style columns
   col_defs <- mapply(colnames(df), bg_color, text_color, FUN = \(nm, bg, txt) {
     if (nm == "syndrome") {
-      colDef(
+      reactable::colDef(
         name = mod_col_labels(nm),
         minWidth = 150,
         sticky = "left",
         style = list(borderRight = "1px solid #ddd")
       )
     } else {
-      colDef(
+      reactable::colDef(
         name = mod_col_labels(nm),
         style = function(n) {
           if (!is.na(n) && n > 0) {
@@ -113,13 +113,13 @@ cluster_count_table <- function(df, bg_color, text_color) {
   names(col_defs) <- colnames(df)
 
   df |>
-    reactable(
+    reactable::reactable(
       columnGroups = list(
-        colGroup(
+        reactable::colGroup(
           name = "ER visits by patient location",
           columns = colnames(df)[grepl("_pat$", colnames(df))]
         ),
-        colGroup(
+        reactable::colGroup(
           name = "ER visits by hospital location",
           columns = colnames(df)[grepl("_hosp$", colnames(df))]
         )
@@ -128,7 +128,7 @@ cluster_count_table <- function(df, bg_color, text_color) {
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
-      theme = reactableTheme(borderColor = "#ddd")
+      theme = reactable::reactableTheme(borderColor = "#ddd")
     )
 }
 
@@ -143,12 +143,12 @@ filter_cluster_data <- function(ls, ri_min) {
   # Filter spatial data by p-value and add labels for map
   lapply(ls[grepl("gis|clust", names(ls))], \(df) {
     df <- df |>
-      filter(as.numeric(ri_level) >= ri_min) |>
-      mutate(lbl = paste("Cluster", cluster))
+      dplyr::filter(as.numeric(ri_level) >= ri_min) |>
+      dplyr::mutate(lbl = paste("Cluster", cluster))
 
     if ("geometry" %in% colnames(df)) {
       df <- df |>
-        relocate(geometry, .after = everything())
+        dplyr::relocate(geometry, .after = dplyr::everything())
     }
 
     if (nrow(df) == 0) {
@@ -169,9 +169,9 @@ expand_point_clusters <- function(ls) {
 
     # Expand cluster polygons for visibility on map
     ls$shapeclust <- ls$shapeclust |>
-      mutate(geometry = if_else(
+      dplyr::mutate(geometry = dplyr::if_else(
         cluster %in% clust,
-        st_buffer(geometry, dist = 2000),
+        sf::st_buffer(geometry, dist = 2000),
         geometry
       ))
   }
@@ -181,7 +181,7 @@ expand_point_clusters <- function(ls) {
 
 # Modify column labels
 mod_col_labels <- function(x) {
-  str_to_sentence(gsub("_", " ", x))
+  stringr::str_to_sentence(gsub("_", " ", x))
 }
 
 # Syndrome table with query names and KR links
@@ -201,9 +201,9 @@ syndrome_table <- function(ls) {
   }
 
   df |>
-    reactable(
+    reactable::reactable(
       columns = list(
-        kr = colDef(
+        kr = reactable::colDef(
           name = "NSSP Knowledge Repository link",
           cell = make_link
         )
@@ -233,26 +233,26 @@ cluster_table <- function(df, bg_color, text_color) {
 
   # Configure data
   df <- df |>
-    st_drop_geometry() |>
-    select(
+    sf::st_drop_geometry() |>
+    dplyr::select(
       cluster, start_date, end_date, number_loc, test_stat, p_value,
       recurr_int, ri_level, observed, expected, ode
     ) |>
-    mutate(
-      across(
+    dplyr::mutate(
+      dplyr::across(
         c(start_date, end_date),
         ~ format(as.Date(.x, "%Y/%m/%d"), "%b %d, %Y")
       ),
-      across(
+      dplyr::across(
         c(test_stat, ode),
-        ~ round_ties_away(.x, 2)
+        ~ setmeup::round_ties_away(.x, 2)
       ),
       p_value = signif(p_value, 1),
-      ri_level = str_to_sentence(ri_level),
-      expected = round_ties_away(expected, 0)
+      ri_level = stringr::str_to_sentence(ri_level),
+      expected = setmeup::round_ties_away(expected, 0)
     ) |>
-    rename_with(mod_col_labels) |>
-    rename(any_of(replace))
+    dplyr::rename_with(mod_col_labels) |>
+    dplyr::rename(dplyr::any_of(replace))
 
   # Function to style `ri_level` column
   fn <- function(bg, txt) {
@@ -277,30 +277,30 @@ cluster_table <- function(df, bg_color, text_color) {
   col_defs <- lapply(colnames(df), \(x) {
     if (x %in% c("P-value", "RI (days)")) {
       # Format as scientific notation
-      colDef(cell = JS(
+      reactable::colDef(cell = htmlwidgets::JS(
         "function(cellInfo) {
             return cellInfo.value.toExponential(1)
         }"
       ))
     } else if (is.numeric(df[[x]])) {
       # Use comma separators
-      colDef(format = colFormat(separators = TRUE))
+      reactable::colDef(format = reactable::colFormat(separators = TRUE))
     } else if (x == "RI level") {
-      colDef(style = cell_style)
+      reactable::colDef(style = cell_style)
     }
   })
 
   names(col_defs) <- colnames(df)
 
   df |>
-    reactable(
-      columns = compact(col_defs),
+    reactable::reactable(
+      columns = purrr::compact(col_defs),
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
       selection = "single",
       onClick = "select",
-      theme = reactableTheme(borderColor = "#ddd")
+      theme = reactable::reactableTheme(borderColor = "#ddd")
     )
 }
 
@@ -324,44 +324,44 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
   # Data source-specific adjustments and styling
   if (src == "patient") {
     df <- df |>
-      mutate(loc_id = as.character(loc_id))
+      dplyr::mutate(loc_id = as.character(loc_id))
 
     replace <- c("ZCTA" = "loc_id", replace)
 
-    col_defs <- list(ZCTA = colDef(minWidth = 200))
+    col_defs <- list(ZCTA = reactable::colDef(minWidth = 200))
   } else if (src == "hospital") {
     df <- df |>
-      mutate(
+      dplyr::mutate(
         loc_id = gsub("_", " ", loc_id) |>
-          str_to_title() |>
+          stringr::str_to_title() |>
           sub(pattern = "\\sOf\\s", replacement = " of ")
       )
 
     replace <- c("Hospital" = "loc_id", replace)
 
-    col_defs <- list(Hospital = colDef(minWidth = 200))
+    col_defs <- list(Hospital = reactable::colDef(minWidth = 200))
   }
 
   # Configure data
   df <- df |>
-    st_drop_geometry() |>
-    filter(cluster == id) |>
-    select(loc_id, kc, cluster, loc_obs, loc_exp, loc_ode) |>
-    mutate(
-      kc = str_to_sentence(kc),
-      loc_exp = round_ties_away(loc_exp, 0),
-      loc_ode = round_ties_away(loc_ode, 2)
+    sf::st_drop_geometry() |>
+    dplyr::filter(cluster == id) |>
+    dplyr::select(loc_id, kc, cluster, loc_obs, loc_exp, loc_ode) |>
+    dplyr::mutate(
+      kc = stringr::str_to_sentence(kc),
+      loc_exp = setmeup::round_ties_away(loc_exp, 0),
+      loc_ode = setmeup::round_ties_away(loc_ode, 2)
     ) |>
-    arrange(loc_id) |>
-    rename(any_of(replace))
+    dplyr::arrange(loc_id) |>
+    dplyr::rename(dplyr::any_of(replace))
 
   df |>
-    reactable(
+    reactable::reactable(
       columns = col_defs,
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
-      theme = reactableTheme(borderColor = "#ddd")
+      theme = reactable::reactableTheme(borderColor = "#ddd")
     )
 }
 

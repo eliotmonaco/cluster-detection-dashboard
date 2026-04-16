@@ -121,7 +121,7 @@ ddraw <- lapply(list(1, 2), \(x) {
     ct <- rpois(length(dates), lambda)
 
     # Create visit dates
-    dates <- map2(dates, ct, \(x, y) {
+    dates <- purrr::map2(dates, ct, \(x, y) {
       rep(x, y)
     })
 
@@ -365,7 +365,7 @@ dir.create(dir_out)
 casefiles <- list()
 
 # Case file: <location ID> <# cases> <date/time>
-casefiles$patient <- imap(dd$patient, \(df, i) {
+casefiles$patient <- purrr::imap(dd$patient, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "zip_code")
@@ -376,7 +376,7 @@ casefiles$patient <- imap(dd$patient, \(df, i) {
   )
 })
 
-casefiles$hospital <- imap(dd$hospital, \(df, i) {
+casefiles$hospital <- purrr::imap(dd$hospital, \(df, i) {
   tryCatch(
     expr = {
       df <- config_casefile(df, var = "hospital_name_geo")
@@ -400,8 +400,8 @@ write.geo(geo_file_pat, dir_in, "zctas")
 write.geo(geo_file_hosp, dir_in, "hospitals")
 
 # Parameter file
-imap(dd, \(ls, i) {
-  imap(ls, \(df, j) {
+purrr::imap(dd, \(ls, i) {
+  purrr::imap(ls, \(df, j) {
     # Set Satscan options to defaults
     invisible(ss.options(reset = TRUE, version = "10.3"))
 
@@ -430,8 +430,8 @@ imap(dd, \(ls, i) {
 })
 
 # Run Satscan
-ssresults <- imap(dd, \(ls, i) {
-  imap(ls, \(x, j) {
+ssresults <- purrr::imap(dd, \(ls, i) {
+  purrr::imap(ls, \(x, j) {
     nm <- paste0(j, "-", i)
 
     if (file.exists(paste0(dir_out, nm, ".prm"))) {
@@ -461,7 +461,7 @@ ssresults <- lapply(ssresults, \(ls) {
 
 # Join `kc` variable that indicates if a geography is in Kansas City
 ssresults$patient <- lapply(ssresults$patient, \(ls) {
-  imap(ls, \(x, i) {
+  purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
       x <- x |>
         left_join(
@@ -478,7 +478,7 @@ ssresults$patient <- lapply(ssresults$patient, \(ls) {
 })
 
 ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
-  imap(ls, \(x, i) {
+  purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
       x <- x |>
         left_join(

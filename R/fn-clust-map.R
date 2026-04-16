@@ -12,18 +12,18 @@ get_cluster_boundaries <- function(ls, locations, var) {
   # For each cluster, get the geometries in `locations` and take the union
   sf <- lapply(clust$cluster, \(x) {
     sfc <- locations |>
-      filter(.data[[var]] %in% loc$loc_id[loc$cluster == x]) |>
-      st_union()
+      dplyr::filter(.data[[var]] %in% loc$loc_id[loc$cluster == x]) |>
+      sf::st_union()
 
-    st_set_geometry(data.frame(cluster = x), sfc)
+    sf::st_set_geometry(data.frame(cluster = x), sfc)
   })
 
   sf <- do.call(rbind, sf)
 
   # Add cluster label for map
   sf |>
-    mutate(lbl = paste("Cluster", cluster)) |>
-    relocate(geometry, .after = everything())
+    dplyr::mutate(lbl = paste("Cluster", cluster)) |>
+    dplyr::relocate(geometry, .after = dplyr::everything())
 }
 
 # Create a custom leaflet legend to add to the `html` arg in `addControl()`
@@ -77,20 +77,23 @@ cluster_map <- function(
     zoom_level
 ) {
   # Map center point
-  center <- st_coordinates(st_centroid(st_union(location_boundaries))) |>
+  center <- location_boundaries |>
+    sf::st_union() |>
+    sf::st_centroid() |>
+    sf::st_coordinates() |>
     as.data.frame()
 
   legend_rows <- lapply(gp, custom_legend_row)
 
-  map <- leaflet(
-    options = leafletOptions(scrollWheelZoom = FALSE)
+  map <- leaflet::leaflet(
+    options = leaflet::leafletOptions(scrollWheelZoom = FALSE)
   ) |>
-    setView(lng = center$X, lat = center$Y, zoom = zoom_level) |>
-    addProviderTiles("CartoDB.Positron") |>
-    addMapPane("hospital_markers", zIndex = 420) |>
-    addMapPane("cluster_outline", zIndex = 430) |>
-    addMapPane("cluster_boundaries", zIndex = 440) |>
-    addPolygons(
+    leaflet::setView(lng = center$X, lat = center$Y, zoom = zoom_level) |>
+    leaflet::addProviderTiles("CartoDB.Positron") |>
+    leaflet::addMapPane("hospital_markers", zIndex = 420) |>
+    leaflet::addMapPane("cluster_outline", zIndex = 430) |>
+    leaflet::addMapPane("cluster_boundaries", zIndex = 440) |>
+    leaflet::addPolygons(
       data = location_boundaries,
       weight = gp$study$wt,
       color = gp$study$clr,
@@ -98,7 +101,7 @@ cluster_map <- function(
       fillColor = gp$study$fill,
       fillOpacity = gp$study$opac2
     ) |>
-    addPolygons(
+    leaflet::addPolygons(
       data = kc_boundary,
       weight = gp$kc$wt,
       color = gp$kc$clr,
@@ -110,7 +113,7 @@ cluster_map <- function(
   # Add cluster regions
   if (!is.null(cluster_boundaries)) {
     map <- map |>
-      addPolygons(
+      leaflet::addPolygons(
         data = cluster_boundaries,
         layerId = ~cluster,
         weight = gp$clust$wt,
@@ -119,8 +122,8 @@ cluster_map <- function(
         fillColor = gp$clust$fill,
         fillOpacity = gp$clust$opac2,
         label = ~lbl,
-        options = pathOptions(pane = "cluster_boundaries"),
-        highlightOptions = highlightOptions(
+        options = leaflet::pathOptions(pane = "cluster_boundaries"),
+        highlightOptions = leaflet::highlightOptions(
           weight = 4,
           opacity = 1
         )
@@ -131,7 +134,7 @@ cluster_map <- function(
 
   # Add hospital locations
   if (!is.null(hospital_locations)) {
-    hospicon <- makeIcon(
+    hospicon <- leaflet::makeIcon(
       iconUrl = "www/img/transparent-square.svg",
       iconWidth = 12,
       iconHeight = 12,
@@ -139,11 +142,11 @@ cluster_map <- function(
     )
 
     map <- map |>
-      addMarkers(
+      leaflet::addMarkers(
         data = hospital_locations,
         icon = hospicon,
         label = ~hospital_name,
-        options = pathOptions(pane = "hospital_markers")
+        options = leaflet::pathOptions(pane = "hospital_markers")
       )
   }
 
@@ -151,31 +154,32 @@ cluster_map <- function(
   legend_html <- custom_legend_combine(legend_rows)
 
   map |>
-    addControl(
+    leaflet::addControl(
       html = legend_html,
       position = "bottomright"
     )
 }
 
+# Add cluster outlines on map click or table row select
 add_cluster_outline <- function(map_id, data, shape_id) {
   # Remove all cluster outlines
-  map <- leafletProxy(map_id) |>
-    removeShape(
+  map <- leaflet::leafletProxy(map_id) |>
+    leaflet::removeShape(
       layerId = data$lbl
     )
 
   # Add outline only if the shape ID is not NULL
   if (!is.null(shape_id)) {
     map |>
-      addPolygons(
+      leaflet::addPolygons(
         data = data |>
-          filter(cluster == shape_id),
+          dplyr::filter(cluster == shape_id),
         layerId = ~lbl,
         weight = 4,
         color = "red",
         opacity = 1,
         fill = FALSE,
-        options = pathOptions(pane = "cluster_outline")
+        options = leaflet::pathOptions(pane = "cluster_outline")
       )
   } else {
     map
