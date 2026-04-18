@@ -178,14 +178,23 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   cols <- colnames(df)[grepl("^pct\\d*(_|$)", colnames(df))]
 
   orange_pal <- function(x) {
-    rgb(colorRamp(c("#fff", "#ffb54d"))(x), maxColorValue = 255)
+    rgb(colorRamp(c("#fff2e0", "#ff9500"))(x), maxColorValue = 255)
   }
 
   col_defs3 <- lapply(cols, \(x) {
     reactable::colDef(
       name = "Pct",
       format = reactable::colFormat(percent = TRUE),
-      style = function(value) list(background = orange_pal(value))
+      style = function(value) {
+        bg <- orange_pal(value)
+
+        clr <- setmeup::contrast_color(bg)
+
+        list(
+          background = bg,
+          color = clr
+        )
+      }
     )
   })
 

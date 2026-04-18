@@ -3,6 +3,7 @@ page_navbar(
   id = "nav",
   theme = bs_theme("navbar-bg" = "#0d3769") |>
     bs_add_rules(sass::sass_file("www/sass/custom.scss")),
+  header = useBusyIndicators(),
 
   nav_panel(
     "Clusters",
