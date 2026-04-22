@@ -3,18 +3,19 @@
 dd_ui <- function(id, header) {
   card(
     card_header(header),
-    reactable::reactableOutput(NS(id, "ddtable"))
+    reactable::reactableOutput(NS(id, "ddtable")),
+    min_height = "100px"
   )
 }
 
 dd_server <- function(id, rv, src, var) {
   moduleServer(id, function(input, output, session) {
     # Data details table data
-    data <- reactive({
+    datadetails <- reactive({
       rv$data$data_details |>
         filter_data_details(
           src = src,
-          syndrome = rv$syn
+          syn = rv$syn
         ) |>
         assemble_dd_summaries(
           cluster_data = rv[[paste0("clustdata_", src)]],
@@ -25,7 +26,12 @@ dd_server <- function(id, rv, src, var) {
 
     # Data details table
     output$ddtable <- reactable::renderReactable({
-      dd_table(data(), var = var)
+      validate(need(
+        datadetails(),
+        "No data available"
+      ))
+
+      dd_table(datadetails(), var = var)
     })
   })
 }

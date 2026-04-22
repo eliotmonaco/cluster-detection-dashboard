@@ -1,10 +1,10 @@
 # Functions for data details tables
 
 # ls = `data_details` list from dashboard data
-filter_data_details <- function(ls, src = c("hospital", "patient"), syndrome) {
+filter_data_details <- function(ls, src = c("hospital", "patient"), syn) {
   src <- match.arg(src)
 
-  ls[[src]][[syndrome]]
+  ls[[src]][[syn]]
 }
 
 # df = `gis` dataframe from Satscan output
@@ -61,6 +61,11 @@ assemble_dd_summaries <- function(
 ) {
   src <- match.arg(src)
 
+  # Return NULL if no data
+  if (nrow(data_details) == 0) {
+    return(NULL)
+  }
+
   smry1 <- dd_full_summary(data_details, var)
 
   cluster_ids <- cluster_data$shapeclust$cluster
@@ -109,7 +114,7 @@ assemble_dd_summaries <- function(
     dplyr::arrange(.data[[var]])
 }
 
-# Data characteristics tables from data details
+# Data details output table
 dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
   # Assign RI levels as names to `color`
   color <- setNames(
