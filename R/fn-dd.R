@@ -155,7 +155,7 @@ dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
 
   # Format columns: Main variable
   col_defs1 <- list(reactable::colDef(
-    name = mod_col_labels(var),
+    name = mod_col_labels1(var),
     sticky = "left"
   ))
 

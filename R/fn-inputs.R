@@ -40,7 +40,7 @@ get_syn_choices <- function(df, ls, colors) {
     ls
   })
 
-  names(ls2) <- stringr::str_to_sentence(cats)
+  names(ls2) <- cats
 
   ls2
 }

@@ -38,12 +38,13 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
     ) |>
     dplyr::left_join(
       data.frame(
+        category = syndromes$category,
         syndrome = syndromes$name1,
         abbr = syndromes$abbr
       ),
       by = "abbr"
     ) |>
-    dplyr::select(syndrome, dplyr::everything(), -abbr)
+    dplyr::select(category, syndrome, dplyr::everything(), -abbr)
 
   # Keep counts above the recurrence interval minimum
   if (ri_min > 1) {
@@ -69,46 +70,48 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
 
 # Table showing the number of clusters detected for each syndrome
 cluster_count_table <- function(df, bg_color, text_color) {
-  # Function to rename columns
-  mod_col_labels <- function(x) {
-    x |>
-      gsub(pattern = "_pat|_hosp", replacement = "") |>
-      gsub(pattern = "_", replacement = " ") |>
-      stringr::str_to_title()
-  }
-
   # Number of RI level columns in `df`
-  n <- 6 - ((ncol(df) - 1) / 2)
+  n <- 6 - sum(grepl("_pat$", colnames(df)))
 
   # Colors
-  bg_color <- c(NA, bg_color[n:5], bg_color[n:5])
+  bg_color <- c(rep(NA, 2), bg_color[n:5], bg_color[n:5])
 
-  text_color <- c(NA, text_color[n:5], text_color[n:5])
+  text_color <- c(rep(NA, 2), text_color[n:5], text_color[n:5])
 
   # Style columns
-  col_defs <- mapply(colnames(df), bg_color, text_color, FUN = \(nm, bg, txt) {
-    if (nm == "syndrome") {
-      reactable::colDef(
-        name = mod_col_labels(nm),
-        minWidth = 150,
-        sticky = "left",
-        style = list(borderRight = "1px solid #ddd")
-      )
-    } else {
-      reactable::colDef(
-        name = mod_col_labels(nm),
-        style = function(n) {
-          if (!is.na(n) && n > 0) {
-            list(
-              fontWeight = "bold",
-              background = bg,
-              color = txt
-            )
+  col_defs <- mapply(
+    colnames(df), bg_color, text_color,
+    FUN = \(nm, bg, txt) {
+      if (nm == "category") {
+        reactable::colDef(
+          name = mod_col_labels2(nm),
+          minWidth = 150,
+          maxWidth = 200
+        )
+      } else if (nm == "syndrome") {
+        reactable::colDef(
+          name = mod_col_labels2(nm),
+          minWidth = 200,
+          maxWidth = 300,
+          sticky = "left",
+          style = list(borderRight = "1px solid #ddd")
+        )
+      } else {
+        reactable::colDef(
+          name = mod_col_labels2(nm),
+          style = function(value) {
+            if (!is.na(value) && value > 0) {
+              list(
+                fontWeight = "bold",
+                background = bg,
+                color = txt
+              )
+            }
           }
-        }
-      )
+        )
+      }
     }
-  })
+  )
 
   names(col_defs) <- colnames(df)
 
@@ -125,6 +128,8 @@ cluster_count_table <- function(df, bg_color, text_color) {
         )
       ),
       columns = col_defs,
+      groupBy = "category",
+      defaultExpanded = TRUE,
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
@@ -179,17 +184,10 @@ expand_point_clusters <- function(ls) {
   ls
 }
 
-# Modify column labels
-mod_col_labels <- function(x) {
-  stringr::str_to_sentence(gsub("_", " ", x))
-}
-
 # Syndrome table with query names and KR links
 syndrome_table <- function(df) {
   df <- df |>
-    dplyr::select(name1, esspath, krlink)
-
-  colnames(df) <- c("Syndrome", "ESSENCE path", "krlink")
+    dplyr::select(category, name1, esspath, krlink)
 
   make_link <- function(value) {
     if (!is.na(value)) {
@@ -200,11 +198,26 @@ syndrome_table <- function(df) {
   df |>
     reactable::reactable(
       columns = list(
+        category = reactable::colDef(
+          name = "Category",
+          minWidth = 150,
+          maxWidth = 200
+        ),
+        name1 = reactable::colDef(
+          name = "Syndrome",
+          minWidth = 200,
+          maxWidth = 300
+        ),
+        esspath = reactable::colDef(
+          name = "ESSENCE query"
+        ),
         krlink = reactable::colDef(
           name = "NSSP Knowledge Repository link",
           cell = make_link
         )
       ),
+      groupBy = "category",
+      defaultExpanded = TRUE,
       rownames = FALSE,
       pagination = FALSE,
       highlight = TRUE,
@@ -248,7 +261,7 @@ cluster_table <- function(df, bg_color, text_color) {
       ri_level = stringr::str_to_sentence(ri_level),
       expected = setmeup::round_ties_away(expected, 0)
     ) |>
-    dplyr::rename_with(mod_col_labels) |>
+    dplyr::rename_with(mod_col_labels1) |>
     dplyr::rename(dplyr::any_of(replace))
 
   # Function to style `ri_level` column
@@ -379,5 +392,18 @@ syndrome_title_tag <- function(x, df) {
     df[df$abbr == x, "name1"],
     class = "cluster-tab-title"
   )
+}
+
+# Modify column labels
+mod_col_labels1 <- function(x) {
+  stringr::str_to_sentence(gsub("_", " ", x))
+}
+
+# Function to rename columns
+mod_col_labels2 <- function(x) {
+  x |>
+    gsub(pattern = "_pat|_hosp", replacement = "") |>
+    gsub(pattern = "_", replacement = " ") |>
+    stringr::str_to_title()
 }
 
