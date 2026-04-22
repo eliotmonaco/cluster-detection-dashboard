@@ -22,7 +22,6 @@ unlink(dir_data, recursive = TRUE, force = TRUE)
 dir.create(dir_data)
 
 source("R/fn-analysis.R")
-source("scripts/syndromes.R")
 source("scripts/get-ess.R")
 source("scripts/satscan.R")
 

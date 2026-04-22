@@ -9,7 +9,6 @@ library(highcharter)
 library(reactable)
 library(leaflet)
 
-source("scripts/syndromes.R")
 source("R/mod-inputs.R")
 source("R/mod-clust.R")
 source("R/mod-dd.R")
@@ -60,17 +59,9 @@ ri_bg_color <- viridisLite::turbo(5, begin = .3, end = .9)
 ri_text_color <- setmeup::contrast_color(ri_bg_color)
 
 # Syndrome input choices (initial)
-syn_input_choices <- dbdata |>
-  get_db_data(max(date_input_choices), "syndromes") |>
-  get_syn_choices()
-
-syn_strength <- dbdata |>
-  get_db_data(max(date_input_choices), "satscan_results") |>
-  get_max_ri_level()
-
-syn_input_choices <- add_ri_icons(
-  syn = syn_input_choices,
-  str = syn_strength,
+syn_input_choices <- get_syn_choices(
+  df = get_db_data(dbdata, max(date_input_choices), "syndromes"),
+  ls = get_db_data(dbdata, max(date_input_choices), "satscan_results"),
   colors = ri_bg_color
 )
 

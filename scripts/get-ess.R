@@ -4,15 +4,35 @@
 
 t0 <- Sys.time()
 
-# Data details: Pulled by both patient location and hospital location. Patient
-# locations are ZCTAs intersecting with Cass, Clay, Jackson, or Platte County.
-# Hospitals are any hospital within those counties.
+# Import syndromes table
+syn <- readxl::read_excel("data/syndromes.xlsx")
 
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
 
 # Syndrome API strings
-syn_api <- lapply(syn, \(ls) ls$apistring)
+syn_api <- apply(syn[, c("api1", "api2")], 1, \(x) {
+  paste(x, collapse = "&")
+})
+
+syn_api <- as.list(syn_api)
+
+names(syn_api) <- syn$abbr
+
+# Add a syndrome name variable that capitalizes first letter
+syn <- syn |>
+  dplyr::mutate(
+    name1 = paste0(
+      toupper(substr(name, 1, 1)),
+      substr(name, 2, nchar(name))
+    ),
+    .before = name
+  ) |>
+  dplyr::rename(name2 = name)
+
+# Data details: Pulled by both patient location and hospital location. Patient
+# locations are ZCTAs intersecting with Cass, Clay, Jackson, or Platte County.
+# Hospitals are any hospital within those counties.
 
 # Data details fields
 flds <- c(
@@ -92,10 +112,10 @@ tsraw <- lapply(url_ts, \(x) {
 
 t2 <- Sys.time()
 
-names(ddraw$patient) <- names(syn)
-names(ddraw$hospital) <- names(syn)
-names(tsraw$patient) <- names(syn)
-names(tsraw$hospital) <- names(syn)
+names(ddraw$patient) <- syn$abbr
+names(ddraw$hospital) <- syn$abbr
+names(tsraw$patient) <- syn$abbr
+names(tsraw$hospital) <- syn$abbr
 
 # Create log entry --------------------------------------------------------
 
@@ -113,7 +133,7 @@ msgts <- lapply(tsraw, \(ls1) {
 })
 
 df <- data.frame(
-  SYNDROME_QUERY = sapply(syn, \(ls) ls$queryname),
+  SYNDROME_QUERY = syn$name1,
   DD_BY_PATIENT = msgdd$patient,
   DD_BY_HOSPITAL = msgdd$hospital,
   TS_BY_PATIENT = msgts$patient,

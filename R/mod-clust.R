@@ -195,7 +195,7 @@ syn_heading_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     # Syndrome heading on clusters page
     output$synheader <- renderUI({
-      syndrome_title_tag(rv$syn, rv$synlist)
+      syndrome_title_tag(rv$syn, rv$data$syndromes)
     })
   })
 }

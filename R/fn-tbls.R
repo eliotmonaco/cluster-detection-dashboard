@@ -38,8 +38,8 @@ summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
     ) |>
     dplyr::left_join(
       data.frame(
-        syndrome = sapply(syndromes, \(ls) ls$name1),
-        abbr = names(syndromes)
+        syndrome = syndromes$name1,
+        abbr = syndromes$abbr
       ),
       by = "abbr"
     ) |>
@@ -185,25 +185,22 @@ mod_col_labels <- function(x) {
 }
 
 # Syndrome table with query names and KR links
-syndrome_table <- function(ls) {
-  df <- data.frame(
-    syndrome = sapply(ls, \(ls2) ls2$name1),
-    query = sapply(ls, \(ls2) ls2$queryname),
-    kr = sapply(ls, \(ls2) ls2$kr)
-  )
+syndrome_table <- function(df) {
+  df <- df |>
+    dplyr::select(name1, esspath, krlink)
 
-  colnames(df) <- c("Syndrome", "ESSENCE query", "kr")
+  colnames(df) <- c("Syndrome", "ESSENCE path", "krlink")
 
-  make_link <- function(x) {
-    if (x != "") {
-      tags$a(href = x, target = "_blank", "KR page")
+  make_link <- function(value) {
+    if (!is.na(value)) {
+      tags$a(href = value, target = "_blank", "KR page")
     }
   }
 
   df |>
     reactable::reactable(
       columns = list(
-        kr = reactable::colDef(
+        krlink = reactable::colDef(
           name = "NSSP Knowledge Repository link",
           cell = make_link
         )
@@ -377,7 +374,10 @@ update_cluster_table_id <- function(id) {
 }
 
 # Return a heading tag for a syndrome
-syndrome_title_tag <- function(x, ls) {
-  tags$h3(names(ls)[which(ls == x)], class = "cluster-tab-title")
+syndrome_title_tag <- function(x, df) {
+  tags$h3(
+    df[df$abbr == x, "name1"],
+    class = "cluster-tab-title"
+  )
 }
 

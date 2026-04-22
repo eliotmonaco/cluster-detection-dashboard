@@ -83,23 +83,23 @@ syn_select_server <- function(id, rv, color) {
       rv$syn <- input$syn
     })
 
-    # Get syndrome list when data is updated
-    synlist <- reactive({
-      get_syn_choices(rv$data$syndromes)
-    })
+    # # Get syndrome list when data is updated
+    # synlist <- reactive({
+    #   get_syn_choices(rv$data$syndromes)
+    # })
 
     # Get syndrome list with icons for syndrome input
     synchoices <- reactive({
-      add_ri_icons(
-        syn = synlist(),
-        str = get_max_ri_level(rv$data$satscan_results),
+      syn_input_choices <- get_syn_choices(
+        df = rv$data$syndromes,
+        ls = rv$data$satscan_results,
         colors = ri_bg_color
       )
     })
 
-    observeEvent(synlist(), {
-      rv$synlist <- synlist()
-    })
+    # observeEvent(synlist(), {
+    #   rv$synlist <- synlist()
+    # })
 
     # Update syndrome choices when syndrome list changes
     observeEvent(synchoices(), {

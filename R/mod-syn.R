@@ -8,7 +8,7 @@ syn_info_table_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     # Syndrome info table
     output$syntbl <- reactable::renderReactable({
-      syndrome_table(rv$data$syn)
+      syndrome_table(rv$data$syndromes)
     })
   })
 }
