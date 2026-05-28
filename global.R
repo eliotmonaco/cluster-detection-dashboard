@@ -29,7 +29,7 @@ geo <- readRDS("data/geographic_data.rds")
 ansi <- readRDS("data/ansi_state_codes.rds")
 
 # Date input choices
-dirs <- list.dirs("data/", full.names = TRUE, recursive = FALSE)
+dirs <- list.dirs("data", full.names = TRUE, recursive = FALSE)
 
 dirs <- dirs[grepl("^data/an-", dirs)]
 

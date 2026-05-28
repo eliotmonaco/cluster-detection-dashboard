@@ -1,5 +1,5 @@
 page_navbar(
-  title = "KC Active Cluster Detection Dashboard",
+  title = "KC Syndromic Cluster Detection Dashboard",
   id = "nav",
   theme = bs_theme("navbar-bg" = "#0d3769") |>
     bs_add_rules(sass::sass_file("www/sass/custom.scss")),
@@ -54,13 +54,13 @@ page_navbar(
       navset_tab(
         nav_panel(
           "Data by patient location",
-          card(markdown(readLines("scripts/dd.md"))),
+          card(markdown(readLines("R/text-dd.md"))),
           dd_ui("pat-sex", "Sex"),
           dd_ui("pat-age", "Age group")
         ),
         nav_panel(
           "Data by hospital location",
-          card(markdown(readLines("scripts/dd.md"))),
+          card(markdown(readLines("R/text-dd.md"))),
           dd_ui("hosp-sex", "Sex"),
           dd_ui("hosp-age", "Age group")
         )
@@ -94,7 +94,7 @@ page_navbar(
   nav_panel(
     "About",
     tags$div(
-      includeMarkdown("scripts/about.md"),
+      includeMarkdown("R/text-about.md"),
       style = "width:980px; margin:auto"
     )
   )

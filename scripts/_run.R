@@ -6,7 +6,11 @@ library(dplyr)
 library(purrr)
 library(setmeup)
 
-# Load Essence profile object, needed for `get_api_data()`
+source("R/fn-analysis.R")
+source("scripts/get-ess.R")
+source("scripts/satscan.R")
+
+# Load Essence profile object, needed for `Rnssp::get_api_data()`
 load("data/myProfile.rda")
 
 # Import data
@@ -20,10 +24,6 @@ end_date <- Sys.Date()
 dir_data <- paste0("data/an-", end_date, "/")
 unlink(dir_data, recursive = TRUE, force = TRUE)
 dir.create(dir_data)
-
-source("R/fn-analysis.R")
-source("scripts/get-ess.R")
-source("scripts/satscan.R")
 
 # Tally datasets and add to log
 tally <- c(
