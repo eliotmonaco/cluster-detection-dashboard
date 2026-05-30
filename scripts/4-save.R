@@ -1,42 +1,13 @@
-library(shiny)
-library(bslib)
-library(dplyr)
-library(purrr)
-library(stringr)
-library(setmeup)
-library(sf)
-library(highcharter)
-library(reactable)
-library(leaflet)
+# Configure and save final datasets for dashboard
 
-source("R/mod-inputs.R")
-source("R/mod-clust.R")
-source("R/mod-dd.R")
-source("R/mod-ts.R")
-source("R/fn-inputs.R")
-source("R/fn-clust-map.R")
-source("R/fn-tbls.R")
-source("R/fn-dd.R")
-source("R/fn-ts.R")
+# Create auxiliary data
+auxdata <- list()
 
-# Import dashboard data
-dbdata <- readRDS("data/dashboard_data.rds")
-
-# Import spatial data
-geo <- readRDS("data/geographic_data.rds")
-
-# Import ANSI codes
-ansi <- readRDS("data/ansi_state_codes.rds")
-
-# Date input choices
-dirs <- list.dirs("data", full.names = TRUE, recursive = FALSE)
-
-dirs <- dirs[grepl("^data/an-", dirs)]
-
-date_input_choices <- as.Date(sub("^data/an-", "", dirs))
+# Date of update
+auxdata$date <- max(procdata$date_range)
 
 # Time series input choices
-ts_input_choices <- list(
+auxdata$ts <- list(
   "Two weeks" = "14",
   "30 days" = "30",
   "90 days" = "90",
@@ -45,7 +16,7 @@ ts_input_choices <- list(
 )
 
 # Recurrence interval input choices
-ri_input_choices <- list(
+auxdata$ri_levels <- list(
   "Very weak (< 100 days)" = 1,
   "Weak (100 days to < 1 year)" = 2,
   "Moderate (1 year to < 5 years)" = 3,
@@ -54,19 +25,23 @@ ri_input_choices <- list(
 )
 
 # Recurrence interval colors
-ri_bg_color <- viridisLite::turbo(5, begin = .3, end = .9)
+auxdata$ri_bg <- viridisLite::turbo(5, begin = .3, end = .9)
 
-ri_text_color <- setmeup::contrast_color(ri_bg_color)
+auxdata$ri_text <- setmeup::contrast_color(auxdata$ri_bg)
 
 # Syndrome input choices (initial)
-syn_input_choices <- get_syn_choices(
-  df = get_db_data(dbdata, max(date_input_choices), "syndromes"),
-  ls = get_db_data(dbdata, max(date_input_choices), "satscan_results"),
-  colors = ri_bg_color
+auxdata$syn <- get_syn_choices(
+  df = procdata$syndromes,
+  ls = procdata$satscan_results,
+  colors = auxdata$ri_bg
 )
 
 # UI text
-uitext <- list(
+auxdata$uitext <- list(
+  update = paste(
+    "Data last updated on",
+    format(Sys.Date(), "%b %d, %Y")
+  ),
   ts = list(
     pat = list(
       hd = "ER visits by patient location",
@@ -86,7 +61,7 @@ uitext <- list(
 )
 
 # Graphical parameters for cluster map shapes and markers
-gp <- list(
+auxdata$graph <- list(
   patient = list(
     study = list(
       name = "Study area (ZCTA)",
@@ -150,4 +125,7 @@ gp <- list(
     )
   )
 )
+
+saveRDS(auxdata, "data/dashboard/aux_data.rds")
+saveRDS(procdata, "data/dashboard/analysis_data.rds")
 

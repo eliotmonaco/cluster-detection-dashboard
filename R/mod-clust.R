@@ -31,8 +31,8 @@ cluster_overview_server <- function(id, rv) {
     output$clustct <- reactable::renderReactable({
       cluster_count_table(
         clust_counts(),
-        bg_color = ri_bg_color,
-        text_color = ri_text_color
+        bg_color = rv$auxdata$ri_bg,
+        text_color = rv$auxdata$ri_text
       )
     })
   })
@@ -78,8 +78,8 @@ cluster_table_server <- function(id, rv, src) {
 
       cluster_table(
         clustdata()$shapeclust,
-        bg_color = ri_bg_color,
-        text_color = ri_text_color
+        bg_color = rv$auxdata$ri_bg,
+        text_color = rv$auxdata$ri_text
       )
     })
 
@@ -153,7 +153,7 @@ cluster_map_server <- function(id, rv, src, loc, var, loc_bnd, hosp_loc, gp) {
       cluster_map(
         cluster_boundaries = clustbound(),
         location_boundaries = loc_bnd,
-        kc_boundary = geo$city,
+        kc_boundary = rv$geo$city,
         hospital_locations = hosp_loc,
         gp = gp,
         zoom_level = rv$zoom

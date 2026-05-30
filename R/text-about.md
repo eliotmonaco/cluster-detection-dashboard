@@ -1,8 +1,8 @@
 ## Purpose
 
-This dashboard uses data downloaded from ESSENCE to track emergency room visits for selected syndromes in the Kansas City metro region. Syndromes include specific diseases, broad disease categories, symptoms, and other health-related queries. Active syndrome clusters are detected using SaTScan.
+This dashboard uses data downloaded from ESSENCE to track emergency room visits for selected syndromes in the Kansas City metro region. Syndromes include specific diseases, broad disease categories, symptoms, and other health-related queries. Active syndrome clusters are detected using SaTScan software.
 
-This tool is intended for use by public health professionals. It may provide advanced warning of developing syndrome clusters. However, the results require interpretation and do not necessarily constitute cause for concern in isolation.
+This tool is intended for use by public health professionals. It may provide advanced warning of developing syndrome clusters. However, the results require interpretation and in isolation do not necessarily constitute cause for concern.
 
 ## Data updates
 
@@ -11,8 +11,6 @@ Records are downloaded from ESSENCE and analyzed daily. After a data update, the
 ## App controls / user interface
 
 The data displayed on the dashboard can be filtered using various controls.
-
-**Analysis date**: Select the date of a data update. The date of the most recent data update is selected by default. If the syndrome list has changed between dates, it will be updated too.
 
 **Syndrome**: Select the syndrome of interest. This list contains all syndromes available for a given analysis date.
 
@@ -75,7 +73,7 @@ The results of cluster analyses are meant to be considered in combination with o
 
 SaTScan<sup>TM</sup> is a trademark of Martin Kulldorff. The SaTScan<sup>TM</sup> software was developed under the joint auspices of (i) Martin Kulldorff, (ii) the National Cancer Institute, and (iii) Farzad Mostashari of the New York City Department of Health and Mental Hygiene.
 
-## References/resources
+## Footnotes
 
 [^lev2024]: Levin-Rector A, Kulldorff M, Peterson E, Hostovich S, Greene S. Prospective Spatiotemporal Cluster Detection Using SaTScan: Tutorial for Designing and Fine-Tuning a System to Detect Reportable Communicable Disease Outbreaks. JMIR Public Health Surveill. 2024;10:e50653.
 URL: https://publichealth.jmir.org/2024/1/e50653

@@ -10,7 +10,7 @@ test_that("get_start_date()", {
 
 test_that("deduplicate_dd()", {
   source("R/analysis-fns.R", local = TRUE)
-  ansi <- readRDS("data/ansi_state_codes.rds")
+  ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
   testdata <- readRDS(test_path("fixtures/test_analysis.rds"))
   dd <- lapply(testdata$data_details_raw, \(ls1) {
     lapply(ls1, \(ls2) ls2$data)
@@ -28,7 +28,7 @@ test_that("deduplicate_dd()", {
 
 test_that("config_dd()", {
   source("R/analysis-fns.R", local = TRUE)
-  ansi <- readRDS("data/ansi_state_codes.rds")
+  ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
   testdata <- readRDS(test_path("fixtures/test_analysis.rds"))
   dd <- testdata$deduplicate_dd_output
   act <- list()

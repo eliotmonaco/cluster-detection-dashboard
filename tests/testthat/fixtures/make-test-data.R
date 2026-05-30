@@ -7,9 +7,9 @@ library(sf)
 source("R/analysis-fns.R")
 source("R/app-fns.R")
 
-geo <- readRDS("data/geographic_data.rds")
-ansi <- readRDS("data/ansi_state_codes.rds")
-hosp <- readRDS("data/hospital_locations.rds")
+geo <- readRDS("data/dashboard/geographic_data.rds")
+ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
+hosp <- readRDS("data/dashboard/hospital_locations.rds")
 
 syn <- list(
   syn1 = list(

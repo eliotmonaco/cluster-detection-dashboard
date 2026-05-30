@@ -5,7 +5,7 @@
 t0 <- Sys.time()
 
 # Import syndromes table
-syn <- readxl::read_excel("data/syndromes.xlsx")
+syn <- readxl::read_excel("data/prep/syndromes.xlsx")
 
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
@@ -117,7 +117,7 @@ names(ddraw$hospital) <- syn$abbr
 names(tsraw$patient) <- syn$abbr
 names(tsraw$hospital) <- syn$abbr
 
-# Create log entry --------------------------------------------------------
+# Essence log entry -------------------------------------------------------
 
 # Pull message text
 msgdd <- lapply(ddraw, \(ls1) {
@@ -170,6 +170,8 @@ log <- c(
   ""
 )
 
+writeLines(log, paste0(dir_data, "log.txt"))
+
 # Configure data ----------------------------------------------------------
 
 # Separate data from API messages
@@ -190,7 +192,7 @@ dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
     expr = {
       ls <- deduplicate_dd(df, geo_var = "zip_code")
-      ls$data <- config_dd(ls$data)
+      ls$data <- config_dd(ls$data, ansi_codes = ansi)
       ls
     },
     error = function(e) e
@@ -201,7 +203,7 @@ dd$hospital <- lapply(dd$hospital, \(df) {
   tryCatch(
     expr = {
       ls <- deduplicate_dd(df, geo_var = "hospital_name")
-      ls$data <- config_dd(ls$data)
+      ls$data <- config_dd(ls$data, ansi_codes = ansi)
       ls
     },
     error = function(e) e
@@ -238,6 +240,5 @@ ess_raw <- list(
 
 # Save --------------------------------------------------------------------
 
-writeLines(log, paste0(dir_data, "log.txt"))
 saveRDS(ess_raw, paste0(dir_data, "essence_raw.rds"))
 

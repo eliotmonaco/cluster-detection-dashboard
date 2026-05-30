@@ -101,7 +101,7 @@ ssresults_raw <- purrr::imap(dd, \(ls, i) {
 
 t1 <- Sys.time()
 
-# Create log entry --------------------------------------------------------
+# Satscan log entry -------------------------------------------------------
 
 # Import log
 log <- readLines(paste0(dir_data, "log.txt"))
@@ -137,6 +137,8 @@ log <- c(
   ),
   logmsg
 )
+
+writeLines(log, paste0(dir_data, "log.txt"))
 
 # Configure ---------------------------------------------------------------
 
@@ -190,6 +192,32 @@ ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
   })
 })
 
+# Datasets log entry ------------------------------------------------------
+
+tally <- c(
+  sapply(c(dd, ts), \(ls) {
+    paste0(sum(sapply(ls, is.data.frame)), "/", length(syn))
+  }),
+  sapply(ssresults, \(ls) {
+    paste0(sum(sapply(ls, \(ls2) !is.null(ls2))), "/", length(syn))
+  })
+)
+
+tally <- paste(
+  c(
+    rep("Data details,", 2),
+    rep("Time series,", 2),
+    rep("Satscan output,", 2)
+  ),
+  paste0(names(tally), ": ", tally)
+)
+
+log <- readLines(paste0(dir_data, "log.txt"))
+
+log <- c(log, "", "---------- DATASETS ----------\n", tally, "")
+
+writeLines(log, paste0(dir_data, "log.txt"))
+
 # Save --------------------------------------------------------------------
 
 procdata <- list(
@@ -201,6 +229,5 @@ procdata <- list(
   satscan_results = ssresults
 )
 
-writeLines(log, paste0(dir_data, "log.txt"))
 saveRDS(procdata, paste0(dir_data, "processed_data.rds"))
 

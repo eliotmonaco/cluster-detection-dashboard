@@ -4,7 +4,7 @@ library(tidyverse)
 
 # Import ANSI codes
 ansi <- readxl::read_excel(
-  "data/ansi-state-codes.xlsx",
+  "data/prep/ansi-state-codes.xlsx",
   .name_repair = setmeup::fix_colnames
 )
 
@@ -17,5 +17,5 @@ ansi <- ansi |>
 
 ansi <- setNames(ansi$abbr, ansi$fips)
 
-saveRDS(ansi, "data/ansi_state_codes.rds")
+saveRDS(ansi, "data/dashboard/ansi_state_codes.rds")
 

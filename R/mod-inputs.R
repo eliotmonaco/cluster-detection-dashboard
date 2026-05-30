@@ -1,44 +1,44 @@
 # Modules for user inputs
 
-# Data selection
-data_select_ui <- function(id, choices) {
-  dateInput(
-    inputId = NS(id, "date"),
-    label = input_tooltip(
-      "Analysis date",
-      paste(
-        "Data is downloaded and analyses are run daily. Changing the analysis",
-        "date will change the dataset and analysis results that are displayed",
-        "throughout the dashboard."
-      )
-    ),
-    value = max(choices),
-    min = min(choices),
-    max = max(choices)
-  )
-}
+# # Data selection
+# data_select_ui <- function(id, choices) {
+#   dateInput(
+#     inputId = NS(id, "date"),
+#     label = input_tooltip(
+#       "Analysis date",
+#       paste(
+#         "Data is downloaded and analyses are run daily. Changing the analysis",
+#         "date will change the dataset and analysis results that are displayed",
+#         "throughout the dashboard."
+#       )
+#     ),
+#     value = max(choices),
+#     min = min(choices),
+#     max = max(choices)
+#   )
+# }
 
-data_select_server <- function(id, rv) {
-  moduleServer(id, function(input, output, session) {
-    observe({
-      rv$date <- input$date
-    })
-
-    # Get all data for a specific analysis date
-    data <- reactive({
-      get_db_data(dbdata, rv$date)
-    })
-
-    observe({
-      rv$data <- data()
-    })
-
-    # Update selected analysis date when analysis date input is changed
-    observeEvent(rv$date, {
-      updateDateInput(session, "date", value = rv$date)
-    })
-  })
-}
+# data_select_server <- function(id, rv, data) {
+#   moduleServer(id, function(input, output, session) {
+#     observe({
+#       rv$date <- input$date
+#     })
+#
+#     # Get all data for a specific analysis date
+#     data <- reactive({
+#       get_db_data(data, rv$date)
+#     })
+#
+#     observe({
+#       rv$data <- data()
+#     })
+#
+#     # Update selected analysis date when analysis date input is changed
+#     observeEvent(rv$date, {
+#       updateDateInput(session, "date", value = rv$date)
+#     })
+#   })
+# }
 
 # Syndrome selection
 syn_select_ui <- function(id, choices, icons) {
@@ -48,10 +48,10 @@ syn_select_ui <- function(id, choices, icons) {
       label = input_tooltip(
         "Syndrome",
         paste(
-          "This list contains the syndromes available for the selected",
-          "analysis date. The circle color indicates the maximum recurrence",
-          "interval level of any clusters that have been detected for a given",
-          "syndrome."
+          "The color of the circle next to a syndrome indicates the highest",
+          "recurrence interval (RI) level of any clusters detected for that",
+          "syndrome. Refer to the RI selector for the level associated with",
+          "each color."
         )
       ),
       choices = choices,
@@ -83,36 +83,27 @@ syn_select_server <- function(id, rv, color) {
       rv$syn <- input$syn
     })
 
-    # # Get syndrome list when data is updated
-    # synlist <- reactive({
-    #   get_syn_choices(rv$data$syndromes)
+    # # Get syndrome list with icons for syndrome input
+    # synchoices <- reactive({
+    #   get_syn_choices(
+    #     df = rv$data$syndromes,
+    #     ls = rv$data$satscan_results,
+    #     colors = rv$auxdata$ri_bg
+    #   )
     # })
-
-    # Get syndrome list with icons for syndrome input
-    synchoices <- reactive({
-      syn_input_choices <- get_syn_choices(
-        df = rv$data$syndromes,
-        ls = rv$data$satscan_results,
-        colors = ri_bg_color
-      )
-    })
-
-    # observeEvent(synlist(), {
-    #   rv$synlist <- synlist()
+    #
+    # # Update syndrome choices when syndrome list changes
+    # observeEvent(synchoices(), {
+    #   updateSelectInput(
+    #     session, "syn",
+    #     choices = synchoices(), selected = rv$syn
+    #   )
     # })
-
-    # Update syndrome choices when syndrome list changes
-    observeEvent(synchoices(), {
-      updateSelectInput(
-        session, "syn",
-        choices = synchoices(), selected = rv$syn
-      )
-    })
-
-    # Update selected syndrome when syndrome input is changed
-    observeEvent(rv$syn, {
-      updateSelectInput(session, "syn", selected = rv$syn)
-    })
+    #
+    # # Update selected syndrome when syndrome input is changed
+    # observeEvent(rv$syn, {
+    #   updateSelectInput(session, "syn", selected = rv$syn)
+    # })
   })
 }
 
@@ -154,7 +145,10 @@ ri_select_server <- function(id, rv) {
 zoom_select_ui <- function(id) {
   numericInput(
     inputId = NS(id, "zoom"),
-    label = "Default map zoom level",
+    label = input_tooltip(
+      "Default map zoom level",
+      "Increase or decrease the default map magnification for the session."
+    ),
     value = 9,
     min = 0
   )

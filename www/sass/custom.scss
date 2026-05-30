@@ -40,6 +40,11 @@ $icon-hosp-fg: #7AB317;
   margin-left: 0 !important;
 }
 
+/* Increase the max height of dropdown list */
+.selectize-dropdown-content {
+  max-height: 400px !important;
+}
+
 /* RI input radio button background colors */
 .ri-select-input .shiny-options-group > .radio:nth-child(1) input {
   background-color: #18D6CBFF;

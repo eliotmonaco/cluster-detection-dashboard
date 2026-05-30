@@ -115,7 +115,7 @@ assemble_dd_summaries <- function(
 }
 
 # Data details output table
-dd_table <- function(df, var, replace_nm = NULL, color = ri_bg_color) {
+dd_table <- function(df, var, color) {
   # Assign RI levels as names to `color`
   color <- setNames(
     color,

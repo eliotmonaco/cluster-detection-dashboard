@@ -7,7 +7,7 @@ library(sf)
 
 source("R/fn.R")
 
-hosp <- readRDS("data/hospital_locations.rds")
+hosp <- readRDS("data/dashboard/hospital_locations.rds")
 
 options(tigris_use_cache = TRUE)
 
@@ -123,5 +123,5 @@ geo <- list(
 )
 
 # Save
-saveRDS(geo, "data/geographic_data.rds")
+saveRDS(geo, "data/dashboard/geographic_data.rds")
 

@@ -191,7 +191,7 @@ syndrome_table <- function(df) {
 
   make_link <- function(value) {
     if (!is.na(value)) {
-      tags$a(href = value, target = "_blank", "KR page")
+      shiny::tags$a(href = value, target = "_blank", "KR page")
     }
   }
 
@@ -388,7 +388,7 @@ update_cluster_table_id <- function(id) {
 
 # Return a heading tag for a syndrome
 syndrome_title_tag <- function(x, df) {
-  tags$h3(
+  shiny::tags$h3(
     df[df$abbr == x, "name1"],
     class = "cluster-tab-title"
   )

@@ -31,7 +31,7 @@ dd_server <- function(id, rv, src, var) {
         "No data available"
       ))
 
-      dd_table(datadetails(), var = var)
+      dd_table(datadetails(), var = var, color = rv$auxdata$ri_bg)
     })
   })
 }

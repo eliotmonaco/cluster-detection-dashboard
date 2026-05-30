@@ -2,7 +2,7 @@
 
 library(tidygeocoder)
 
-hosp <- read.csv("data/hospitals.csv")
+hosp <- read.csv("data/prep/hospitals.csv")
 
 hosp <- hosp |>
   tidyr::separate_wider_delim(
@@ -28,5 +28,5 @@ hosp_gc <- geocode(
   full_results = TRUE
 )
 
-saveRDS(hosp_gc, "data/hospital_locations.rds")
+saveRDS(hosp_gc, "data/dashboard/hospital_locations.rds")
 
