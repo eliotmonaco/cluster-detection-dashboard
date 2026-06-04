@@ -57,11 +57,11 @@ ui <- page_navbar(
       ),
       navset_tab(
         nav_panel(
-          "Overview",
+          "Overview (table)",
           cluster_overview_ui("clust")
         ),
         nav_panel(
-          "Clusters by patient location",
+          "Clusters by patient location (map + tables)",
           syn_heading_ui("pat"),
           layout_column_wrap(
             cluster_map_ui("pat"),
@@ -71,7 +71,7 @@ ui <- page_navbar(
           cluster_table_ui("pat")
         ),
         nav_panel(
-          "Clusters by hospital location",
+          "Clusters by hospital location (map + tables)",
           syn_heading_ui("hosp"),
           layout_column_wrap(
             cluster_map_ui("hosp"),

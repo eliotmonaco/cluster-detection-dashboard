@@ -4,13 +4,13 @@
 cluster_overview_ui <- function(id) {
   card(
     p(
-      "Number of clusters detected for each syndrome",
+      "Active clusters grouped by recurrence interval (RI)",
       style = "text-align:center;font-size:1.4rem;"
     ),
-    p(
-      "Clusters are grouped by recurrence interval (RI)",
-      style = "text-align:center;font-size:1.2rem;margin-bottom:16px;"
-    ),
+    # p(
+    #   "Clusters are grouped by recurrence interval (RI)",
+    #   style = "text-align:center;font-size:1.2rem;margin-bottom:16px;"
+    # ),
     reactable::reactableOutput(NS(id, "clustct")),
     class = "overview-tbl"
   )
