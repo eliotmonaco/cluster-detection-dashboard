@@ -1,10 +1,12 @@
 # Configure and save final datasets for dashboard
 
+# Aux data ----------------------------------------------------------------
+
 # Create auxiliary data
 auxdata <- list()
 
 # Date of update
-auxdata$date <- max(procdata$date_range)
+auxdata$date <- max(syndata$date_range)
 
 # Time series input choices
 auxdata$ts <- list(
@@ -31,8 +33,8 @@ auxdata$ri_text <- setmeup::contrast_color(auxdata$ri_bg)
 
 # Syndrome input choices (initial)
 auxdata$syn <- get_syn_choices(
-  df = procdata$syndromes,
-  ls = procdata$satscan_results,
+  df = syndata$syndromes,
+  ls = syndata$satscan_results,
   colors = auxdata$ri_bg
 )
 
@@ -126,6 +128,8 @@ auxdata$graph <- list(
   )
 )
 
+# Save --------------------------------------------------------------------
+
 saveRDS(auxdata, "data/dashboard/aux_data.rds")
-saveRDS(procdata, "data/dashboard/analysis_data.rds")
+saveRDS(syndata, "data/dashboard/syndrome_data.rds")
 

@@ -32,11 +32,11 @@ purrr::imap(dd$hospital, \(df, i) {
 })
 
 # Coordinates file: <location ID> <latitude> <longitude>
-geo_file_pat <- geo$zcta_pts |>
+geo_file_pat <- geodata$zcta_pts |>
   sf::st_drop_geometry() |>
   dplyr::select(zcta, lat, long)
 
-geo_file_hosp <- geo$hosp |>
+geo_file_hosp <- geodata$hosp |>
   sf::st_drop_geometry() |>
   dplyr::select(hospital_name_geo, lat, long)
 
@@ -159,7 +159,7 @@ ssresults <- lapply(ssresults_raw, \(ls) {
 ssresults$patient <- lapply(ssresults$patient, \(ls) {
   purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
-      geo <- geo$zctas |>
+      geo <- geodata$zctas |>
         sf::st_drop_geometry() |>
         dplyr::select(loc_id = GEOID20, kc)
 
@@ -177,7 +177,7 @@ ssresults$patient <- lapply(ssresults$patient, \(ls) {
 ssresults$hospital <- lapply(ssresults$hospital, \(ls) {
   purrr::imap(ls, \(x, i) {
     if (is.data.frame(x) && grepl("gis", i)) {
-      geo <- geo$hosp |>
+      geo <- geodata$hosp |>
         sf::st_drop_geometry() |>
         dplyr::select(loc_id = hospital_name_geo, kc)
 
@@ -218,16 +218,26 @@ log <- c(log, "", "---------- DATASETS ----------\n", tally, "")
 
 writeLines(log, paste0(dir_data, "log.txt"))
 
+# Cluster summary ---------------------------------------------------------
+
+clust_smry <- summarize_clusters(ssresults, syn)
+
 # Save --------------------------------------------------------------------
 
-procdata <- list(
+syndata <- list(
   syndromes = syn,
   date_range = ts_range,
   time_series = ts,
   data_details = dd,
   data_details_error = dderror,
-  satscan_results = ssresults
+  satscan_results = ssresults,
+  cluster_summary = clust_smry
 )
 
-saveRDS(procdata, paste0(dir_data, "processed_data.rds"))
+saveRDS(syndata, paste0(dir_data, "syndrome_data.rds"))
+saveRDS(clust_smry, paste0(
+  "data/prep/cluster-summaries/clust-smry-",
+  format(Sys.Date(), "%Y%m%d"),
+  ".rds"
+))
 

@@ -24,16 +24,16 @@ source("R/fn-dd.R")
 source("R/fn-ts.R")
 
 # Import dashboard data
-dbdata <- readRDS("data/dashboard/analysis_data.rds")
-
-# Import spatial data
-geo <- readRDS("data/dashboard/geographic_data.rds")
-
-# Import ANSI codes
-ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
+syndata <- readRDS("data/dashboard/syndrome_data.rds")
 
 # Import aux data
 auxdata <- readRDS("data/dashboard/aux_data.rds")
+
+# Import spatial data
+geodata <- readRDS("data/dashboard/geographic_data.rds")
+
+# Import ANSI codes
+ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 
 # UI ----------------------------------------------------------------------
 
@@ -154,16 +154,16 @@ server <- function(input, output, session) {
   # INPUTS
 
   # # Data selection
-  # data_select_server("clust", rv, dbdata)
-  # data_select_server("dd", rv, dbdata)
-  # data_select_server("ts", rv, dbdata)
-  # data_select_server("syn", rv, dbdata)
+  # data_select_server("clust", rv, syndata)
+  # data_select_server("dd", rv, syndata)
+  # data_select_server("ts", rv, syndata)
+  # data_select_server("syn", rv, syndata)
 
   observe({
-    rv$data <- dbdata
-    rv$geo <- geo
+    rv$data <- syndata
+    rv$geo <- geodata
     rv$ansi <- ansi
-    rv$auxdata <- auxdata
+    rv$aux <- auxdata
   })
 
   # Syndrome selection
@@ -194,15 +194,15 @@ server <- function(input, output, session) {
 
   # Cluster maps
   cluster_map_server(
-    "pat", rv, src = "patient", loc = geo$zctas,
-    var = "GEOID20", loc_bnd = geo$zctas,
-    hosp_loc = NULL, gp = rv$auxdata$graph$patient
+    "pat", rv, src = "patient", loc = geodata$zctas,
+    var = "GEOID20", loc_bnd = geodata$zctas,
+    hosp_loc = NULL, gp = rv$aux$graph$patient
   )
   cluster_map_server(
     "hosp", rv, src = "hospital",
     loc = rv$clustdata_hospital$shapeclust,
-    var = "loc_id", loc_bnd = geo$counties,
-    hosp_loc = geo$hosp, gp = rv$auxdata$graph$hospital
+    var = "loc_id", loc_bnd = geodata$counties,
+    hosp_loc = geodata$hosp, gp = rv$aux$graph$hospital
   )
 
   # TABLES

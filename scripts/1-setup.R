@@ -10,7 +10,7 @@ library(setmeup)
 load("data/prep/myProfile.rda")
 
 # Import data
-geo <- readRDS("data/dashboard/geographic_data.rds")
+geodata <- readRDS("data/dashboard/geographic_data.rds")
 
 ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 

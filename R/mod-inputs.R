@@ -88,7 +88,7 @@ syn_select_server <- function(id, rv, color) {
     #   get_syn_choices(
     #     df = rv$data$syndromes,
     #     ls = rv$data$satscan_results,
-    #     colors = rv$auxdata$ri_bg
+    #     colors = rv$aux$ri_bg
     #   )
     # })
     #

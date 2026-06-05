@@ -1,75 +1,30 @@
 # Functions for syndrome, cluster, and cluster location tables
 
-# Summarize data for significant clusters table
-summarize_syndrome_clusters <- function(ls, syndromes, ri_min = 0) {
-  # Count clusters by RI level for each syndrome
-  ls <- lapply(ls, \(ls2) {
-    ct <- lapply(ls2, \(ls3) {
-      if (is.data.frame(ls3$shapeclust)) {
-        ls3$shapeclust |>
-          sf::st_drop_geometry() |>
-          dplyr::count(ri_level, .drop = FALSE) |>
-          dplyr::mutate(ri_level = gsub("\\s", "_", ri_level)) |>
-          tibble::column_to_rownames("ri_level") |>
-          t() |>
-          as.data.frame()
-      } else if (length(ls3) == 0) {
-        data.frame(
-          very_weak = NA, weak = NA, moderate = NA,
-          strong = NA, very_strong = NA
-        )
-      } else if (is.na(ls3$shapeclust)) {
-        data.frame(
-          very_weak = 0, weak = 0, moderate = 0,
-          strong = 0, very_strong = 0
-        )
-      }
-    })
+# Filter syndrome summary table by RI minimum
+filter_cluster_summary <- function(df, ri_min) {
+  lvl <- list(
+    "very_weak" = 1,
+    "weak" = 2,
+    "moderate" = 3,
+    "strong" = 4,
+    "very_strong" = 5
+  )
 
-    purrr::list_rbind(ct, names_to = "abbr")
-  })
-
-  # Join patient and hospital dataframes and syndrome names
-  df <- ls$patient |>
-    dplyr::left_join(
-      ls$hospital,
-      by = "abbr",
-      suffix = c("_pat", "_hosp")
-    ) |>
-    dplyr::left_join(
-      data.frame(
-        category = syndromes$category,
-        syndrome = syndromes$name1,
-        abbr = syndromes$abbr
-      ),
-      by = "abbr"
-    ) |>
-    dplyr::select(category, syndrome, dplyr::everything(), -abbr)
-
-  # Keep counts above the recurrence interval minimum
-  if (ri_min > 1) {
-    lvl <- list(
-      "very_weak" = 1,
-      "weak" = 2,
-      "moderate" = 3,
-      "strong" = 4,
-      "very_strong" = 5
-    )
-
-    lvl <- lvl[lvl < ri_min]
-
-    p <- paste(paste0("^", names(lvl)), collapse = "|")
-
-    vars <- colnames(df)[!grepl(p, colnames(df))]
-
-    df[, vars]
-  } else {
-    df
+  if (ri_min < 2) {
+    return(df)
   }
+
+  lvl <- lvl[lvl < ri_min]
+
+  p <- paste(paste0("^", names(lvl)), collapse = "|")
+
+  vars <- colnames(df)[!grepl(p, colnames(df))]
+
+  df[, vars]
 }
 
 # Table showing the number of clusters detected for each syndrome
-cluster_count_table <- function(df, bg_color, text_color) {
+cluster_summary_table <- function(df, bg_color, text_color) {
   # Number of RI level columns in `df`
   n <- 6 - sum(grepl("_pat$", colnames(df)))
 

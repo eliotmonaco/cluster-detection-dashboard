@@ -7,10 +7,6 @@ cluster_overview_ui <- function(id) {
       "Active clusters grouped by recurrence interval (RI)",
       style = "text-align:center;font-size:1.4rem;"
     ),
-    # p(
-    #   "Clusters are grouped by recurrence interval (RI)",
-    #   style = "text-align:center;font-size:1.2rem;margin-bottom:16px;"
-    # ),
     reactable::reactableOutput(NS(id, "clustct")),
     class = "overview-tbl"
   )
@@ -18,21 +14,20 @@ cluster_overview_ui <- function(id) {
 
 cluster_overview_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
-    # Cluster counts
-    clust_counts <- reactive({
-      summarize_syndrome_clusters(
-        rv$data$satscan_results,
-        syndromes = rv$data$syndromes,
+    # Cluster summary
+    clust_smry <- reactive({
+      filter_cluster_summary(
+        rv$data$cluster_summary,
         ri_min = rv$ri
       )
     })
 
-    # Cluster count table
+    # Cluster summary table
     output$clustct <- reactable::renderReactable({
-      cluster_count_table(
-        clust_counts(),
-        bg_color = rv$auxdata$ri_bg,
-        text_color = rv$auxdata$ri_text
+      cluster_summary_table(
+        clust_smry(),
+        bg_color = rv$aux$ri_bg,
+        text_color = rv$aux$ri_text
       )
     })
   })
@@ -78,8 +73,8 @@ cluster_table_server <- function(id, rv, src) {
 
       cluster_table(
         clustdata()$shapeclust,
-        bg_color = rv$auxdata$ri_bg,
-        text_color = rv$auxdata$ri_text
+        bg_color = rv$aux$ri_bg,
+        text_color = rv$aux$ri_text
       )
     })
 

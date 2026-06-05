@@ -50,7 +50,7 @@ url_dd <- list(
     data_source = "patient",
     output = "dd",
     dd_fields = flds,
-    zipcodes = geo$zctas$GEOID20
+    zipcodes = geodata$zctas$GEOID20
   ),
   hospital = build_ess_url(
     syndrome = syn_api,

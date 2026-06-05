@@ -599,3 +599,52 @@ add_ri_icon <- function(lvl, text, colors) {
   }
 }
 
+# CLUSTER SUMMARY ---------------------------------------------------------
+
+# Summarize syndrome clusters by RI level
+summarize_clusters <- function(ls, syndromes) {
+  # Count clusters by RI level for each syndrome
+  ls <- lapply(ls, \(ls2) {
+    ct <- lapply(ls2, \(ls3) {
+      if (is.data.frame(ls3$shapeclust)) {
+        ls3$shapeclust |>
+          sf::st_drop_geometry() |>
+          dplyr::count(ri_level, .drop = FALSE) |>
+          dplyr::mutate(ri_level = gsub("\\s", "_", ri_level)) |>
+          tibble::column_to_rownames("ri_level") |>
+          t() |>
+          as.data.frame()
+      } else if (length(ls3) == 0) {
+        data.frame(
+          very_weak = NA, weak = NA, moderate = NA,
+          strong = NA, very_strong = NA
+        )
+      } else if (is.na(ls3$shapeclust)) {
+        data.frame(
+          very_weak = 0, weak = 0, moderate = 0,
+          strong = 0, very_strong = 0
+        )
+      }
+    })
+
+    purrr::list_rbind(ct, names_to = "abbr")
+  })
+
+  # Join patient and hospital dataframes and syndrome names
+  ls$patient |>
+    dplyr::left_join(
+      ls$hospital,
+      by = "abbr",
+      suffix = c("_pat", "_hosp")
+    ) |>
+    dplyr::left_join(
+      data.frame(
+        category = syndromes$category,
+        syndrome = syndromes$name1,
+        abbr = syndromes$abbr
+      ),
+      by = "abbr"
+    ) |>
+    dplyr::select(category, syndrome, dplyr::everything(), -abbr)
+}
+
