@@ -1,18 +1,18 @@
 # Modules for cluster tables and maps
 
 # Cluster count table on overview tab
-cluster_overview_ui <- function(id) {
+cluster_summary_ui <- function(id) {
   card(
     p(
       "Active clusters grouped by recurrence interval (RI)",
       style = "text-align:center;font-size:1.4rem;"
     ),
-    reactable::reactableOutput(NS(id, "clustct")),
-    class = "overview-tbl"
+    reactable::reactableOutput(NS(id, "clustsmry")),
+    class = "clust-smry-tbl"
   )
 }
 
-cluster_overview_server <- function(id, rv) {
+cluster_summary_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     # Cluster summary
     clust_smry <- reactive({
@@ -23,7 +23,7 @@ cluster_overview_server <- function(id, rv) {
     })
 
     # Cluster summary table
-    output$clustct <- reactable::renderReactable({
+    output$clustsmry <- reactable::renderReactable({
       cluster_summary_table(
         clust_smry(),
         bg_color = rv$aux$ri_bg,

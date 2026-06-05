@@ -46,38 +46,42 @@ ui <- page_navbar(
   header = useBusyIndicators(),
 
   nav_panel(
-    "Clusters",
+    "Active clusters summary",
     layout_sidebar(
       sidebar = sidebar(
-        shiny::tags$p(auxdata$uitext$update),
-        # data_select_ui("clust", auxdata$date),
-        syn_select_ui("clust", auxdata$syn),
-        ri_select_ui("clust", auxdata$ri_levels),
-        zoom_select_ui("clust")
+        date = auxdata$date,
+        ri_select_ui("smry", auxdata$ri_levels)
+      ),
+      cluster_summary_ui("smry")
+    )
+  ),
+
+  nav_panel(
+    "Activer clusters by syndrome",
+    layout_sidebar(
+      sidebar = sidebar(
+        date = auxdata$date,
+        syn_select_ui("synclust", auxdata$syn),
+        ri_select_ui("synclust", auxdata$ri_levels),
+        zoom_select_ui("synclust")
       ),
       navset_tab(
         nav_panel(
-          "Overview (table)",
-          cluster_overview_ui("clust")
-        ),
-        nav_panel(
-          "Clusters by patient location (map + tables)",
+          "Clusters by patient location",
           syn_heading_ui("pat"),
           layout_column_wrap(
             cluster_map_ui("pat"),
             location_table_ui("pat")
           ),
-          # card(htmlOutput("ptxt"), height = "100px"), # check map & table IDs
           cluster_table_ui("pat")
         ),
         nav_panel(
-          "Clusters by hospital location (map + tables)",
+          "Clusters by hospital location",
           syn_heading_ui("hosp"),
           layout_column_wrap(
             cluster_map_ui("hosp"),
             location_table_ui("hosp")
           ),
-          # card(htmlOutput("htxt"), height = "100px"), # check map & table IDs
           cluster_table_ui("hosp")
         )
       )
@@ -88,8 +92,7 @@ ui <- page_navbar(
     "Data details",
     layout_sidebar(
       sidebar = sidebar(
-        shiny::tags$p(auxdata$uitext$update),
-        # data_select_ui("dd", auxdata$date),
+        date = auxdata$date,
         syn_select_ui("dd", auxdata$syn),
         ri_select_ui("dd", auxdata$ri_levels)
       ),
@@ -114,24 +117,17 @@ ui <- page_navbar(
     "Time series",
     layout_sidebar(
       sidebar = sidebar(
-        shiny::tags$p(auxdata$uitext$update),
-        # data_select_ui("ts", auxdata$date),
+        date = auxdata$date,
         syn_select_ui("ts", auxdata$syn),
         days_select_ui("ts", auxdata$ts)
       ),
-      ts_plot_ui("pat", auxdata$uitext$ts$pat$hd, auxdata$uitext$ts$pat$ft),
-      ts_plot_ui("hosp", auxdata$uitext$ts$hosp$hd, auxdata$uitext$ts$hosp$ft)
+      ts_plot_ui("pat", auxdata$tstext$pat$hd, auxdata$tstext$pat$ft),
+      ts_plot_ui("hosp", auxdata$tstext$hosp$hd, auxdata$tstext$hosp$ft)
     )
   ),
 
   nav_panel(
     "Syndromes",
-    # layout_sidebar(
-    #   sidebar = sidebar(
-    #     data_select_ui("syn", auxdata$date)
-    #   ),
-    #   syn_info_table_ui("syn")
-    # )
     syn_info_table_ui("syn")
   ),
 
@@ -153,12 +149,6 @@ server <- function(input, output, session) {
 
   # INPUTS
 
-  # # Data selection
-  # data_select_server("clust", rv, syndata)
-  # data_select_server("dd", rv, syndata)
-  # data_select_server("ts", rv, syndata)
-  # data_select_server("syn", rv, syndata)
-
   observe({
     rv$data <- syndata
     rv$geo <- geodata
@@ -167,16 +157,17 @@ server <- function(input, output, session) {
   })
 
   # Syndrome selection
-  syn_select_server("clust", rv, auxdata$ri_bg)
+  syn_select_server("synclust", rv, auxdata$ri_bg)
   syn_select_server("dd", rv, auxdata$ri_bg)
   syn_select_server("ts", rv, auxdata$ri_bg)
 
   # Recurrence interval selection
-  ri_select_server("clust", rv)
+  ri_select_server("smry", rv)
+  ri_select_server("synclust", rv)
   ri_select_server("dd", rv)
 
   # Map zoom level selection
-  zoom_select_server("clust", rv)
+  zoom_select_server("synclust", rv)
 
   # Days selection
   days_select_server("ts", rv)
@@ -207,8 +198,10 @@ server <- function(input, output, session) {
 
   # TABLES
 
-  # Clusters
-  cluster_overview_server("clust", rv)
+  # Clusters summary
+  cluster_summary_server("smry", rv)
+
+  # Clusters by syndrome
   cluster_table_server("pat", rv, "patient")
   cluster_table_server("hosp", rv, "hospital")
   location_table_server("pat", rv, "patient")
@@ -222,22 +215,6 @@ server <- function(input, output, session) {
 
   # Syndromes
   syn_info_table_server("syn", rv)
-
-  # TESTING
-
-  # output$ptxt <- renderUI({
-  #   HTML(paste(
-  #     "Map ID:", rv$map_id_patient, "<br>",
-  #     "Table ID:", rv$tbl_id_patient
-  #   ))
-  # })
-  #
-  # output$htxt <- renderUI({
-  #   HTML(paste(
-  #     "Map ID:", rv$map_id_hospital, "<br>",
-  #     "Table ID:", rv$tbl_id_hospital
-  #   ))
-  # })
 
 }
 

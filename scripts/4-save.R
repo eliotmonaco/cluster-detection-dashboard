@@ -6,7 +6,7 @@
 auxdata <- list()
 
 # Date of update
-auxdata$date <- max(syndata$date_range)
+auxdata$date <- Sys.Date()
 
 # Time series input choices
 auxdata$ts <- list(
@@ -38,26 +38,20 @@ auxdata$syn <- get_syn_choices(
   colors = auxdata$ri_bg
 )
 
-# UI text
-auxdata$uitext <- list(
-  update = paste(
-    "Data last updated on",
-    format(Sys.Date(), "%b %d, %Y")
+# Time series plot text
+auxdata$tstext <- list(
+  pat = list(
+    hd = "ER visits by patient location",
+    ft = paste(
+      "This dataset consists of ER visit records for patients residing in",
+      "Kansas City ZIP codes."
+    )
   ),
-  ts = list(
-    pat = list(
-      hd = "ER visits by patient location",
-      ft = paste(
-        "This dataset consists of ER visit records for patients residing in",
-        "Kansas City ZIP codes."
-      )
-    ),
-    hosp = list(
-      hd = "ER visits by hospital location",
-      ft = paste(
-        "This dataset consists of ER visit records from hospitals in Cass,",
-        "Clay, Jackson, and Platte Counties."
-      )
+  hosp = list(
+    hd = "ER visits by hospital location",
+    ft = paste(
+      "This dataset consists of ER visit records from hospitals in Cass,",
+      "Clay, Jackson, and Platte Counties."
     )
   )
 )

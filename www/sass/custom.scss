@@ -75,11 +75,11 @@ $icon-hosp-fg: #7AB317;
 }
 
 /* Row and card heights (Cluster page) */
-.overview-tbl {
+.clust-smry-tbl {
   height: calc(100vh - 145px);
 }
 
-.overview-tbl > .bslib-gap-spacing {
+.clust-smry-tbl > .bslib-gap-spacing {
   gap: 0;
 }
 

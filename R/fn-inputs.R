@@ -27,8 +27,11 @@ input_tooltip <- function(label, tooltip_text) {
 }
 
 # Custom sidebar
-sidebar <- function(...) {
+sidebar <- function(date, ...) {
+  date <- format(date, "%b %d, %Y")
+
   bslib::sidebar(
+    shiny::tags$p("Data last updated on ", shiny::strong(date)),
     ...,
     width = 310,
     bg = "#e4f3ff"
