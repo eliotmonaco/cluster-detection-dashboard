@@ -14,6 +14,7 @@ library(markdown)
 
 source("R/mod-inputs.R")
 source("R/mod-clust.R")
+source("R/mod-clust-timeline.R")
 source("R/mod-dd.R")
 source("R/mod-ts.R")
 source("R/mod-syn.R")
@@ -49,7 +50,7 @@ ui <- page_navbar(
     "Active clusters summary",
     layout_sidebar(
       sidebar = sidebar(
-        date = auxdata$date,
+        date = auxdata$date_updated,
         ri_select_ui("smry", auxdata$ri_levels)
       ),
       cluster_summary_ui("smry")
@@ -57,10 +58,10 @@ ui <- page_navbar(
   ),
 
   nav_panel(
-    "Activer clusters by syndrome",
+    "Active clusters detail",
     layout_sidebar(
       sidebar = sidebar(
-        date = auxdata$date,
+        date = auxdata$date_updated,
         syn_select_ui("synclust", auxdata$syn),
         ri_select_ui("synclust", auxdata$ri_levels),
         zoom_select_ui("synclust")
@@ -89,10 +90,24 @@ ui <- page_navbar(
   ),
 
   nav_panel(
+    "Cluster timeline",
+    navset_tab(
+      nav_panel(
+        "Clusters by patient location",
+        cluster_timeline_ui("pat")
+      ),
+      nav_panel(
+        "Clusters by hospital location",
+        cluster_timeline_ui("hosp")
+      )
+    )
+  ),
+
+  nav_panel(
     "Data details",
     layout_sidebar(
       sidebar = sidebar(
-        date = auxdata$date,
+        date = auxdata$date_updated,
         syn_select_ui("dd", auxdata$syn),
         ri_select_ui("dd", auxdata$ri_levels)
       ),
@@ -117,7 +132,7 @@ ui <- page_navbar(
     "Time series",
     layout_sidebar(
       sidebar = sidebar(
-        date = auxdata$date,
+        date = auxdata$date_updated,
         syn_select_ui("ts", auxdata$syn),
         days_select_ui("ts", auxdata$ts)
       ),
@@ -178,6 +193,10 @@ server <- function(input, output, session) {
   syn_heading_server("hosp", rv)
 
   # PLOTS
+
+  # Cluster timeline
+  cluster_timeline_server("pat", rv, "patient")
+  cluster_timeline_server("hosp", rv, "hospital")
 
   # Time series
   ts_plot_server("pat", rv, "patient")

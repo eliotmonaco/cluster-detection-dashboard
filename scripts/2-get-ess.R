@@ -6,6 +6,7 @@ t0 <- Sys.time()
 
 # Import syndromes table
 syn <- readxl::read_excel("data/prep/syndromes.xlsx")
+# syn <- syn[c(5, 9, 16, 20, 21), ]
 
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
@@ -21,14 +22,14 @@ names(syn_api) <- syn$abbr
 
 # Add a syndrome name variable that capitalizes first letter
 syn <- syn |>
-  dplyr::mutate(
+  mutate(
     name1 = paste0(
       toupper(substr(name, 1, 1)),
       substr(name, 2, nchar(name))
     ),
     .before = name
   ) |>
-  dplyr::rename(name2 = name)
+  rename(name2 = name)
 
 # Data details: Pulled by both patient location and hospital location. Patient
 # locations are ZCTAs intersecting with Cass, Clay, Jackson, or Platte County.
@@ -141,7 +142,7 @@ df <- data.frame(
 )
 
 # Make a table easy to read in a text file
-df <- setmeup::readable_table(df, 30)
+df <- readable_table(df, 30)
 
 tf <- tempfile(fileext = ".txt")
 
@@ -163,7 +164,7 @@ log <- c(
   paste("Started at", format(t0, "%I:%M %p")),
   paste(
     "Download time:",
-    setmeup::round_ties_away(as.numeric(dur), 2),
+    round_ties_away(as.numeric(dur), 2),
     units(dur), "\n"
   ),
   log,

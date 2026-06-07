@@ -599,7 +599,7 @@ add_ri_icon <- function(lvl, text, colors) {
   }
 }
 
-# CLUSTER SUMMARY ---------------------------------------------------------
+# CLUSTERS ----------------------------------------------------------------
 
 # Summarize syndrome clusters by RI level
 summarize_clusters <- function(ls, syndromes) {
@@ -646,5 +646,94 @@ summarize_clusters <- function(ls, syndromes) {
       by = "abbr"
     ) |>
     dplyr::select(category, syndrome, dplyr::everything(), -abbr)
+}
+
+# Filter clusters by data source and pivot longer
+config_clusters <- function(df, data_source = c("hospital", "patient")) {
+  # Keep/remove variables with "_hosp" or "_pat" suffix
+  if (data_source == "hospital") {
+    sfx_kp <- "_hosp"; sfx_rm <- "_pat"
+  } else if (data_source == "patient") {
+    sfx_kp <- "_pat"; sfx_rm <- "_hosp"
+  }
+
+  # Remove variables related to the non-pertinent data source
+  df <- df |>
+    dplyr::select(-dplyr::ends_with(sfx_rm))
+
+  # Find and remove syndromes with no clusters
+  syn0 <- df |>
+    dplyr::mutate(total = rowSums(
+      dplyr::pick(dplyr::ends_with(sfx_kp)),
+      na.rm = TRUE
+    )) |>
+    tidyr::pivot_wider(
+      id_cols = syndrome,
+      names_from = date,
+      names_prefix = "date_",
+      values_from = total,
+      values_fill = 0
+    ) |>
+    dplyr::mutate(total = rowSums(
+      dplyr::pick(dplyr::starts_with("date_")),
+      na.rm = TRUE
+    )) |>
+    dplyr::filter(total == 0) |>
+    dplyr::pull(syndrome)
+
+  df <- df |>
+    dplyr::filter(!syndrome %in% syn0)
+
+  # Pivot longer and remove suffix from RI levels
+  df |>
+    tidyr::pivot_longer(
+      cols = dplyr::ends_with(sfx_kp),
+      names_to = "ri_level",
+      values_to = "n"
+    ) |>
+    dplyr::mutate(ri_level = sub(sfx_kp, "", ri_level))
+}
+
+# Create cluster timeline
+cluster_timeline <- function(df, colors) {
+  lvl <- c("very_weak", "weak", "moderate", "strong", "very_strong")
+
+  df |>
+    dplyr::mutate(ri_level = factor(ri_level, levels = rev(lvl))) |>
+    ggplot2::ggplot(ggplot2::aes(
+      x = date,
+      y = n,
+      fill = ri_level
+    )) +
+    ggplot2::geom_area() +
+    ggplot2::facet_wrap(
+      syndrome ~ .,
+      ncol = 1,
+      scales = "free_y",
+      drop = FALSE,
+      axes = "all_x"
+    ) +
+    ggplot2::scale_y_continuous(breaks = integer_scale()) +
+    ggplot2::scale_fill_manual(
+      labels = function(x) stringr::str_to_sentence(gsub("_", " ", x)),
+      values = rev(colors)
+    ) +
+    ggplot2::theme_bw(base_size = 20) +
+    ggplot2::labs(
+      x = stringr::str_to_sentence,
+      y = stringr::str_to_sentence,
+      fill = "RI level"
+    )
+}
+
+# Return function that converts axis labels to integers
+integer_scale <- function(n) {
+  function(x) {
+    breaks <- floor(pretty(x))
+
+    names(breaks) <- attr(breaks, "labels")
+
+    breaks
+  }
 }
 
