@@ -689,7 +689,7 @@ config_clusters <- function(df, data_source = c("hospital", "patient")) {
     tidyr::pivot_longer(
       cols = dplyr::ends_with(sfx_kp),
       names_to = "ri_level",
-      values_to = "n"
+      values_to = "clusters"
     ) |>
     dplyr::mutate(ri_level = sub(sfx_kp, "", ri_level))
 }
@@ -702,7 +702,7 @@ cluster_timeline <- function(df, colors) {
     dplyr::mutate(ri_level = factor(ri_level, levels = rev(lvl))) |>
     ggplot2::ggplot(ggplot2::aes(
       x = date,
-      y = n,
+      y = clusters,
       fill = ri_level
     )) +
     ggplot2::geom_area() +
@@ -713,12 +713,16 @@ cluster_timeline <- function(df, colors) {
       drop = FALSE,
       axes = "all_x"
     ) +
+    ggplot2::scale_x_date(
+      date_breaks = "1 day",
+      date_labels = "%b %d"
+    ) +
     ggplot2::scale_y_continuous(breaks = integer_scale()) +
     ggplot2::scale_fill_manual(
       labels = function(x) stringr::str_to_sentence(gsub("_", " ", x)),
       values = rev(colors)
     ) +
-    ggplot2::theme_bw(base_size = 20) +
+    ggplot2::theme_minimal(base_size = 20) +
     ggplot2::labs(
       x = stringr::str_to_sentence,
       y = stringr::str_to_sentence,
