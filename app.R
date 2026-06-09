@@ -115,12 +115,16 @@ ui <- page_navbar(
         nav_panel(
           "Data by patient location",
           card(shiny::markdown(readLines("R/text-dd.md"))),
+          dd_ui("pat-res", "Residence"),
+          dd_ui("pat-travel", "Travel"),
           dd_ui("pat-sex", "Sex"),
           dd_ui("pat-age", "Age group")
         ),
         nav_panel(
           "Data by hospital location",
           card(shiny::markdown(readLines("R/text-dd.md"))),
+          dd_ui("hosp-res", "Residence"),
+          dd_ui("hosp-travel", "Travel"),
           dd_ui("hosp-sex", "Sex"),
           dd_ui("hosp-age", "Age group")
         )
@@ -227,8 +231,12 @@ server <- function(input, output, session) {
   location_table_server("hosp", rv, "hospital")
 
   # Data details
+  dd_server("pat-res", rv, "patient", "residence")
+  dd_server("pat-travel", rv, "patient", "travel")
   dd_server("pat-sex", rv, "patient", "sex")
   dd_server("pat-age", rv, "patient", "age_group")
+  dd_server("hosp-res", rv, "hospital", "residence")
+  dd_server("hosp-travel", rv, "hospital", "travel")
   dd_server("hosp-sex", rv, "hospital", "sex")
   dd_server("hosp-age", rv, "hospital", "age_group")
 

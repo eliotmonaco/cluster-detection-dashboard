@@ -15,6 +15,8 @@ geodata <- readRDS("data/dashboard/geographic_data.rds")
 
 ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 
+res <- readRDS("data/prep/residence_data.rds")
+
 # Create a directory in `data/prep/` for storing output
 dir_data <- paste0("data/prep/analysis-", end_date, "/")
 

@@ -263,13 +263,20 @@ deduplicate_dd <- function(df, geo_var) {
 }
 
 # Configure data details data
-config_dd <- function(df, ansi_codes) {
+config_dd <- function(df, ansi_codes, residence_data) {
   agecat <- c(
     "00-04" = "0-4", "05-17" = "5-17", "18-44" = "18-44",
     "45-64" = "45-64", "65-1000" = "65+", "Unknown" = "Unknown"
   )
 
   sexcat <- c("F" = "Female", "M" = "Male", "U" = "Unknown/Other")
+
+  rescat <- c("Kansas City, MO", "KC region", "Other US", "Other/unknown")
+
+  # Create regex patterns from `residence_data$kcarea_places`
+  p <- lapply(residence_data$kcarea_places, \(df) {
+    paste0("(?i)", paste(df$city, collapse = "|"))
+  })
 
   df <- df |>
     dplyr::mutate(
@@ -280,16 +287,40 @@ config_dd <- function(df, ansi_codes) {
       hospital_name_geo = gsub("\\s", "_", hospital_name),
       age_group = unname(agecat[age_group]),
       age_group = dplyr::if_else(age_group %in% agecat, age_group, agecat[6]),
-      age_group = factor(age_group, agecat),
+      age_group = factor(age_group, levels = agecat),
       sex = unname(sexcat[sex]),
       sex = dplyr::if_else(sex %in% sexcat, sex, sexcat[3]),
-      sex = factor(sex, sexcat),
+      sex = factor(sex, levels = sexcat),
+      patient_state_orig = patient_state,
       patient_state2 = unname(ansi_codes[patient_state]),
       patient_state = dplyr::if_else(
         grepl("[[:alpha:]]", patient_state),
         patient_state,
         patient_state2
-      )
+      ),
+      # Many records seem to erroneously have "MI" instead of "MO"
+      # If the ZIP is a MO ZIP, or if the city is KC, replace "MI" with "MO"
+      patient_state = case_when(
+        patient_state == "MI" & grepl("^6[345]\\d{3}", zip_code) ~ "MO",
+        patient_state == "MI" & grepl("(?i)kansas city", patient_city) ~ "MO",
+        .default = patient_state
+      ),
+      # Create `residence` variable based on ZIP code, city, and/or state
+      residence = case_when(
+        zip_code %in% kcData::geoid$zcta2020 ~ rescat[1],
+        grepl("(?i)kansa.? city", patient_city) & patient_state == "M[OI]" ~
+          rescat[1],
+        zip_code %in% residence_data$kcarea_zctas ~ rescat[2],
+        grepl(p$ia, patient_city) & patient_state == "IA" |
+          grepl(p$ks, patient_city) & patient_state == "KS" |
+          grepl(p$mo, patient_city) & patient_state == "MO" |
+          grepl(p$ne, patient_city) & patient_state == "NE" ~
+          rescat[2],
+        zip_code %in% residence_data$us_zctas |
+          patient_state %in% ansi_codes ~ rescat[3],
+        .default = rescat[4]
+      ),
+      residence = factor(residence, levels = rescat)
     ) |>
     dplyr::select(-patient_state2)
 }

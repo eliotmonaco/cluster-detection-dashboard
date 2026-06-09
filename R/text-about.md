@@ -8,33 +8,17 @@ This tool is intended for use by public health professionals. It may provide adv
 
 Records are downloaded from ESSENCE and analyzed daily. After a data update, the dashboard will automatically display the most recent data. If the dashboard was active during an update, reloading the page will refresh the data.
 
-## App controls / user interface
-
-The data displayed on the dashboard can be filtered using various controls.
-
-**Syndrome**: Select the syndrome of interest. This list contains all syndromes available for a given analysis date.
-
-**Date range**: Select the date range for time series data.
-
-**Minimum recurrence interval (RI)**: Select a recurrence interval level to filter the clusters and data details displayed.
-
-**Default map zoom level**: Increase or decrease the number to reset the default magnification for maps during the session.
-
 ## ESSENCE data
 
 Records downloaded from ESSENCE represent emergency room visits and contain information about the reason for the visit, the location, and certain patient characteristics. Patient names and addresses are not included. Records are accessed via API using queries developed by public health experts. The list of queries used to download data for a given date are available on the Syndromes page.
 
-Hospitals in Missouri are required to provide records to ESSENCE within three business days of a visit. Records from out of state hospitals may take longer to receive.
+Data can be downloaded from the ESSENCE system grouped by the location of the patient or the location of the hospital in the record. This dashboard displays datasets grouped by both patient and hospital location because both types of geography are relevant for cluster analysis.
 
-Data can be downloaded from the ESSENCE system based on either the location of the patient or the location of the hospital in the record. This dashboard displays both types of datasets.
+**Patient location.** Datasets grouped by patient location consist of records for patients residing in a particular region. For cluster analyses, these datasets are records showing the patient's residential ZIP code to be at least partly within Cass, Clay, Jackson, or Platte County. For time series plots, these datasets are records where at least 10% of the patient's residential ZIP code is within the Kansas City, MO, boundary.
 
-**Data by patient location** consist of records for patients who live in a particular region. Datasets used for cluster analysis include records in which a patient's residential ZIP code is at least partly within Cass, Clay, Jackson, or Platte County. Datasets used for the time series plot include records in which at least 10% of a patient's residential ZIP code is within the Kansas City boundary. Records in these datasets can come from hospitals in any US state. However, most of the visits occur at local hospitals. This is the dataset that most closely reflects the long-term residential population.
+**Hospital location.** Datasets grouped by hospital location consist of records from hospitals in Cass, Clay, Jackson, and Platte Counties, MO.
 
-(Assignment of ZIP code if a residential ZIP code isn't available?)
-
-**Data by hospital location** consist of records from hospitals within a particular region. The datasets used for cluster analysis and the time series plot include records in which the hospital where the patient was seen is located in Cass, Clay, Jackson, or Platte County. Patients in these datasets may be both residents and non-residents. Therefore, these datasets should be more responsive to changes in the non-resident population, e.g., due to an increase of visitors during the World Cup events.
-    
-ESSENCE data may contain duplicates. An effort is made to deduplicate the data, but there is a potential duplicate error rate for each syndrome dataset.
+All datasets downloaded from ESSENCE are cleaned and deduplicated. However, some errors may remain.
 
 ## SaTScan analysis
 
@@ -76,10 +60,9 @@ SaTScan<sup>TM</sup> is a trademark of Martin Kulldorff. The SaTScan<sup>TM</sup
 ## Footnotes
 
 [^lev2024]: Levin-Rector A, Kulldorff M, Peterson E, Hostovich S, Greene S. Prospective Spatiotemporal Cluster Detection Using SaTScan: Tutorial for Designing and Fine-Tuning a System to Detect Reportable Communicable Disease Outbreaks. JMIR Public Health Surveill. 2024;10:e50653.
-URL: https://publichealth.jmir.org/2024/1/e50653
-DOI: [10.2196/50653](https://doi.org/10.2196/50653)
+[View online.](https://publichealth.jmir.org/2024/1/e50653)
 
-[^userguide]: Kulldorff M. SaTScan<sup>TM</sup> user guide for version 10.1. SaTScan<sup>TM</sup>. 2022. URL: https://www.satscan.org/cgi-bin/satscan/register.pl/SaTScan_Users_Guide.pdf?todo=process_userguide_download
+[^userguide]: Kulldorff M. SaTScan<sup>TM</sup> user guide for version 10.1. SaTScan<sup>TM</sup>. 2022. [View online.](https://www.satscan.org/cgi-bin/satscan/register.pl/SaTScan_Users_Guide.pdf?todo=process_userguide_download)
 
-[^kul2005]: Kulldorff M, Heffernan R, Hartman J, Assunção RM, Mostashari F. A space-time permutation scan statistic for the early detection of disease outbreaks. PLoS Medicine, 2:216-224, 2005. [online](https://www.researchgate.net/publication/8014395_A_Space-Time_Permutation_Scan_Statistic_for_Disease_Outbreak_Detection)
+[^kul2005]: Kulldorff M, Heffernan R, Hartman J, Assunção RM, Mostashari F. A space-time permutation scan statistic for the early detection of disease outbreaks. PLoS Medicine, 2:216-224, 2005. [View online.](https://www.researchgate.net/publication/8014395_A_Space-Time_Permutation_Scan_Statistic_for_Disease_Outbreak_Detection)
 

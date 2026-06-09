@@ -4,7 +4,18 @@
 filter_data_details <- function(ls, src = c("hospital", "patient"), syn) {
   src <- match.arg(src)
 
-  ls[[src]][[syn]]
+  df <- ls[[src]][[syn]]
+
+  # Convert variables with many possible values to factor here to keep levels
+  # specific to this syndrome
+  lvl <- sort(unique(df$travel))
+
+  lvl_last <- lvl[grepl("(?i)^(other|no|none)$", lvl)]
+
+  lvl_trav <- c(lvl[!lvl %in% lvl_last], lvl_last)
+
+  df |>
+    dplyr::mutate(travel = factor(travel, levels = lvl_trav))
 }
 
 # df = `gis` dataframe from Satscan output

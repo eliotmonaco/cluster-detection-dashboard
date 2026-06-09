@@ -1,3 +1,1 @@
-These tables present data for the complete study population during the study period along with data for each cluster population during the cluster period for comparison. If no clusters were detected, only data for the study population is presented.
-
-For data based on patient location, the study population is residents of ZIP codes that are at least partly within Cass, Clay, Jackson, and Platte Counties. For data based on hospital location, the study population is anyone who visited the emergency department at a hospital in Cass, Clay, Jackson, or Platte County. The study period is from one year until one day before the analysis date.
+These tables present data for the full population during the study period along with data for each cluster population during the cluster period for comparison. If no clusters were detected, only data for the full population is presented.

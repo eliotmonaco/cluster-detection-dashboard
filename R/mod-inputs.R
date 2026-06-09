@@ -99,11 +99,11 @@ syn_select_server <- function(id, rv, color) {
     #     choices = synchoices(), selected = rv$syn
     #   )
     # })
-    #
-    # # Update selected syndrome when syndrome input is changed
-    # observeEvent(rv$syn, {
-    #   updateSelectInput(session, "syn", selected = rv$syn)
-    # })
+
+    # Update selected syndrome when syndrome input is changed
+    observeEvent(rv$syn, {
+      updateSelectInput(session, "syn", selected = rv$syn)
+    })
   })
 }
 

@@ -193,7 +193,13 @@ dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
     expr = {
       ls <- deduplicate_dd(df, geo_var = "zip_code")
-      ls$data <- config_dd(ls$data, ansi_codes = ansi)
+
+      ls$data <- config_dd(
+        ls$data,
+        ansi_codes = ansi,
+        residence_data = res
+      )
+
       ls
     },
     error = function(e) e
@@ -204,7 +210,13 @@ dd$hospital <- lapply(dd$hospital, \(df) {
   tryCatch(
     expr = {
       ls <- deduplicate_dd(df, geo_var = "hospital_name")
-      ls$data <- config_dd(ls$data, ansi_codes = ansi)
+
+      ls$data <- config_dd(
+        ls$data,
+        ansi_codes = ansi,
+        residence_data = res
+      )
+
       ls
     },
     error = function(e) e
