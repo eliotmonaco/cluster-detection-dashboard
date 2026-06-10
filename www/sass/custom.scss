@@ -1,3 +1,4 @@
+/* ---VARIABLES--- */
 
 $icon-hosp-bg: #FFFFFF;
 $icon-hosp-fg: #7AB317;
@@ -73,23 +74,6 @@ $icon-hosp-fg: #7AB317;
 .card {
   --bs-card-cap-bg: #626f7d;
   --bs-card-cap-color: white;
-}
-
-/* Row and card heights */
-.clust-smry-tbl {
-  //height: calc(100vh - 145px);
-}
-
-.clust-smry-tbl > .bslib-gap-spacing {
-  gap: 0;
-}
-
-.clust-row-1 {
-  //height: calc(calc(100vh - 220px) * .6);
-}
-
-.clust-row-2 {
-  //height: calc(calc(100vh - 220px) * .37);
 }
 
 /* Hospital legend marker, adapted from https://css-shape.com/plus/ */
