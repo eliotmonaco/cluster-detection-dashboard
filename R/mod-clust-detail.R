@@ -19,18 +19,24 @@ cluster_map_ui <- function(id) {
   card(
     leaflet::leafletOutput(NS(id, "clustmap")),
     full_screen = TRUE,
-    min_height = "500px",
+    height = "500px",
     class = "clust-row-1"
   )
 }
 
-cluster_map_server <- function(id, rv, src, loc, var, loc_bnd, hosp_loc, gp) {
+cluster_map_server <- function(id, rv, src, var, loc_bnd, hosp_loc, gp) {
   moduleServer(id, function(input, output, session) {
     tbl_id <- paste0("tbl_id_", src)
     map_id <- paste0("map_id_", src)
 
     # Cluster boundary data for maps
     clustbound <- reactive({
+      if (src == "patient") {
+        loc <- rv$geo$zctas
+      } else if (src == "hospital") {
+        loc <- rv$clustdata_hospital$shapeclust
+      }
+
       get_cluster_boundaries(
         rv[[paste0("clustdata_", src)]],
         locations = loc,
@@ -82,7 +88,7 @@ location_table_ui <- function(id) {
     card_header("Locations in cluster"),
     reactable::reactableOutput(NS(id, "loctbl")),
     full_screen = TRUE,
-    min_height = "500px",
+    height = "500px",
     class = "clust-row-1"
   )
 }

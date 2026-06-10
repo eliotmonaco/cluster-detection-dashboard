@@ -10,7 +10,10 @@ filter_data_details <- function(ls, src = c("hospital", "patient"), syn) {
   # specific to this syndrome
   lvl <- sort(unique(df$travel))
 
-  lvl_last <- lvl[grepl("(?i)^(other|no|none)$", lvl)]
+  lvl_last <- c(
+    lvl[grepl("(?i)^other$", lvl)],
+    lvl[grepl("(?i)^(no|none)$", lvl)]
+  )
 
   lvl_trav <- c(lvl[!lvl %in% lvl_last], lvl_last)
 

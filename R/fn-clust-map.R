@@ -3,6 +3,7 @@
 # Filter location geometries by cluster
 get_cluster_boundaries <- function(ls, locations, var) {
   clust <- ls$shapeclust # contains clusters
+
   loc <- ls$gis # contains locations within each cluster
 
   if (!is.data.frame(clust) || nrow(clust) == 0) {

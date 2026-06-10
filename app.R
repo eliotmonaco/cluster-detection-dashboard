@@ -209,15 +209,14 @@ server <- function(input, output, session) {
 
   # Cluster maps
   cluster_map_server(
-    "pat", rv, src = "patient", loc = geodata$zctas,
+    "pat", rv, src = "patient",
     var = "GEOID20", loc_bnd = geodata$zctas,
-    hosp_loc = NULL, gp = rv$aux$graph$patient
+    hosp_loc = NULL, gp = auxdata$graph$patient
   )
   cluster_map_server(
     "hosp", rv, src = "hospital",
-    loc = rv$clustdata_hospital$shapeclust,
     var = "loc_id", loc_bnd = geodata$counties,
-    hosp_loc = geodata$hosp, gp = rv$aux$graph$hospital
+    hosp_loc = geodata$hosp, gp = auxdata$graph$hospital
   )
 
   # TABLES
