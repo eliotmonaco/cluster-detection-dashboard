@@ -1,10 +1,9 @@
 # Modules for time series plot
 
-ts_plot_ui <- function(id, header, footer) {
+ts_plot_ui <- function(id, header) {
   card(
     card_header(header),
-    highcharter::highchartOutput(NS(id, "tsplot")),
-    p(footer)
+    highcharter::highchartOutput(NS(id, "tsplot"))
   )
 }
 

@@ -140,8 +140,8 @@ ui <- page_navbar(
         syn_select_ui("ts", auxdata$syn),
         days_select_ui("ts", auxdata$ts)
       ),
-      ts_plot_ui("pat", auxdata$tstext$pat$hd, auxdata$tstext$pat$ft),
-      ts_plot_ui("hosp", auxdata$tstext$hosp$hd, auxdata$tstext$hosp$ft)
+      ts_plot_ui("pat", auxdata$tstext$pat),
+      ts_plot_ui("hosp", auxdata$tstext$hosp)
     )
   ),
 

@@ -40,19 +40,10 @@ auxdata$syn <- get_syn_choices(
 
 # Time series plot text
 auxdata$tstext <- list(
-  pat = list(
-    hd = "ER visits by patient location",
-    ft = paste(
-      "This dataset consists of ER visit records for patients residing in",
-      "Kansas City ZIP codes."
-    )
-  ),
-  hosp = list(
-    hd = "ER visits by hospital location",
-    ft = paste(
-      "This dataset consists of ER visit records from hospitals in Cass,",
-      "Clay, Jackson, and Platte Counties."
-    )
+  pat = "ER visits by patient location (residents of KC ZIP codes)",
+  hosp = paste(
+    "ER visits by hospital location (Cass, Clay, Jackson, and Platte",
+    "Counties)"
   )
 )
 

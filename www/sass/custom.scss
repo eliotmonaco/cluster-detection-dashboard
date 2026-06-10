@@ -27,7 +27,8 @@ $icon-hosp-fg: #7AB317;
 }
 
 /* Prevent selected item from overlapping with dropdown arrow */
-.selectize-input.items.full.has-options.has-items > .syn-flex-container > .syn-text {
+.selectize-input.items.full.has-options.has-items > .syn-flex-container >
+.syn-text {
   padding-right: 1.5rem;
 }
 
@@ -76,7 +77,7 @@ $icon-hosp-fg: #7AB317;
 
 /* Row and card heights */
 .clust-smry-tbl {
-  height: calc(100vh - 145px);
+  //height: calc(100vh - 145px);
 }
 
 .clust-smry-tbl > .bslib-gap-spacing {
@@ -84,11 +85,11 @@ $icon-hosp-fg: #7AB317;
 }
 
 .clust-row-1 {
-  height: calc(calc(100vh - 220px) * .6);
+  //height: calc(calc(100vh - 220px) * .6);
 }
 
 .clust-row-2 {
-  height: calc(calc(100vh - 220px) * .37);
+  //height: calc(calc(100vh - 220px) * .37);
 }
 
 /* Hospital legend marker, adapted from https://css-shape.com/plus/ */
