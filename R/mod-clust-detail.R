@@ -51,6 +51,7 @@ cluster_map_server <- function(id, rv, src, var, loc_bnd, hosp_loc, gp) {
         location_boundaries = loc_bnd,
         kc_boundary = rv$geo$city,
         hospital_locations = hosp_loc,
+        worldcup_sites = rv$geo$worldcup,
         gp = gp,
         zoom_level = rv$zoom
       )

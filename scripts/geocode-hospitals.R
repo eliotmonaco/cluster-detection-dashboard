@@ -28,5 +28,5 @@ hosp_gc <- geocode(
   full_results = TRUE
 )
 
-saveRDS(hosp_gc, "data/dashboard/hospital_locations.rds")
+saveRDS(hosp_gc, "data/prep/hospital_locations.rds")
 

@@ -74,6 +74,7 @@ cluster_map <- function(
     location_boundaries,
     kc_boundary,
     hospital_locations = NULL,
+    worldcup_sites,
     gp,
     zoom_level
 ) {
@@ -91,6 +92,7 @@ cluster_map <- function(
   ) |>
     leaflet::setView(lng = center$X, lat = center$Y, zoom = zoom_level) |>
     leaflet::addProviderTiles("CartoDB.Positron") |>
+    leaflet::addMapPane("worldcup_markers", zIndex = 410) |>
     leaflet::addMapPane("hospital_markers", zIndex = 420) |>
     leaflet::addMapPane("cluster_outline", zIndex = 430) |>
     leaflet::addMapPane("cluster_boundaries", zIndex = 440) |>
@@ -109,6 +111,22 @@ cluster_map <- function(
       opacity = gp$kc$opac1,
       fillColor = gp$kc$fill,
       fillOpacity = gp$kc$opac2
+    )
+
+  # Add World Cup sites
+  wcicon <- leaflet::makeIcon(
+    iconUrl = "www/img/futbol-solid.svg",
+    iconWidth = 12,
+    iconHeight = 12,
+    className = "futbol"
+  )
+
+  map <- map |>
+    leaflet::addMarkers(
+      data = worldcup_sites,
+      icon = wcicon,
+      label = ~name,
+      options = leaflet::pathOptions(pane = "worldcup_markers")
     )
 
   # Add cluster regions

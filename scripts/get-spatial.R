@@ -5,9 +5,11 @@ library(tigris)
 library(tidyverse)
 library(sf)
 
-source("R/fn.R")
+source("scripts/fn-prep.R")
 
-hosp <- readRDS("data/dashboard/hospital_locations.rds")
+hosp <- readRDS("data/prep/hospital_locations.rds")
+
+wcsites <- readRDS("data/prep/worldcup_sites.rds")
 
 options(tigris_use_cache = TRUE)
 
@@ -72,10 +74,13 @@ zctakc <- sf1[!sf1$GEOID20 %in% sf2$GEOID20, ]
 zctaco <- zctaco |>
   mutate(kc = GEOID20 %in% zctakc$GEOID20, .before = geometry)
 
-# Geocoded hospitals to points
+# Geocoded hospitals and WC sites to points
 hosp <- hosp |>
   # Location name without spaces for Satscan coordinates file
   mutate(hospital_name_geo = gsub("\\s", "_", hospital_name)) |>
+  st_as_sf(coords = c("long", "lat"), crs = "WGS84", remove = FALSE)
+
+wcsites <- wcsites |>
   st_as_sf(coords = c("long", "lat"), crs = "WGS84", remove = FALSE)
 
 # Visualize
@@ -111,6 +116,10 @@ ggplot() +
   geom_sf(
     data = hosp,
     color = "yellow"
+  ) +
+  geom_sf(
+    data = wcsites,
+    color = "purple"
   )
 
 # Combine
@@ -119,7 +128,8 @@ geo <- list(
   city = kcmap,
   counties = comap,
   zcta_pts = zcta_pts,
-  hosp = hosp
+  hosp = hosp,
+  worldcup = wcsites
 )
 
 # Save

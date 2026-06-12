@@ -48,68 +48,45 @@ auxdata$tstext <- list(
 )
 
 # Graphical parameters for cluster map shapes and markers
+gp <- list(
+  study = list(
+    name = "Study area",
+    clr = "#aaa", fill = "#aaa", wt = 2,
+    opac1 = 1, opac2 = .1, shp = "square"
+  ),
+  kc = list(
+    name = "KC boundary",
+    clr = "#024cbf", fill = "#024cbf", wt = 2,
+    opac1 = 1, opac2 = 0, shp = "square"
+  ),
+  clust = list(
+    name = "Syndrome cluster",
+    clr = "red", fill = "red", wt = 2,
+    opac1 = .5, opac2 = .1, shp = "square"
+  ),
+  hosp = list(
+    name = "Hospital",
+    class = "plus-legend"
+  ),
+  wc = list(
+    name = "World Cup site",
+    class = "wc-legend"
+  )
+)
+
 auxdata$graph <- list(
   patient = list(
-    study = list(
-      name = "Study area (ZCTA)",
-      clr = "#aaa",
-      fill = "#aaa",
-      wt = 2,
-      opac1 = 1,
-      opac2 = .1,
-      shp = "square"
-    ),
-    kc = list(
-      name = "KC boundary",
-      clr = "#024cbf",
-      fill = "#024cbf",
-      wt = 2,
-      opac1 = 1,
-      opac2 = 0,
-      shp = "square"
-    ),
-    clust = list(
-      name = "Syndrome cluster",
-      clr = "red",
-      fill = "red",
-      wt = 2,
-      opac1 = .5,
-      opac2 = .1,
-      shp = "square"
-    )
+    study = replace(gp$study, 1, "Study area (ZCTA)"),
+    kc = gp$kc,
+    worldcup = gp$wc,
+    clust = gp$clust
   ),
   hospital = list(
-    study = list(
-      name = "Study area (county)",
-      clr = "#aaa",
-      fill = "#aaa",
-      wt = 2,
-      opac1 = 1,
-      opac2 = .1,
-      shp = "square"
-    ),
-    kc = list(
-      name = "KC boundary",
-      clr = "#024cbf",
-      fill = "#024cbf",
-      wt = 2,
-      opac1 = 1,
-      opac2 = 0,
-      shp = "square"
-    ),
-    hosp = list(
-      name = "Hospital",
-      class = "plus-legend"
-    ),
-    clust = list(
-      name = "Syndrome cluster",
-      clr = "red",
-      fill = "red",
-      wt = 2,
-      opac1 = .5,
-      opac2 = .1,
-      shp = "circle"
-    )
+    study = replace(gp$study, 1, "Study area (county)"),
+    kc = gp$kc,
+    hosp = gp$hosp,
+    worldcup = gp$wc,
+    clust = replace(gp$clust, which(names(gp$clust) == "shp"), "circle")
   )
 )
 
