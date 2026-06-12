@@ -7,6 +7,7 @@ t0 <- Sys.time()
 # Import syndromes table
 syn <- readxl::read_excel("data/prep/syndromes.xlsx")
 # syn <- syn[c(5, 9, 16, 20, 21), ]
+# syn <- syn[5, ]
 
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
