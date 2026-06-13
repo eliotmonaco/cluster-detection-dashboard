@@ -103,7 +103,7 @@ location_table_server <- function(id, rv, src) {
       validate(need(
         rv[[map_id]],
         paste(
-          "Select a cluster on the map or cluster table",
+          "Select a cluster on the map or a row in the cluster table",
           "to see location details"
         )
       ))
@@ -111,7 +111,8 @@ location_table_server <- function(id, rv, src) {
       location_table(
         rv[[paste0("clustdata_", src)]]$gis,
         id = rv[[map_id]],
-        src = src
+        src = src,
+        n_suppr = 16
       )
     })
   })
@@ -160,7 +161,8 @@ cluster_table_server <- function(id, rv, src) {
       cluster_table(
         clustdata()$shapeclust,
         bg_color = rv$aux$ri_bg,
-        text_color = rv$aux$ri_text
+        text_color = rv$aux$ri_text,
+        n_suppr = 16
       )
     })
 

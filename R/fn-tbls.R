@@ -49,18 +49,26 @@ cluster_summary_table <- function(df, bg_color, text_color) {
           minWidth = 200,
           maxWidth = 300,
           sticky = "left",
-          style = list(borderRight = "1px solid #ddd")
+          style = list(borderRight = "1px solid #555")
+        )
+      } else if (nm == "very_strong_pat") {
+        reactable::colDef(
+          name = mod_col_labels2(nm),
+          style = function(value) {
+            ls <- list(borderRight = "1px solid #555")
+            if (!is.na(value) && value > 0) {
+              c(ls, list(fontWeight = "bold", background = bg, color = txt))
+            } else {
+              ls
+            }
+          }
         )
       } else {
         reactable::colDef(
           name = mod_col_labels2(nm),
           style = function(value) {
             if (!is.na(value) && value > 0) {
-              list(
-                fontWeight = "bold",
-                background = bg,
-                color = txt
-              )
+              list(fontWeight = "bold", background = bg, color = txt)
             }
           }
         )
@@ -84,6 +92,11 @@ cluster_summary_table <- function(df, bg_color, text_color) {
       ),
       columns = col_defs,
       groupBy = "category",
+      defaultColDef = reactable::colDef(
+        vAlign = "center",
+        headerVAlign = "bottom",
+        headerClass = "tbl-header"
+      ),
       defaultExpanded = TRUE,
       pagination = FALSE,
       highlight = TRUE,
@@ -119,7 +132,7 @@ filter_cluster_data <- function(ls, ri_min) {
   })
 }
 
-# Point expansion for single location clusters
+# Add buffer to single location clusters
 expand_point_clusters <- function(ls) {
   if (!is.null(ls$shapeclust)) {
     # Find clusters with only 1 location
@@ -181,28 +194,25 @@ syndrome_table <- function(df) {
 }
 
 # Table with cluster data
-cluster_table <- function(df, bg_color, text_color) {
+cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
   if (is.null(df)) {
     return(NULL)
   }
 
   # Var name replacements
-  replace <- c(
-    "Locations" = "Number loc",
-    "Test statistic" = "Test stat",
-    "P-value" = "P value",
-    "RI (days)" = "Recurr int",
-    "RI level" = "Ri level",
-    "Obs/exp" = "Ode"
+  vars <- c(
+    "Cluster" = "cluster",
+    "Start date" = "start_date", "End date" = "end_date",
+    "Locations" = "number_loc",
+    "Test statistic" = "test_stat", "P-value" = "p_value",
+    "RI (days)" = "recurr_int", "RI level" = "ri_level",
+    "Observed" = "observed", "Expected" = "expected", "Obs/exp" = "ode"
   )
 
   # Configure data
   df <- df |>
     sf::st_drop_geometry() |>
-    dplyr::select(
-      cluster, start_date, end_date, number_loc, test_stat, p_value,
-      recurr_int, ri_level, observed, expected, ode
-    ) |>
+    dplyr::select(dplyr::all_of(unname(vars))) |>
     dplyr::mutate(
       dplyr::across(
         c(start_date, end_date),
@@ -212,12 +222,21 @@ cluster_table <- function(df, bg_color, text_color) {
         c(test_stat, ode),
         ~ setmeup::round_ties_away(.x, 2)
       ),
-      p_value = signif(p_value, 1),
+      dplyr::across(
+        c(p_value, recurr_int),
+        ~ prettyNum(signif(.x, 2), scientific = TRUE)
+      ),
       ri_level = stringr::str_to_sentence(ri_level),
-      expected = setmeup::round_ties_away(expected, 0)
-    ) |>
-    dplyr::rename_with(mod_col_labels1) |>
-    dplyr::rename(dplyr::any_of(replace))
+      expected = setmeup::round_ties_away(expected, 0),
+      dplyr::across(
+        c(observed, expected),
+        ~ ifelse(observed < n_suppr, "suppr.", prettyNum(.x, big.mark = ","))
+      ),
+      dplyr::across(
+        dplyr::where(is.numeric),
+        ~ prettyNum(.x, big.mark = ",")
+      )
+    )
 
   # Function to style `ri_level` column
   fn <- function(bg, txt) {
@@ -236,22 +255,25 @@ cluster_table <- function(df, bg_color, text_color) {
     }
   }
 
-  cell_style <- fn(bg_color, text_color)
+  ri_cell_style <- fn(bg_color, text_color)
 
   # Style columns
   col_defs <- lapply(colnames(df), \(x) {
-    if (x %in% c("P-value", "RI (days)")) {
-      # Format as scientific notation
-      reactable::colDef(cell = htmlwidgets::JS(
-        "function(cellInfo) {
-            return cellInfo.value.toExponential(1)
-        }"
-      ))
-    } else if (is.numeric(df[[x]])) {
-      # Use comma separators
-      reactable::colDef(format = reactable::colFormat(separators = TRUE))
-    } else if (x == "RI level") {
-      reactable::colDef(style = cell_style)
+    if (x == "ri_level") {
+      reactable::colDef(
+        name = names(vars)[vars == x],
+        style = ri_cell_style
+      )
+    } else if (x %in% c(
+      "number_loc", "test_stat", "p_value", "recurr_int",
+      "observed", "expected", "ode"
+    )) {
+      reactable::colDef(
+        name = names(vars)[vars == x],
+        align = "right"
+      )
+    } else {
+      reactable::colDef(name = names(vars)[vars == x])
     }
   })
 
@@ -259,7 +281,7 @@ cluster_table <- function(df, bg_color, text_color) {
 
   df |>
     reactable::reactable(
-      columns = purrr::compact(col_defs),
+      columns = col_defs,
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
@@ -270,7 +292,12 @@ cluster_table <- function(df, bg_color, text_color) {
 }
 
 # Table with location data for a given cluster
-location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
+location_table <- function(
+    df,
+    id = NULL,
+    src = c("patient", "hospital"),
+    n_suppr = 0
+) {
   if (is.null(id)) {
     return(NULL)
   }
@@ -278,7 +305,7 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
   src <- match.arg(src)
 
   # Var name replacements
-  replace <- c(
+  vars <- c(
     "In KC" = "kc",
     "Cluster" = "cluster",
     "Observed" = "loc_obs",
@@ -286,14 +313,12 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
     "Obs/exp" = "loc_ode"
   )
 
-  # Data source-specific adjustments and styling
+  # Data source-specific config
   if (src == "patient") {
     df <- df |>
       dplyr::mutate(loc_id = as.character(loc_id))
 
-    replace <- c("ZCTA" = "loc_id", replace)
-
-    col_defs <- list(ZCTA = reactable::colDef(minWidth = 200))
+    vars <- c("ZCTA" = "loc_id", vars)
   } else if (src == "hospital") {
     df <- df |>
       dplyr::mutate(
@@ -302,23 +327,42 @@ location_table <- function(df, id = NULL, src = c("patient", "hospital")) {
           sub(pattern = "\\sOf\\s", replacement = " of ")
       )
 
-    replace <- c("Hospital" = "loc_id", replace)
-
-    col_defs <- list(Hospital = reactable::colDef(minWidth = 200))
+    vars <- c("Hospital" = "loc_id", vars)
   }
 
   # Configure data
   df <- df |>
     sf::st_drop_geometry() |>
     dplyr::filter(cluster == id) |>
-    dplyr::select(loc_id, kc, cluster, loc_obs, loc_exp, loc_ode) |>
+    dplyr::select(loc_id, kc, loc_obs, loc_exp, loc_ode) |>
     dplyr::mutate(
       kc = stringr::str_to_sentence(kc),
       loc_exp = setmeup::round_ties_away(loc_exp, 0),
-      loc_ode = setmeup::round_ties_away(loc_ode, 2)
+      loc_ode = setmeup::round_ties_away(loc_ode, 2),
+      dplyr::across(
+        c(loc_obs, loc_exp),
+        ~ ifelse(loc_obs < n_suppr, "suppr.", prettyNum(.x, big.mark = ","))
+      )
     ) |>
-    dplyr::arrange(loc_id) |>
-    dplyr::rename(dplyr::any_of(replace))
+    dplyr::arrange(loc_id)
+
+  # Style columns
+  col_defs <- lapply(colnames(df), \(x) {
+    if (x %in% c("loc_obs", "loc_exp")) {
+      reactable::colDef(
+        name = names(vars)[vars == x],
+        align = "right"
+      )
+    } else {
+      reactable::colDef(name = names(vars)[vars == x])
+    }
+  })
+
+  names(col_defs) <- colnames(df)
+
+  if (src == "hospital") {
+    col_defs$loc_id <- reactable::colDef(name = "Hospital", minWidth = 200)
+  }
 
   df |>
     reactable::reactable(
@@ -347,11 +391,6 @@ syndrome_title_tag <- function(x, df) {
     df[df$abbr == x, "name1"],
     class = "cluster-tab-title"
   )
-}
-
-# Modify column labels
-mod_col_labels1 <- function(x) {
-  stringr::str_to_sentence(gsub("_", " ", x))
 }
 
 # Function to rename columns

@@ -76,6 +76,11 @@ $icon-hosp-fg: #7AB317;
   --bs-card-cap-color: white;
 }
 
+/* Cluster summary table */
+.clust-smry-tbl .tbl-header {
+  border-bottom-color: #555;
+}
+
 /* Hospital legend marker, adapted from https://css-shape.com/plus/ */
 .plus {
   height: 12px;
