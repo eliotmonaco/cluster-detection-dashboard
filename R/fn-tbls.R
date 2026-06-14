@@ -1,4 +1,4 @@
-# Functions for syndrome, cluster, and cluster location tables
+# Functions for cluster summary, cluster detail, and syndrome info tables
 
 # Filter syndrome summary table by RI minimum
 filter_cluster_summary <- function(df, ri_min) {
@@ -33,19 +33,27 @@ cluster_summary_table <- function(df, bg_color, text_color) {
 
   text_color <- c(rep(NA, 2), text_color[n:5], text_color[n:5])
 
+  # Function to rename columns
+  mod_col_labels <- function(x) {
+    x |>
+      gsub(pattern = "_pat|_hosp", replacement = "") |>
+      gsub(pattern = "_", replacement = " ") |>
+      stringr::str_to_title()
+  }
+
   # Style columns
   col_defs <- mapply(
     colnames(df), bg_color, text_color,
     FUN = \(nm, bg, txt) {
       if (nm == "category") {
         reactable::colDef(
-          name = mod_col_labels2(nm),
+          name = mod_col_labels(nm),
           minWidth = 150,
           maxWidth = 200
         )
       } else if (nm == "syndrome") {
         reactable::colDef(
-          name = mod_col_labels2(nm),
+          name = mod_col_labels(nm),
           minWidth = 200,
           maxWidth = 300,
           sticky = "left",
@@ -53,7 +61,7 @@ cluster_summary_table <- function(df, bg_color, text_color) {
         )
       } else if (nm == "very_strong_pat") {
         reactable::colDef(
-          name = mod_col_labels2(nm),
+          name = mod_col_labels(nm),
           style = function(value) {
             ls <- list(borderRight = "1px solid #555")
             if (!is.na(value) && value > 0) {
@@ -65,7 +73,7 @@ cluster_summary_table <- function(df, bg_color, text_color) {
         )
       } else {
         reactable::colDef(
-          name = mod_col_labels2(nm),
+          name = mod_col_labels(nm),
           style = function(value) {
             if (!is.na(value) && value > 0) {
               list(fontWeight = "bold", background = bg, color = txt)
@@ -96,6 +104,11 @@ cluster_summary_table <- function(df, bg_color, text_color) {
         vAlign = "center",
         headerVAlign = "bottom",
         headerClass = "tbl-header"
+      ),
+      rowStyle = JS( # style row group
+        "function(rowInfo) {
+          if (rowInfo.level == 0) return {background: '#EEE'}
+        }"
       ),
       defaultExpanded = TRUE,
       pagination = FALSE,
@@ -393,11 +406,20 @@ syndrome_title_tag <- function(x, df) {
   )
 }
 
-# Function to rename columns
-mod_col_labels2 <- function(x) {
-  x |>
-    gsub(pattern = "_pat|_hosp", replacement = "") |>
-    gsub(pattern = "_", replacement = " ") |>
-    stringr::str_to_title()
+# Add footnote to reactable output in UI using conditionalPanel()
+conditional_footnote <- function(id, output_name) {
+  cond <- paste0("!output.", output_name)
+
+  conditionalPanel(
+    condition = cond,
+    div(
+      paste(
+        "When visit counts are below 16, observed and expected values are",
+        "suppressed (indicated by \"suppr.\")."
+      ),
+      class = "reactable-footnote"
+    ),
+    ns = NS(id)
+  )
 }
 

@@ -84,10 +84,11 @@ cluster_map_server <- function(id, rv, src, var, loc_bnd, hosp_loc, gp) {
 }
 
 # Cluster locations table
-location_table_ui <- function(id) {
+location_table_ui <- function(id, output_name = "loctblempty") {
   card(
     card_header("Locations in cluster"),
     reactable::reactableOutput(NS(id, "loctbl")),
+    conditional_footnote(id, output_name),
     full_screen = TRUE,
     height = "500px",
     class = "clust-row-1"
@@ -115,14 +116,22 @@ location_table_server <- function(id, rv, src) {
         n_suppr = 16
       )
     })
+
+    # Logical output to trigger conditionalPanel()
+    output$loctblempty <- reactive({
+      is.null(rv[[map_id]])
+    })
+
+    outputOptions(output, "loctblempty", suspendWhenHidden = FALSE)
   })
 }
 
 # Cluster table
-cluster_table_ui <- function(id) {
+cluster_table_ui <- function(id, output_name = "clusttblempty") {
   card(
     card_header("Clusters"),
     reactable::reactableOutput(NS(id, "clusttbl")),
+    conditional_footnote(id, output_name),
     full_screen = TRUE,
     min_height = "200px",
     class = "clust-row-2"
@@ -165,6 +174,13 @@ cluster_table_server <- function(id, rv, src) {
         n_suppr = 16
       )
     })
+
+    # Logical output to trigger conditionalPanel()
+    output$clusttblempty <- reactive({
+      is.null(rv[[paste0("clustdata_", src)]]$shapeclust)
+    })
+
+    outputOptions(output, "clusttblempty", suspendWhenHidden = FALSE)
 
     # When cluster table row is selected, update map cluster ID
     observeEvent(reactable::getReactableState("clusttbl"), {
