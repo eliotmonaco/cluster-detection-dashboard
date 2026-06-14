@@ -116,9 +116,9 @@ cluster_map <- function(
   # Add World Cup sites
   wcicon <- leaflet::makeIcon(
     iconUrl = "www/img/futbol-solid.svg",
-    iconWidth = 12,
-    iconHeight = 12,
-    className = "futbol"
+    iconWidth = 16,
+    iconHeight = 16,
+    className = "wc-icon-map"
   )
 
   map <- map |>
@@ -154,10 +154,10 @@ cluster_map <- function(
   # Add hospital locations
   if (!is.null(hospital_locations)) {
     hospicon <- leaflet::makeIcon(
-      iconUrl = "www/img/transparent-square.svg",
-      iconWidth = 12,
-      iconHeight = 12,
-      className = "plus"
+      iconUrl = "www/img/circle-plus.svg",
+      iconWidth = 16,
+      iconHeight = 16,
+      className = "hosp-icon-map"
     )
 
     map <- map |>

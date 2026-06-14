@@ -62,15 +62,15 @@ gp <- list(
   clust = list(
     name = "Syndrome cluster",
     clr = "red", fill = "red", wt = 2,
-    opac1 = .5, opac2 = .1, shp = "square"
+    opac1 = 1, opac2 = .1, shp = "square"
   ),
   hosp = list(
     name = "Hospital",
-    class = "plus-legend"
+    class = "hosp-icon-legend"
   ),
   wc = list(
     name = "World Cup site",
-    class = "wc-legend"
+    class = "wc-icon-legend"
   )
 )
 

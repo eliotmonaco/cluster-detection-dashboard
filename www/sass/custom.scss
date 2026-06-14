@@ -70,53 +70,43 @@ $icon-hosp-fg: #7AB317;
 
 /* ---BODY--- */
 
-/* Cards */
 .card {
   --bs-card-cap-bg: #626f7d;
   --bs-card-cap-color: white;
 }
 
-/* Cluster summary table */
-.clust-smry-tbl .tbl-header {
+.clust-smry-tbl .tbl-header { // Cluster summary table
   border-bottom-color: #555;
 }
 
-/* Hospital legend marker, adapted from https://css-shape.com/plus/ */
-.plus {
-  height: 12px;
-  aspect-ratio: 1;
-  box-shadow: 0 0 0 1px inset $icon-hosp-fg;
-  border-image: conic-gradient($icon-hosp-fg 0 0) 50%/calc(50% - 1px);
-  background-color: $icon-hosp-bg;
+.hosp-icon-legend {
+  height: 16px;
+  width: 16px;
+  background-image: url("../img/circle-plus.svg");
+  background-size: contain;
+  margin: 2px;
 }
 
-.plus-legend {
-  height: 12px;
-  aspect-ratio: 1;
-  box-shadow: 0 0 0 1px inset $icon-hosp-fg;
-  border-image: conic-gradient($icon-hosp-fg 0 0) 50%/calc(50% - 1px);
-  background-color: $icon-hosp-bg;
-  margin: 4px;
-}
-
-/* World Cup site legend marker */
-.wc-legend {
-  height: 12px;
-  width: 12px;
+.wc-icon-legend {
+  height: 16px;
+  width: 16px;
   background-image: url("../img/futbol-solid.svg");
-  margin: 4px;
+  background-size: contain;
+  margin: 2px;
 }
 
-/* Modify reactable scroll bar */
-.rt-table {
+.rt-table { // Prevent scrollbar overlapping table
   padding-right: 10px;
 }
 
-/* Cluster tab titles */
 .cluster-tab-title {
   text-align: center;
   margin-top: 20px;
   margin-bottom: 0;
+}
+
+.reactable-footnote {
+  font-size: .9rem;
 }
 
 /* Example markdown table (About page) */
