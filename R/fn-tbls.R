@@ -54,14 +54,14 @@ cluster_summary_table <- function(df, bg_color, text_color) {
       } else if (nm == "syndrome") {
         reactable::colDef(
           name = mod_col_labels(nm),
-          minWidth = 150,
+          minWidth = 160,
           sticky = "left",
           style = list(borderRight = "1px solid #555")
         )
       } else if (nm == "very_strong_pat") {
         reactable::colDef(
           name = mod_col_labels(nm),
-          minWidth = 50,
+          minWidth = 100,
           style = function(value) {
             ls <- list(borderRight = "1px solid #555")
             if (!is.na(value) && value > 0) {
@@ -74,7 +74,7 @@ cluster_summary_table <- function(df, bg_color, text_color) {
       } else {
         reactable::colDef(
           name = mod_col_labels(nm),
-          minWidth = 50,
+          minWidth = 100,
           style = function(value) {
             if (!is.na(value) && value > 0) {
               list(fontWeight = "bold", background = bg, color = txt)
@@ -187,7 +187,7 @@ syndrome_table <- function(df) {
         ),
         name1 = reactable::colDef(
           name = "Syndrome",
-          minWidth = 150
+          minWidth = 160
         ),
         esspath = reactable::colDef(
           name = "ESSENCE query",
@@ -286,7 +286,7 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
     if (x == "ri_level") {
       reactable::colDef(
         name = names(vars)[vars == x],
-        minWidth = 50,
+        minWidth = 80,
         style = ri_cell_style
       )
     } else if (x %in% c(
@@ -295,13 +295,13 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
     )) {
       reactable::colDef(
         name = names(vars)[vars == x],
-        minWidth = 50,
+        minWidth = 80,
         align = "right"
       )
     } else {
       reactable::colDef(
         name = names(vars)[vars == x],
-        minWidth = 50
+        minWidth = 80
       )
     }
   })
@@ -385,13 +385,13 @@ location_table <- function(
     if (x %in% c("loc_obs", "loc_exp")) {
       reactable::colDef(
         name = names(vars)[vars == x],
-        minWidth = 50,
+        minWidth = 80,
         align = "right"
       )
     } else {
       reactable::colDef(
         name = names(vars)[vars == x],
-        minWidth = 50
+        minWidth = 80
       )
     }
   })
