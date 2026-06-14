@@ -1,7 +1,10 @@
 # Modules for the syndrome info table
 
 syn_info_table_ui <- function(id) {
-  card(reactable::reactableOutput(NS(id, "syntbl")))
+  card(
+    reactable::reactableOutput(NS(id, "syntbl")),
+    class = "syn-info-tbl"
+  )
 }
 
 syn_info_table_server <- function(id, rv) {

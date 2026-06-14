@@ -75,7 +75,8 @@ $icon-hosp-fg: #7AB317;
   --bs-card-cap-color: white;
 }
 
-.clust-smry-tbl .tbl-header { // Cluster summary table
+.clust-smry-tbl .tbl-header,
+.syn-info-tbl .tbl-header { // Cluster summary & syndrome info tables
   border-bottom-color: #555;
 }
 

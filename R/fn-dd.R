@@ -136,6 +136,11 @@ dd_table <- function(df, var, color) {
     c("very_weak", "weak", "moderate", "strong", "very_strong")
   )
 
+  # Function to rename columns
+  mod_col_labels <- function(x) {
+    stringr::str_to_sentence(gsub("_", " ", x))
+  }
+
   # Configure column groups: Study area
   col_groups1 <- list(reactable::colGroup(
     name = "Study area",
@@ -174,7 +179,7 @@ dd_table <- function(df, var, color) {
 
   # Format columns: Main variable
   col_defs1 <- list(reactable::colDef(
-    name = mod_col_labels1(var),
+    name = mod_col_labels(var),
     sticky = "left"
   ))
 

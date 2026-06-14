@@ -54,14 +54,14 @@ cluster_summary_table <- function(df, bg_color, text_color) {
       } else if (nm == "syndrome") {
         reactable::colDef(
           name = mod_col_labels(nm),
-          minWidth = 200,
-          maxWidth = 300,
+          minWidth = 150,
           sticky = "left",
           style = list(borderRight = "1px solid #555")
         )
       } else if (nm == "very_strong_pat") {
         reactable::colDef(
           name = mod_col_labels(nm),
+          minWidth = 50,
           style = function(value) {
             ls <- list(borderRight = "1px solid #555")
             if (!is.na(value) && value > 0) {
@@ -74,6 +74,7 @@ cluster_summary_table <- function(df, bg_color, text_color) {
       } else {
         reactable::colDef(
           name = mod_col_labels(nm),
+          minWidth = 50,
           style = function(value) {
             if (!is.na(value) && value > 0) {
               list(fontWeight = "bold", background = bg, color = txt)
@@ -186,11 +187,11 @@ syndrome_table <- function(df) {
         ),
         name1 = reactable::colDef(
           name = "Syndrome",
-          minWidth = 200,
-          maxWidth = 300
+          minWidth = 150
         ),
         esspath = reactable::colDef(
-          name = "ESSENCE query"
+          name = "ESSENCE query",
+          minWidth = 300
         ),
         krlink = reactable::colDef(
           name = "NSSP Knowledge Repository link",
@@ -198,6 +199,16 @@ syndrome_table <- function(df) {
         )
       ),
       groupBy = "category",
+      defaultColDef = reactable::colDef(
+        vAlign = "center",
+        headerVAlign = "bottom",
+        headerClass = "tbl-header"
+      ),
+      rowStyle = JS( # style row group
+        "function(rowInfo) {
+          if (rowInfo.level == 0) return {background: '#EEE'}
+        }"
+      ),
       defaultExpanded = TRUE,
       rownames = FALSE,
       pagination = FALSE,
@@ -275,6 +286,7 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
     if (x == "ri_level") {
       reactable::colDef(
         name = names(vars)[vars == x],
+        minWidth = 50,
         style = ri_cell_style
       )
     } else if (x %in% c(
@@ -283,10 +295,14 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
     )) {
       reactable::colDef(
         name = names(vars)[vars == x],
+        minWidth = 50,
         align = "right"
       )
     } else {
-      reactable::colDef(name = names(vars)[vars == x])
+      reactable::colDef(
+        name = names(vars)[vars == x],
+        minWidth = 50
+      )
     }
   })
 
@@ -295,6 +311,11 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
   df |>
     reactable::reactable(
       columns = col_defs,
+      defaultColDef = reactable::colDef(
+        vAlign = "center",
+        headerVAlign = "bottom",
+        headerClass = "tbl-header"
+      ),
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
@@ -364,22 +385,34 @@ location_table <- function(
     if (x %in% c("loc_obs", "loc_exp")) {
       reactable::colDef(
         name = names(vars)[vars == x],
+        minWidth = 50,
         align = "right"
       )
     } else {
-      reactable::colDef(name = names(vars)[vars == x])
+      reactable::colDef(
+        name = names(vars)[vars == x],
+        minWidth = 50
+      )
     }
   })
 
   names(col_defs) <- colnames(df)
 
   if (src == "hospital") {
-    col_defs$loc_id <- reactable::colDef(name = "Hospital", minWidth = 200)
+    col_defs$loc_id <- reactable::colDef(
+      name = "Hospital",
+      minWidth = 120
+    )
   }
 
   df |>
     reactable::reactable(
       columns = col_defs,
+      defaultColDef = reactable::colDef(
+        vAlign = "center",
+        headerVAlign = "bottom",
+        headerClass = "tbl-header"
+      ),
       pagination = FALSE,
       highlight = TRUE,
       compact = TRUE,
