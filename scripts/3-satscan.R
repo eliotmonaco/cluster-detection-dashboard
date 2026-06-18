@@ -218,10 +218,6 @@ log <- c(log, "", "---------- DATASETS ----------\n", tally, "")
 
 writeLines(log, paste0(dir_data, "log.txt"))
 
-# Cluster summary ---------------------------------------------------------
-
-clust_smry <- summarize_clusters(ssresults, syn)
-
 # Save --------------------------------------------------------------------
 
 syndata <- list(
@@ -230,13 +226,8 @@ syndata <- list(
   time_series = ts,
   data_details = dd,
   data_details_error = dderror,
-  satscan_results = ssresults,
-  cluster_summary = clust_smry
+  satscan_results = ssresults
 )
 
 saveRDS(syndata, paste0(dir_data, "syndrome_data.rds"))
-saveRDS(
-  clust_smry,
-  paste0("data/prep/cluster-summaries/clust-smry-", end_date, ".rds")
-)
 

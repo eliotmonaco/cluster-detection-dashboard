@@ -1,8 +1,5 @@
-# Configure and save final datasets for dashboard
+# Create aux data
 
-# Aux data ----------------------------------------------------------------
-
-# Create auxiliary data
 auxdata <- list()
 
 # Date of update
@@ -90,35 +87,5 @@ auxdata$graph <- list(
   )
 )
 
-# Cluster timeline --------------------------------------------------------
-
-files <- list.files("data/prep/cluster-summaries", full.names = TRUE)
-
-clust_smries <- lapply(files, \(x) {
-  date <- str_extract(x, regex("\\d{4}-\\d{2}-\\d{2}"))
-
-  df <- readRDS(x)
-
-  df |>
-    mutate(date = as.Date(date))
-}) |>
-  list_rbind()
-
-p1 <- clust_smries |>
-  config_clusters(data_source = "patient") |>
-  cluster_timeline(colors = auxdata$ri_bg)
-
-p2 <- clust_smries |>
-  config_clusters(data_source = "hospital") |>
-  cluster_timeline(colors = auxdata$ri_bg)
-
-syndata$cluster_timeline <- list(
-  patient = p1,
-  hospital = p2
-)
-
-# Save --------------------------------------------------------------------
-
-saveRDS(syndata, "data/dashboard/syndrome_data.rds")
 saveRDS(auxdata, "data/dashboard/aux_data.rds")
 

@@ -772,3 +772,26 @@ integer_scale <- function(n) {
   }
 }
 
+# Filter syndrome summary table by RI minimum (copied from `fn-tbls.R`)
+filter_cluster_summary <- function(df, ri_min) {
+  lvl <- list(
+    "very_weak" = 1,
+    "weak" = 2,
+    "moderate" = 3,
+    "strong" = 4,
+    "very_strong" = 5
+  )
+
+  if (ri_min < 2) {
+    return(df)
+  }
+
+  lvl <- lvl[lvl < ri_min]
+
+  p <- paste(paste0("^", names(lvl)), collapse = "|")
+
+  vars <- colnames(df)[!grepl(p, colnames(df))]
+
+  df[, vars]
+}
+
