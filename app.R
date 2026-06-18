@@ -12,18 +12,9 @@ library(reactable)
 library(leaflet)
 library(markdown)
 
-source("R/mod-inputs.R")
-source("R/mod-clust-smry.R")
-source("R/mod-clust-detail.R")
-source("R/mod-clust-timeline.R")
-source("R/mod-dd.R")
-source("R/mod-ts.R")
-source("R/mod-syn.R")
-source("R/fn-inputs.R")
-source("R/fn-clust-map.R")
-source("R/fn-tbls.R")
-source("R/fn-dd.R")
-source("R/fn-ts.R")
+files <- list.files("R", pattern = "^(fn|mod)-", full.names = TRUE)
+
+lapply(files, source)
 
 # Import dashboard data
 syndata <- readRDS("data/dashboard/syndrome_data.rds")
@@ -41,7 +32,7 @@ ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 
 ui <- page_navbar(
 
-  title = "KC Syndromic Cluster Detection Dashboard",
+  title = "KC Syndromic Cluster Detection",
   id = "nav",
   theme = bs_theme("navbar-bg" = "#0d3769") |>
     bs_add_rules(sass::sass_file("www/sass/custom.scss")),
@@ -52,14 +43,16 @@ ui <- page_navbar(
     layout_sidebar(
       sidebar = sidebar(
         date = auxdata$date_updated,
-        ri_select_ui("smry", auxdata$ri_levels)
+        ri_select_ui("smry", auxdata$ri_levels),
+        compact_toggle_ui("smry")
       ),
+      md_text_ui("smry"),
       cluster_summary_ui("smry")
     )
   ),
 
   nav_panel(
-    "Active clusters detail",
+    "Clusters detail",
     layout_sidebar(
       sidebar = sidebar(
         date = auxdata$date_updated,
@@ -92,6 +85,7 @@ ui <- page_navbar(
 
   nav_panel(
     "Cluster timeline",
+    md_text_ui("tmln"),
     navset_tab(
       nav_panel(
         "Clusters by patient location",
@@ -112,10 +106,10 @@ ui <- page_navbar(
         syn_select_ui("dd", auxdata$syn),
         ri_select_ui("dd", auxdata$ri_levels)
       ),
+      md_text_ui("dd"),
       navset_tab(
         nav_panel(
           "Data by patient location",
-          card(shiny::markdown(readLines("R/text-dd.md"))),
           dd_ui("pat-res", "Residence"),
           dd_ui("pat-travel", "Travel"),
           dd_ui("pat-sex", "Sex"),
@@ -123,7 +117,6 @@ ui <- page_navbar(
         ),
         nav_panel(
           "Data by hospital location",
-          card(shiny::markdown(readLines("R/text-dd.md"))),
           dd_ui("hosp-res", "Residence"),
           dd_ui("hosp-travel", "Travel"),
           dd_ui("hosp-sex", "Sex"),
@@ -192,10 +185,17 @@ server <- function(input, output, session) {
   # Days selection
   days_select_server("ts", rv)
 
+  # Compact table toggle
+  compact_toggle_server("smry", rv)
+
   # TEXT
 
   syn_heading_server("pat", rv)
   syn_heading_server("hosp", rv)
+
+  md_text_server("smry", file = "R/text.md", delim = "[smry]")
+  md_text_server("tmln", file = "R/text.md", delim = "[tmln]")
+  md_text_server("dd", file = "R/text.md", delim = "[dd]")
 
   # PLOTS
 

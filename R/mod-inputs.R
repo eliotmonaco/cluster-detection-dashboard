@@ -115,11 +115,8 @@ ri_select_ui <- function(id, choices) {
       label = input_tooltip(
         "Minimum recurrence interval (RI)",
         paste(
-          "The recurrence interval (RI) reflects the frequency that a cluster",
-          "of the observed likelihood would occur by chance. An RI of 100 days",
-          "indicates that a false positive is expected once in 100 days, while",
-          "an RI of 100 years indicates that a false positive is expected once",
-          "in 100 years."
+          "Select a minimum recurrence interval (RI) to show only clusters of",
+          "that level or higher."
         )
       ),
       choices = choices,
@@ -141,7 +138,7 @@ ri_select_server <- function(id, rv) {
   })
 }
 
-# Map zoom level selection
+# Zoom level selection (cluster maps)
 zoom_select_ui <- function(id) {
   numericInput(
     inputId = NS(id, "zoom"),
@@ -162,7 +159,7 @@ zoom_select_server <- function(id, rv) {
   })
 }
 
-# Days selection
+# Days selection (time series plots)
 days_select_ui <- function(id, choices) {
   radioButtons(
     inputId = NS(id, "days"),
@@ -178,6 +175,30 @@ days_select_server <- function(id, rv) {
   moduleServer(id, function(input, output, session) {
     observe({
       rv$days <- as.numeric(input$days)
+    })
+  })
+}
+
+# Keep/remove rows with no clusters (cluster summary table)
+compact_toggle_ui <- function(id) {
+  checkboxInput(
+    inputId = NS(id, "compact"),
+    label = input_tooltip(
+      "Show all syndromes",
+      paste(
+        "By default, only syndromes with active clusters are shown. Check the",
+        "box to show all syndromes, including those with no active clusters",
+        "detected."
+      )
+    ),
+    value = FALSE
+  )
+}
+
+compact_toggle_server <- function(id, rv) {
+  moduleServer(id, function(input, output, session) {
+    observe({
+      rv$compact <- !input$compact
     })
   })
 }

@@ -18,7 +18,8 @@ cluster_summary_server <- function(id, rv) {
     clust_smry <- reactive({
       filter_cluster_summary(
         rv$data$cluster_summary,
-        ri_min = rv$ri
+        ri_min = rv$ri,
+        compact = rv$compact
       )
     })
 

@@ -1,1 +1,0 @@
-These tables present data for the full population during the study period along with data for each cluster population during the cluster period for comparison. If no clusters were detected, only data for the full population is presented.

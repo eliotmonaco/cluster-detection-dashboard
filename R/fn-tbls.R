@@ -1,7 +1,7 @@
 # Functions for cluster summary, cluster detail, and syndrome info tables
 
 # Filter syndrome summary table by RI minimum
-filter_cluster_summary <- function(df, ri_min) {
+filter_cluster_summary <- function(df, ri_min, compact = FALSE) {
   lvl <- list(
     "very_weak" = 1,
     "weak" = 2,
@@ -10,17 +10,26 @@ filter_cluster_summary <- function(df, ri_min) {
     "very_strong" = 5
   )
 
-  if (ri_min < 2) {
-    return(df)
+  if (ri_min > 1) {
+    lvl <- lvl[lvl < ri_min]
+
+    p <- paste(paste0("^", names(lvl)), collapse = "|")
+
+    vars <- colnames(df)[!grepl(p, colnames(df))]
+  } else {
+    vars <- colnames(df)
   }
 
-  lvl <- lvl[lvl < ri_min]
-
-  p <- paste(paste0("^", names(lvl)), collapse = "|")
-
-  vars <- colnames(df)[!grepl(p, colnames(df))]
-
-  df[, vars]
+  if (compact) {
+    df[, vars] |>
+      dplyr::mutate(
+        total = rowSums(dplyr::across(dplyr::matches("_pat$|_hosp$")))
+      ) |>
+      dplyr::filter_out(total == 0) |>
+      dplyr::select(-total)
+  } else {
+    df[, vars]
+  }
 }
 
 # Table showing the number of clusters detected for each syndrome
@@ -429,14 +438,6 @@ update_cluster_table_id <- function(id) {
   } else {
     id
   }
-}
-
-# Return a heading tag for a syndrome
-syndrome_title_tag <- function(x, df) {
-  shiny::tags$h3(
-    df[df$abbr == x, "name1"],
-    class = "cluster-tab-title"
-  )
 }
 
 # Add footnote to reactable output in UI using conditionalPanel()

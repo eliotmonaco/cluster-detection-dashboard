@@ -1,19 +1,5 @@
 # Modules for cluster maps and detail tables
 
-# Syndrome heading
-syn_heading_ui <- function(id) {
-  htmlOutput(NS(id, "synheader"))
-}
-
-syn_heading_server <- function(id, rv) {
-  moduleServer(id, function(input, output, session) {
-    # Syndrome heading on clusters page
-    output$synheader <- renderUI({
-      syndrome_title_tag(rv$syn, rv$data$syndromes)
-    })
-  })
-}
-
 # Cluster map
 cluster_map_ui <- function(id) {
   card(

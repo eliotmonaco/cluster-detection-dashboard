@@ -43,13 +43,9 @@ A cluster is detected if a region has a higher proportion of visits than all oth
 
 ### Interpreting the results
 
-The recurrence interval (RI) is an indicator of the strength of a cluster. From the SaTScan User Guide:
+The recurrence interval (RI) is an indicator of relative certainty that a detected cluster is a true positive. More specifically, the RI reflects the frequency that a cluster of the observed likelihood would occur by chance. An RI of 100 days indicates that a false positive is expected once in 100 days, while an RI of 100 years indicates that a false positive is expected once in 100 years.[^userguide]
 
->For prospective analyses, the recurrence interval is shown as an alternative to the p-value. The measure reflects how often a cluster of the observed or larger likelihood will be observed by chance, assuming that analyses are repeated on a regular basis with a periodicity equal to the specified time interval length. For example, if the observed p-value is used as the cut-off for a signal and if the recurrence interval is once in 14 months, than the expected number of false signals in any 14 month period is one.[^userguide]
-
-The dashboard uses the following guidance from the Bureau of Communicable Disease at the New York City Department of Health and Mental Hygiene to define RI levels.
-
->Consider an RI of 100 to < 365 days as a weak cluster, an RI of 365 days to < 5 years as a moderate cluster, an RI of 5 to < 100 years as a strong cluster, and an RI of ≥ 100 years as a very strong cluster.[^lev2024]
+This dashboard groups RIs into five levels, from very weak to very strong, based on interpretation guidelines from the Bureau of Communicable Disease at the New York City Department of Health and Mental Hygiene.[^lev2024]
 
 The results of cluster analyses are meant to be considered in combination with other data sources, e.g., confirmed case counts, to determine the risk to the public of a syndrome cluster.
 
