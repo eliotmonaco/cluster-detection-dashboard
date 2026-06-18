@@ -20,11 +20,11 @@ clust_smries <- lapply(files, \(x) {
 
 p1 <- clust_smries |>
   config_clusters(data_source = "patient") |>
-  cluster_timeline(colors = auxdata$ri_bg)
+  cluster_timeline_plot(colors = auxdata$ri_bg)
 
 p2 <- clust_smries |>
   config_clusters(data_source = "hospital") |>
-  cluster_timeline(colors = auxdata$ri_bg)
+  cluster_timeline_plot(colors = auxdata$ri_bg)
 
 syndata$cluster_timeline <- list(
   patient = p1,

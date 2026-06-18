@@ -726,7 +726,7 @@ config_clusters <- function(df, data_source = c("hospital", "patient")) {
 }
 
 # Create cluster timeline
-cluster_timeline <- function(df, colors) {
+cluster_timeline_plot <- function(df, colors) {
   lvl <- c("very_weak", "weak", "moderate", "strong", "very_strong")
 
   df |>
@@ -758,6 +758,9 @@ cluster_timeline <- function(df, colors) {
       x = stringr::str_to_sentence,
       y = stringr::str_to_sentence,
       fill = "RI level"
+    ) +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = .5)
     )
 }
 

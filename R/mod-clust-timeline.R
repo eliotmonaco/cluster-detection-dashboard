@@ -2,7 +2,7 @@
 
 cluster_timeline_ui <- function(id) {
   card(
-    plotOutput(NS(id, "clusttimeline"), height = "5000px"),
+    plotOutput(NS(id, "clusttimeline"), height = "7000px"),
     class = "clust-timeline"
   )
 }
