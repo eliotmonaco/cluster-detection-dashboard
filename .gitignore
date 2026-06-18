@@ -1,9 +1,11 @@
 .posit/
 .Rproj.user/
+rsconnect/
 data/
 extras/
 
 *.Rproj
 *.html
 
+manifest.json
 
