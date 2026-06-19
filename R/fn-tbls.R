@@ -227,7 +227,7 @@ syndrome_table <- function(df) {
 }
 
 # Table with cluster data
-cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
+cluster_table <- function(df, bg_color, text_color, n_suppr = NULL) {
   if (is.null(df)) {
     return(NULL)
   }
@@ -260,16 +260,23 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = 0) {
         ~ prettyNum(signif(.x, 2), scientific = TRUE)
       ),
       ri_level = stringr::str_to_sentence(ri_level),
-      expected = setmeup::round_ties_away(expected, 0),
-      dplyr::across(
-        c(observed, expected),
-        ~ ifelse(observed < n_suppr, "suppr.", prettyNum(.x, big.mark = ","))
-      ),
-      dplyr::across(
-        dplyr::where(is.numeric),
-        ~ prettyNum(.x, big.mark = ",")
-      )
+      expected = setmeup::round_ties_away(expected, 0)
     )
+
+  if (!is.null(n_suppr)) {
+    # Suppress counts
+    df <- df |>
+      dplyr::mutate(
+        expected = suppress_count(observed, n = n_suppr, suppr = expected),
+        observed = suppress_count(observed, n = n_suppr)
+      )
+  }
+
+  df <- df |>
+    dplyr::mutate(dplyr::across(
+      dplyr::where(is.numeric),
+      ~ prettyNum(.x, big.mark = ",")
+    ))
 
   # Function to style `ri_level` column
   fn <- function(bg, txt) {
@@ -381,12 +388,23 @@ location_table <- function(
     dplyr::mutate(
       kc = stringr::str_to_sentence(kc),
       loc_exp = setmeup::round_ties_away(loc_exp, 0),
-      loc_ode = setmeup::round_ties_away(loc_ode, 2),
-      dplyr::across(
-        c(loc_obs, loc_exp),
-        ~ ifelse(loc_obs < n_suppr, "suppr.", prettyNum(.x, big.mark = ","))
+      loc_ode = setmeup::round_ties_away(loc_ode, 2)
+    )
+
+  if (!is.null(n_suppr)) {
+    # Suppress counts
+    df <- df |>
+      dplyr::mutate(
+        loc_exp = suppress_count(loc_obs, n = n_suppr, suppr = loc_exp),
+        loc_obs = suppress_count(loc_obs, n = n_suppr)
       )
-    ) |>
+  }
+
+  df <- df |>
+    dplyr::mutate(dplyr::across(
+      dplyr::where(is.numeric),
+      ~ prettyNum(.x, big.mark = ",")
+    )) |>
     dplyr::arrange(loc_id)
 
   # Style columns
@@ -429,6 +447,17 @@ location_table <- function(
     )
 }
 
+# Suppress counts
+# x = the value to evaluate for suppression
+# n = the suppression threshold
+# suppr = the value to suppress
+suppress_count <- function(x, n, suppr = x) {
+  ifelse(
+    x < n & x > 0,
+    yes = "*",
+    no = prettyNum(suppr, big.mark = ","))
+}
+
 # Get the cluster table ID from the map cluster ID (cannot be NULL)
 update_cluster_table_id <- function(id) {
   if (is.null(id)) {
@@ -441,15 +470,15 @@ update_cluster_table_id <- function(id) {
 }
 
 # Add footnote to reactable output in UI using conditionalPanel()
-conditional_footnote <- function(id, output_name) {
+conditional_footnote <- function(id, output_name, n_suppr) {
   cond <- paste0("!output.", output_name)
 
   conditionalPanel(
     condition = cond,
     div(
-      paste(
-        "When visit counts are below 16, observed and expected values are",
-        "suppressed (indicated by \"suppr.\")."
+      paste0(
+        "When observed counts are between 0 and ", n_suppr, ", observed and ",
+        "expected values are suppressed (indicated by \"*\")."
       ),
       class = "reactable-footnote"
     ),

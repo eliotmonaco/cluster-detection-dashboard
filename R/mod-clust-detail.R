@@ -74,7 +74,7 @@ location_table_ui <- function(id, output_name = "loctblempty") {
   card(
     card_header("Locations in cluster"),
     reactable::reactableOutput(NS(id, "loctbl")),
-    conditional_footnote(id, output_name),
+    # conditional_footnote(id, output_name, n_suppr = 16),
     full_screen = TRUE,
     height = "500px",
     class = "clust-row-1"
@@ -98,8 +98,8 @@ location_table_server <- function(id, rv, src) {
       location_table(
         rv[[paste0("clustdata_", src)]]$gis,
         id = rv[[map_id]],
-        src = src,
-        n_suppr = 16
+        src = src#,
+        # n_suppr = 16
       )
     })
 
@@ -117,7 +117,7 @@ cluster_table_ui <- function(id, output_name = "clusttblempty") {
   card(
     card_header("Clusters"),
     reactable::reactableOutput(NS(id, "clusttbl")),
-    conditional_footnote(id, output_name),
+    # conditional_footnote(id, output_name, n_suppr = 16),
     full_screen = TRUE,
     min_height = "200px",
     class = "clust-row-2"
@@ -156,8 +156,8 @@ cluster_table_server <- function(id, rv, src) {
       cluster_table(
         clustdata()$shapeclust,
         bg_color = rv$aux$ri_bg,
-        text_color = rv$aux$ri_text,
-        n_suppr = 16
+        text_color = rv$aux$ri_text#,
+        # n_suppr = 16
       )
     })
 

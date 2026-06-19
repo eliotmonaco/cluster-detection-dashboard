@@ -39,7 +39,7 @@ ui <- page_navbar(
   header = useBusyIndicators(),
 
   nav_panel(
-    "Active clusters summary",
+    "Active cluster summary",
     layout_sidebar(
       sidebar = sidebar(
         date = auxdata$date_updated,
@@ -52,7 +52,7 @@ ui <- page_navbar(
   ),
 
   nav_panel(
-    "Clusters detail",
+    "Cluster detail",
     layout_sidebar(
       sidebar = sidebar(
         date = auxdata$date_updated,
