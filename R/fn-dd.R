@@ -39,31 +39,43 @@ get_cluster_dates <- function(df, cluster_id) {
     as.Date(format = "%Y/%m/%d")
 }
 
-# Summarize all data from the data details table
+# Summarize visits for one syndrome by one grouping variable for the full study
+# population
 # df = data details table for a specific syndrome
 # var = a grouping variable
-dd_full_summary <- function(df, var) {
+dd_full_summary <- function(df, var, n_suppr = NULL) {
+  total <- nrow(df)
+
+  df <- df |>
+    dplyr::count(.data[[var]], .drop = FALSE)
+
+  if (!is.null(n_suppr)) {
+    # Suppress counts
+    df <- df |>
+      dplyr::mutate(n = suppress_count(n, n = n_suppr, sep = FALSE))
+  }
+
   df |>
-    dplyr::count(.data[[var]], .drop = FALSE) |>
-    dplyr::mutate(pct = setmeup::pct(n, nrow(df)) / 100) |>
+    dplyr::mutate(
+      pct = setmeup::pct(suppressWarnings(as.numeric(n)), total)
+    ) |>
     dplyr::arrange(.data[[var]])
 }
 
-# Summarize a single cluster from the data details table
+# Summarize visits for one syndrome by one grouping variable for a single
+# cluster
 # df = data details table for a specific syndrome
 # var = a grouping variable
-dd_cluster_summary <- function(df, var, loc_var, loc_ids, cluster_dates) {
+dd_cluster_summary <- function(
+  df, var, loc_var, loc_ids, cluster_dates, n_suppr = NULL
+) {
   df <- df |>
     dplyr::filter(
       .data[[loc_var]] %in% loc_ids,
       date >= cluster_dates[1],
       date <= cluster_dates[2]
-    )
-
-  df |>
-    dplyr::count(.data[[var]], .drop = FALSE) |>
-    dplyr::mutate(pct = setmeup::pct(n, nrow(df)) / 100) |>
-    dplyr::arrange(.data[[var]])
+    ) |>
+    dd_full_summary(var, n_suppr)
 }
 
 # Assemble the full summary and cluster summaries
@@ -71,7 +83,8 @@ assemble_dd_summaries <- function(
   data_details,
   cluster_data,
   var,
-  src = c("hospital", "patient")
+  src = c("hospital", "patient"),
+  n_suppr = NULL
 ) {
   src <- match.arg(src)
 
@@ -80,7 +93,8 @@ assemble_dd_summaries <- function(
     return(NULL)
   }
 
-  smry1 <- dd_full_summary(data_details, var)
+  # Summarize data for full population
+  smry1 <- dd_full_summary(data_details, var, n_suppr)
 
   cluster_ids <- cluster_data$shapeclust$cluster
 
@@ -88,7 +102,7 @@ assemble_dd_summaries <- function(
 
   sfx <- paste0(cluster_ids, "_(", ri_levels, ")")
 
-  # Return smry1 if no clusters were detected
+  # Return `smry1` if no clusters were detected
   if (length(cluster_ids) == 0) {
     return(smry1)
   }
@@ -110,7 +124,8 @@ assemble_dd_summaries <- function(
       var = var,
       loc_var = locvar,
       loc_ids = location_ids,
-      cluster_dates = dates
+      cluster_dates = dates,
+      n_suppr = n_suppr
     )
   })
 
@@ -191,7 +206,12 @@ dd_table <- function(df, var, color) {
   col_defs2 <- lapply(cols, \(x) {
     reactable::colDef(
       name = "N",
-      format = reactable::colFormat(separators = TRUE),
+      align = "right",
+      cell = \(value) ifelse(
+        is.numeric(suppressWarnings(as.numeric(value))),
+        yes = prettyNum(value, big.mark = ","),
+        no = value
+      ),
       style = list(borderLeft = "1px solid #ddd")
     )
   })
@@ -208,9 +228,12 @@ dd_table <- function(df, var, color) {
   col_defs3 <- lapply(cols, \(x) {
     reactable::colDef(
       name = "Pct",
-      format = reactable::colFormat(percent = TRUE),
-      style = function(value) {
-        bg <- orange_pal(value)
+      align = "right",
+      cell = \(value) ifelse(is.na(value), "-", paste0(value, "%")),
+      style = \(value) {
+        bg <- ifelse(
+          is.na(value), "#eee", orange_pal(as.numeric(value / 100))
+        )
 
         clr <- setmeup::contrast_color(bg)
 

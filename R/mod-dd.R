@@ -20,7 +20,8 @@ dd_server <- function(id, rv, src, var) {
         assemble_dd_summaries(
           cluster_data = rv[[paste0("clustdata_", src)]],
           var = var,
-          src = src
+          src = src#,
+          # n_suppr = 16
         )
     })
 

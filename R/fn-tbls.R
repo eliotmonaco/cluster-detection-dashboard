@@ -451,11 +451,14 @@ location_table <- function(
 # x = the value to evaluate for suppression
 # n = the suppression threshold
 # suppr = the value to suppress
-suppress_count <- function(x, n, suppr = x) {
-  ifelse(
-    x < n & x > 0,
-    yes = "*",
-    no = prettyNum(suppr, big.mark = ","))
+suppress_count <- function(x, n, suppr = x, sep = TRUE) {
+  if (sep) {
+    no_val <- prettyNum(suppr, big.mark = ",")
+  } else {
+    no_val <- suppr
+  }
+
+  ifelse(x < n & x > 0, yes = "*", no = no_val)
 }
 
 # Get the cluster table ID from the map cluster ID (cannot be NULL)
