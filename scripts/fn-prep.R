@@ -745,8 +745,8 @@ cluster_timeline_plot <- function(df, colors) {
       axes = "all_x"
     ) +
     ggplot2::scale_x_date(
-      date_breaks = "1 day",
-      date_labels = "%b %d"
+      breaks = sort(unique(df$date)),
+      date_labels = "%b %d",
     ) +
     ggplot2::scale_y_continuous(breaks = integer_scale()) +
     ggplot2::scale_fill_manual(
