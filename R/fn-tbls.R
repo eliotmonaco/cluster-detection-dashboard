@@ -155,26 +155,6 @@ filter_cluster_data <- function(ls, ri_min) {
   })
 }
 
-# Add buffer to single location clusters
-expand_point_clusters <- function(ls) {
-  if (!is.null(ls$shapeclust)) {
-    # Find clusters with only 1 location
-    clust <- ls$gis$cluster
-
-    clust <- clust[!clust %in% clust[duplicated(clust)]]
-
-    # Expand cluster polygons for visibility on map
-    ls$shapeclust <- ls$shapeclust |>
-      dplyr::mutate(geometry = dplyr::if_else(
-        cluster %in% clust,
-        sf::st_buffer(geometry, dist = 2000),
-        geometry
-      ))
-  }
-
-  ls
-}
-
 # Syndrome table with query names and KR links
 syndrome_table <- function(df) {
   df <- df |>
@@ -227,7 +207,8 @@ syndrome_table <- function(df) {
 }
 
 # Table with cluster data
-cluster_table <- function(df, bg_color, text_color, n_suppr = NULL) {
+# suppr = the suppression level (counts below this number will be suppressed)
+cluster_table <- function(df, bg_color, text_color, suppr = NULL) {
   if (is.null(df)) {
     return(NULL)
   }
@@ -263,13 +244,23 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = NULL) {
       expected = setmeup::round_ties_away(expected, 0)
     )
 
-  if (!is.null(n_suppr)) {
-    # Suppress counts
-    df <- df |>
-      dplyr::mutate(
-        expected = suppress_count(observed, n = n_suppr, suppr = expected),
-        observed = suppress_count(observed, n = n_suppr)
-      )
+  if (!is.null(suppr)) {
+    # Suppress values in `expected`
+    df <- suppress_df(
+      df,
+      var = "observed",
+      n = suppr,
+      var_suppr = "expected",
+      sep = TRUE
+    )
+
+    # Suppress counts in `observed`
+    df <- suppress_df(
+      df,
+      var = "observed",
+      n = suppr,
+      sep = TRUE
+    )
   }
 
   df <- df |>
@@ -342,11 +333,9 @@ cluster_table <- function(df, bg_color, text_color, n_suppr = NULL) {
 }
 
 # Table with location data for a given cluster
+# suppr = the suppression level (counts below this number will be suppressed)
 location_table <- function(
-    df,
-    id = NULL,
-    src = c("patient", "hospital"),
-    n_suppr = 0
+    df, id = NULL, src = c("patient", "hospital"), suppr = NULL
 ) {
   if (is.null(id)) {
     return(NULL)
@@ -391,13 +380,25 @@ location_table <- function(
       loc_ode = setmeup::round_ties_away(loc_ode, 2)
     )
 
-  if (!is.null(n_suppr)) {
-    # Suppress counts
-    df <- df |>
-      dplyr::mutate(
-        loc_exp = suppress_count(loc_obs, n = n_suppr, suppr = loc_exp),
-        loc_obs = suppress_count(loc_obs, n = n_suppr)
-      )
+  if (!is.null(suppr)) {
+    # Suppress values in `loc_exp`
+    df <- suppress_df(
+      df,
+      var = "loc_obs",
+      n = suppr,
+      var_suppr = "loc_exp",
+      sep = TRUE,
+      sec = TRUE
+    )
+
+    # Suppress counts in `loc_obs`
+    df <- suppress_df(
+      df,
+      var = "loc_obs",
+      n = suppr,
+      sep = TRUE,
+      sec = TRUE
+    )
   }
 
   df <- df |>
@@ -447,20 +448,6 @@ location_table <- function(
     )
 }
 
-# Suppress counts
-# x = the value to evaluate for suppression
-# n = the suppression threshold
-# suppr = the value to suppress
-suppress_count <- function(x, n, suppr = x, sep = TRUE) {
-  if (sep) {
-    no_val <- prettyNum(suppr, big.mark = ",")
-  } else {
-    no_val <- suppr
-  }
-
-  ifelse(x < n & x > 0, yes = "*", no = no_val)
-}
-
 # Get the cluster table ID from the map cluster ID (cannot be NULL)
 update_cluster_table_id <- function(id) {
   if (is.null(id)) {
@@ -473,14 +460,15 @@ update_cluster_table_id <- function(id) {
 }
 
 # Add footnote to reactable output in UI using conditionalPanel()
-conditional_footnote <- function(id, output_name, n_suppr) {
+# suppr = the suppression level (counts below this number will be suppressed)
+conditional_footnote <- function(id, output_name, suppr) {
   cond <- paste0("!output.", output_name)
 
   conditionalPanel(
     condition = cond,
     div(
       paste0(
-        "When observed counts are between 0 and ", n_suppr, ", observed and ",
+        "When observed counts are between 0 and ", suppr, ", observed and ",
         "expected values are suppressed (indicated by \"*\")."
       ),
       class = "reactable-footnote"

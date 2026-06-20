@@ -1,5 +1,25 @@
 # Functions for cluster map
 
+# Add buffer to single location clusters
+expand_point_clusters <- function(ls) {
+  if (!is.null(ls$shapeclust)) {
+    # Find clusters with only 1 location
+    clust <- ls$gis$cluster
+
+    clust <- clust[!clust %in% clust[duplicated(clust)]]
+
+    # Expand cluster polygons for visibility on map
+    ls$shapeclust <- ls$shapeclust |>
+      dplyr::mutate(geometry = dplyr::if_else(
+        cluster %in% clust,
+        sf::st_buffer(geometry, dist = 2000),
+        geometry
+      ))
+  }
+
+  ls
+}
+
 # Filter location geometries by cluster
 get_cluster_boundaries <- function(ls, locations, var) {
   clust <- ls$shapeclust # contains clusters

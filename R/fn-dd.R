@@ -43,16 +43,15 @@ get_cluster_dates <- function(df, cluster_id) {
 # population
 # df = data details table for a specific syndrome
 # var = a grouping variable
-dd_full_summary <- function(df, var, n_suppr = NULL) {
+# suppr = the suppression level (counts below this number will be suppressed)
+dd_full_summary <- function(df, var, suppr = NULL) {
   total <- nrow(df)
 
   df <- df |>
     dplyr::count(.data[[var]], .drop = FALSE)
 
-  if (!is.null(n_suppr)) {
-    # Suppress counts
-    df <- df |>
-      dplyr::mutate(n = suppress_count(n, n = n_suppr, sep = FALSE))
+  if (!is.null(suppr)) {
+    df <- suppress_df(df, var = "n", n = suppr, sec = TRUE)
   }
 
   df |>
@@ -67,7 +66,7 @@ dd_full_summary <- function(df, var, n_suppr = NULL) {
 # df = data details table for a specific syndrome
 # var = a grouping variable
 dd_cluster_summary <- function(
-  df, var, loc_var, loc_ids, cluster_dates, n_suppr = NULL
+  df, var, loc_var, loc_ids, cluster_dates, suppr = NULL
 ) {
   df <- df |>
     dplyr::filter(
@@ -75,7 +74,7 @@ dd_cluster_summary <- function(
       date >= cluster_dates[1],
       date <= cluster_dates[2]
     ) |>
-    dd_full_summary(var, n_suppr)
+    dd_full_summary(var = var, suppr = suppr)
 }
 
 # Assemble the full summary and cluster summaries
@@ -84,7 +83,7 @@ assemble_dd_summaries <- function(
   cluster_data,
   var,
   src = c("hospital", "patient"),
-  n_suppr = NULL
+  suppr = NULL
 ) {
   src <- match.arg(src)
 
@@ -94,7 +93,7 @@ assemble_dd_summaries <- function(
   }
 
   # Summarize data for full population
-  smry1 <- dd_full_summary(data_details, var, n_suppr)
+  smry1 <- dd_full_summary(data_details, var, suppr)
 
   cluster_ids <- cluster_data$shapeclust$cluster
 
@@ -125,7 +124,7 @@ assemble_dd_summaries <- function(
       loc_var = locvar,
       loc_ids = location_ids,
       cluster_dates = dates,
-      n_suppr = n_suppr
+      suppr = suppr
     )
   })
 
