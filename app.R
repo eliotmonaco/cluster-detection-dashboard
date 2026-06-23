@@ -63,10 +63,10 @@ ui <- page_navbar(
         ri_select_ui("synclust", auxdata$ri_levels),
         zoom_select_ui("synclust")
       ),
+      syn_heading_ui("synclust"),
       navset_tab(
         nav_panel(
           "Clusters by patient location",
-          syn_heading_ui("pat"),
           layout_column_wrap(
             cluster_map_ui("pat"),
             location_table_ui("pat", suppr = suppr_lvl)
@@ -75,7 +75,6 @@ ui <- page_navbar(
         ),
         nav_panel(
           "Clusters by hospital location",
-          syn_heading_ui("hosp"),
           layout_column_wrap(
             cluster_map_ui("hosp"),
             location_table_ui("hosp", suppr = suppr_lvl)
@@ -194,8 +193,7 @@ server <- function(input, output, session) {
 
   # TEXT
 
-  syn_heading_server("pat", rv)
-  syn_heading_server("hosp", rv)
+  syn_heading_server("synclust", rv)
 
   md_text_server("smry", file = "R/text.md", delim = "[smry]")
   md_text_server("tmln", file = "R/text.md", delim = "[tmln]")
