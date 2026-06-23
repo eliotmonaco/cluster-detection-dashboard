@@ -5,6 +5,11 @@ clust_smry <- summarize_clusters(ssresults, syn)
 
 syndata$cluster_summary = clust_smry
 
+saveRDS(
+  clust_smry,
+  paste0("data/prep/cluster-summaries/clust-smry-", end_date, ".rds")
+)
+
 # Cluster timeline
 files <- list.files("data/prep/cluster-summaries", full.names = TRUE)
 
@@ -31,9 +36,5 @@ syndata$cluster_timeline <- list(
   hospital = p2
 )
 
-saveRDS(
-  clust_smry,
-  paste0("data/prep/cluster-summaries/clust-smry-", end_date, ".rds")
-)
 saveRDS(syndata, "data/dashboard/syndrome_data.rds")
 
