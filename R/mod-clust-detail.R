@@ -5,8 +5,7 @@ cluster_map_ui <- function(id) {
   card(
     leaflet::leafletOutput(NS(id, "clustmap")),
     full_screen = TRUE,
-    height = "500px",
-    class = "clust-row-1"
+    height = "500px"
   )
 }
 
@@ -48,6 +47,11 @@ cluster_map_server <- function(id, rv, src, var, loc_bnd, hosp_loc, gp) {
       rv[[map_id]] <- NULL
     })
 
+    # Set map cluster ID to NULL when a new RI minimum is selected
+    observeEvent(rv$ri, {
+      rv[[map_id]] <- NULL
+    })
+
     # On map click update map cluster ID
     observeEvent(input$clustmap_shape_click, {
       rv[[map_id]] <- input$clustmap_shape_click$id
@@ -70,36 +74,32 @@ cluster_map_server <- function(id, rv, src, var, loc_bnd, hosp_loc, gp) {
 }
 
 # Cluster locations table
-location_table_ui <- function(id, output_name = "loctblempty") {
+location_table_ui <- function(id, output_name = "loctblempty", suppr) {
   card(
     card_header("Locations in cluster"),
     reactable::reactableOutput(NS(id, "loctbl")),
-    # conditional_footnote(id, output_name, suppr = 16),
+    conditional_footnote(id, output_name, suppr),
     full_screen = TRUE,
-    height = "500px",
-    class = "clust-row-1"
+    height = "500px"
   )
 }
 
-location_table_server <- function(id, rv, src) {
+location_table_server <- function(id, rv, src, suppr) {
   moduleServer(id, function(input, output, session) {
     map_id <- paste0("map_id_", src)
 
     # Location table
     output$loctbl <- reactable::renderReactable({
-      validate(need(
-        rv[[map_id]],
-        paste(
-          "Select a cluster on the map or a row in the cluster table",
-          "to see location details"
-        )
-      ))
+      validate(need(rv[[map_id]], paste(
+        "Select a cluster on the map or a row in the cluster table to see",
+        "location details"
+      )))
 
       location_table(
         rv[[paste0("clustdata_", src)]]$gis,
         id = rv[[map_id]],
         src = src,
-        suppr = 16
+        suppr = suppr
       )
     })
 
@@ -113,18 +113,17 @@ location_table_server <- function(id, rv, src) {
 }
 
 # Cluster table
-cluster_table_ui <- function(id, output_name = "clusttblempty") {
+cluster_table_ui <- function(id, output_name = "clusttblempty", suppr) {
   card(
     card_header("Clusters"),
     reactable::reactableOutput(NS(id, "clusttbl")),
-    # conditional_footnote(id, output_name, suppr = 16),
+    conditional_footnote(id, output_name, suppr),
     full_screen = TRUE,
-    min_height = "200px",
-    class = "clust-row-2"
+    min_height = "200px"
   )
 }
 
-cluster_table_server <- function(id, rv, src) {
+cluster_table_server <- function(id, rv, src, suppr) {
   moduleServer(id, function(input, output, session) {
     map_id <- paste0("map_id_", src)
 
@@ -148,16 +147,13 @@ cluster_table_server <- function(id, rv, src) {
 
     # Cluster table
     output$clusttbl <- reactable::renderReactable({
-      validate(need(
-        clustdata()$shapeclust,
-        "No clusters detected"
-      ))
+      validate(need(clustdata()$shapeclust, "No clusters detected"))
 
       cluster_table(
         clustdata()$shapeclust,
         bg_color = rv$aux$ri_bg,
         text_color = rv$aux$ri_text,
-        suppr = 16
+        suppr = suppr
       )
     })
 
@@ -171,8 +167,7 @@ cluster_table_server <- function(id, rv, src) {
     # When cluster table row is selected, update map cluster ID
     observeEvent(reactable::getReactableState("clusttbl"), {
       rv[[map_id]] <- reactable::getReactableState(
-        "clusttbl",
-        name = "selected"
+        "clusttbl", name = "selected"
       )
     })
   })

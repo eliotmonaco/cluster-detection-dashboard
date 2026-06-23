@@ -8,7 +8,7 @@ dd_ui <- function(id, header) {
   )
 }
 
-dd_server <- function(id, rv, src, var) {
+dd_server <- function(id, rv, src, var, suppr) {
   moduleServer(id, function(input, output, session) {
     # Data details table data
     datadetails <- reactive({
@@ -21,16 +21,13 @@ dd_server <- function(id, rv, src, var) {
           cluster_data = rv[[paste0("clustdata_", src)]],
           var = var,
           src = src,
-          suppr = 16
+          suppr = suppr
         )
     })
 
     # Data details table
     output$ddtable <- reactable::renderReactable({
-      validate(need(
-        datadetails(),
-        "No data available"
-      ))
+      validate(need(datadetails(), "No data available"))
 
       dd_table(datadetails(), var = var, color = rv$aux$ri_bg)
     })

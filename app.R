@@ -28,6 +28,9 @@ geodata <- readRDS("data/dashboard/geographic_data.rds")
 # Import ANSI codes
 ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 
+# Data suppression level (NULL for no suppression)
+suppr_lvl <- 16
+
 # UI ----------------------------------------------------------------------
 
 ui <- page_navbar(
@@ -66,18 +69,18 @@ ui <- page_navbar(
           syn_heading_ui("pat"),
           layout_column_wrap(
             cluster_map_ui("pat"),
-            location_table_ui("pat")
+            location_table_ui("pat", suppr = suppr_lvl)
           ),
-          cluster_table_ui("pat")
+          cluster_table_ui("pat", suppr = suppr_lvl)
         ),
         nav_panel(
           "Clusters by hospital location",
           syn_heading_ui("hosp"),
           layout_column_wrap(
             cluster_map_ui("hosp"),
-            location_table_ui("hosp")
+            location_table_ui("hosp", suppr = suppr_lvl)
           ),
-          cluster_table_ui("hosp")
+          cluster_table_ui("hosp", suppr = suppr_lvl)
         )
       )
     )
@@ -126,18 +129,18 @@ ui <- page_navbar(
     )
   ),
 
-  nav_panel(
-    "Time series",
-    layout_sidebar(
-      sidebar = sidebar(
-        date = auxdata$date_updated,
-        syn_select_ui("ts", auxdata$syn),
-        days_select_ui("ts", auxdata$ts)
-      ),
-      ts_plot_ui("pat", auxdata$tstext$pat),
-      ts_plot_ui("hosp", auxdata$tstext$hosp)
-    )
-  ),
+  # nav_panel(
+  #   "Time series",
+  #   layout_sidebar(
+  #     sidebar = sidebar(
+  #       date = auxdata$date_updated,
+  #       syn_select_ui("ts", auxdata$syn),
+  #       days_select_ui("ts", auxdata$ts)
+  #     ),
+  #     ts_plot_ui("pat", auxdata$tstext$pat),
+  #     ts_plot_ui("hosp", auxdata$tstext$hosp)
+  #   )
+  # ),
 
   nav_panel(
     "Syndromes",
@@ -172,7 +175,7 @@ server <- function(input, output, session) {
   # Syndrome selection
   syn_select_server("synclust", rv, auxdata$ri_bg)
   syn_select_server("dd", rv, auxdata$ri_bg)
-  syn_select_server("ts", rv, auxdata$ri_bg)
+  # syn_select_server("ts", rv, auxdata$ri_bg)
 
   # Recurrence interval selection
   ri_select_server("smry", rv)
@@ -183,7 +186,7 @@ server <- function(input, output, session) {
   zoom_select_server("synclust", rv)
 
   # Days selection
-  days_select_server("ts", rv)
+  # days_select_server("ts", rv)
 
   # Compact table toggle
   compact_toggle_server("smry", rv)
@@ -204,8 +207,8 @@ server <- function(input, output, session) {
   cluster_timeline_server("hosp", rv, "hospital")
 
   # Time series
-  ts_plot_server("pat", rv, "patient")
-  ts_plot_server("hosp", rv, "hospital")
+  # ts_plot_server("pat", rv, "patient")
+  # ts_plot_server("hosp", rv, "hospital")
 
   # Cluster maps
   cluster_map_server(
@@ -225,20 +228,20 @@ server <- function(input, output, session) {
   cluster_summary_server("smry", rv)
 
   # Clusters by syndrome
-  cluster_table_server("pat", rv, "patient")
-  cluster_table_server("hosp", rv, "hospital")
-  location_table_server("pat", rv, "patient")
-  location_table_server("hosp", rv, "hospital")
+  cluster_table_server("pat", rv, "patient", suppr_lvl)
+  cluster_table_server("hosp", rv, "hospital", suppr_lvl)
+  location_table_server("pat", rv, "patient", suppr_lvl)
+  location_table_server("hosp", rv, "hospital", suppr_lvl)
 
   # Data details
-  dd_server("pat-res", rv, "patient", "residence")
-  dd_server("pat-travel", rv, "patient", "travel")
-  dd_server("pat-sex", rv, "patient", "sex")
-  dd_server("pat-age", rv, "patient", "age_group")
-  dd_server("hosp-res", rv, "hospital", "residence")
-  dd_server("hosp-travel", rv, "hospital", "travel")
-  dd_server("hosp-sex", rv, "hospital", "sex")
-  dd_server("hosp-age", rv, "hospital", "age_group")
+  dd_server("pat-res", rv, "patient", "residence", suppr_lvl)
+  dd_server("pat-travel", rv, "patient", "travel", suppr_lvl)
+  dd_server("pat-sex", rv, "patient", "sex", suppr_lvl)
+  dd_server("pat-age", rv, "patient", "age_group", suppr_lvl)
+  dd_server("hosp-res", rv, "hospital", "residence", suppr_lvl)
+  dd_server("hosp-travel", rv, "hospital", "travel", suppr_lvl)
+  dd_server("hosp-sex", rv, "hospital", "sex", suppr_lvl)
+  dd_server("hosp-age", rv, "hospital", "age_group", suppr_lvl)
 
   # Syndromes
   syn_info_table_server("syn", rv)
