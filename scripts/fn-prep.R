@@ -271,7 +271,10 @@ config_dd <- function(df, ansi_codes, residence_data) {
 
   sexcat <- c("F" = "Female", "M" = "Male", "U" = "Unknown/Other")
 
-  rescat <- c("Kansas City, MO", "KC region", "Other US", "Other/unknown")
+  rescat <- c(
+    "Kansas City, MO", "Other KC region",
+    "Other US state/terr.", "Other/unknown"
+  )
 
   # Create regex patterns from `residence_data$kcarea_places`
   p <- lapply(residence_data$kcarea_places, \(df) {
