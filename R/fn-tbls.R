@@ -233,15 +233,14 @@ cluster_table <- function(df, bg_color, text_color, suppr = NULL) {
         ~ format(as.Date(.x, "%Y/%m/%d"), "%b %d, %Y")
       ),
       dplyr::across(
-        c(test_stat, ode),
+        c(test_stat, expected, ode),
         ~ setmeup::round_ties_away(.x, 2)
       ),
       dplyr::across(
         c(p_value, recurr_int),
         ~ prettyNum(signif(.x, 2), scientific = TRUE)
       ),
-      ri_level = stringr::str_to_sentence(ri_level),
-      expected = setmeup::round_ties_away(expected, 0)
+      ri_level = stringr::str_to_sentence(ri_level)
     )
 
   if (!is.null(suppr)) {
@@ -376,8 +375,10 @@ location_table <- function(
     dplyr::select(loc_id, kc, loc_obs, loc_exp, loc_ode) |>
     dplyr::mutate(
       kc = stringr::str_to_sentence(kc),
-      loc_exp = setmeup::round_ties_away(loc_exp, 0),
-      loc_ode = setmeup::round_ties_away(loc_ode, 2)
+      dplyr::across(
+        c(loc_exp, loc_ode),
+        ~ setmeup::round_ties_away(.x, 2)
+      )
     )
 
   if (!is.null(suppr)) {
@@ -410,7 +411,7 @@ location_table <- function(
 
   # Style columns
   col_defs <- lapply(colnames(df), \(x) {
-    if (x %in% c("loc_obs", "loc_exp")) {
+    if (x %in% c("loc_obs", "loc_exp", "loc_ode")) {
       reactable::colDef(
         name = names(vars)[vars == x],
         minWidth = 80,
