@@ -110,6 +110,7 @@ ui <- page_navbar(
         ri_select_ui("dd", auxdata$ri_levels)
       ),
       md_text_ui("dd"),
+      suppr_text_ui("dd", suppr = suppr_lvl),
       navset_tab(
         nav_panel(
           "Data by patient location",
@@ -199,6 +200,8 @@ server <- function(input, output, session) {
   md_text_server("smry", file = "R/text.md", delim = "[smry]")
   md_text_server("tmln", file = "R/text.md", delim = "[tmln]")
   md_text_server("dd", file = "R/text.md", delim = "[dd]")
+
+  suppr_text_server("dd", suppr_lvl)
 
   # PLOTS
 

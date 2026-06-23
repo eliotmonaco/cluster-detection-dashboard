@@ -462,13 +462,11 @@ update_cluster_table_id <- function(id) {
 
 # Add footnote to reactable output in UI using conditionalPanel()
 # suppr = the suppression level (counts below this number will be suppressed)
-conditional_footnote <- function(id, output_name, suppr) {
+tbl_suppr_footnote <- function(id, output_name, suppr) {
   if (is.null(suppr)) return(invisible(NULL))
 
-  cond <- paste0("!output.", output_name)
-
   conditionalPanel(
-    condition = cond,
+    condition = paste0("output.", output_name),
     div(
       paste0(
         "When observed counts are between 0 and ", suppr, ", observed and ",

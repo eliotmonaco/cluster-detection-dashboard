@@ -27,3 +27,26 @@ syn_heading_server <- function(id, rv) {
   })
 }
 
+# Conditional text section
+suppr_text_ui <- function(id, suppr) {
+  conditionalPanel(
+    condition = "output.suppr_txt",
+    div(paste0(
+      "When counts are between 0 and ", suppr, ", values are suppressed ",
+      "(indicated by \"*\")."
+    )),
+    ns = NS(id)
+  )
+}
+
+suppr_text_server <- function(id, suppr) {
+  moduleServer(id, function(input, output, session) {
+    # Logical output to trigger conditionalPanel()
+    output$suppr_txt <- reactive({
+      !is.null(suppr)
+    })
+
+    outputOptions(output, "suppr_txt", suspendWhenHidden = FALSE)
+  })
+}
+
