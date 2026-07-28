@@ -3,7 +3,7 @@
 ts_plot_ui <- function(id, header) {
   card(
     card_header(header),
-    highcharter::highchartOutput(NS(id, "tsplot"))
+    plotly::plotlyOutput(NS(id, "tsplot"))
   )
 }
 
@@ -20,8 +20,8 @@ ts_plot_server <- function(id, rv, src) {
     })
 
     # Time series plot
-    output$tsplot <- highcharter::renderHighchart({
-      ts_plot(
+    output$tsplot <- plotly::renderPlotly({
+      kcPopsci:::ess_plot_timeseries(
         data(),
         title = rv$data$syndromes[[rv$syn]]$name1
       )

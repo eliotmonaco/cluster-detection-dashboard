@@ -224,15 +224,6 @@ dd$hospital <- lapply(dd$hospital, \(df) {
   )
 })
 
-ts <- lapply(ts, \(ls) {
-  lapply(ls, \(df) {
-    tryCatch(
-      config_ts(df),
-      error = function(e) e
-    )
-  })
-})
-
 # Separate data from error tables in data details
 dderror <- lapply(dd, \(ls1) {
   lapply(ls1, \(ls2) {

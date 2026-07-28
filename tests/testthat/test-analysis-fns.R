@@ -44,19 +44,6 @@ test_that("config_dd()", {
   expect_equal(act, exp)
 })
 
-test_that("config_ts()", {
-  source("R/analysis-fns.R", local = TRUE)
-  testdata <- readRDS(test_path("fixtures/test_analysis.rds"))
-  ts <- lapply(testdata$time_series_raw, \(ls1) {
-    lapply(ls1, \(ls2) ls2$data)
-  })
-  act <- lapply(ts, \(ls) {
-    lapply(ls, config_ts)
-  })
-  exp <- testdata$config_ts_output
-  expect_equal(act, exp)
-})
-
 test_that("get_centroids()", {
   source("R/analysis-fns.R", local = TRUE)
   testdata <- readRDS(test_path("fixtures/test_analysis.rds"))

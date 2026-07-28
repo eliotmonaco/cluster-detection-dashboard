@@ -328,31 +328,6 @@ config_dd <- function(df, ansi_codes, residence_data) {
     dplyr::select(-patient_state2)
 }
 
-# Configure time series data
-config_ts <- function(df) {
-  # Add alert status, color, symbol, and radius
-  lvl <- c("Normal", "Warning", "Anomaly")
-  fill <- c("#0703fc", "#f2c00a", "#ff0000")
-  clr <- c("#04029e", "#a17f03", "#a30202")
-  shp <- c("circle", "diamond", "triangle")
-
-  df <- df |>
-    dplyr::mutate(
-      alert_status = dplyr::case_when(
-        color_id == 0 ~ lvl[1],
-        color_id == 1 ~ lvl[1],
-        color_id == 2 ~ lvl[2],
-        color_id == 3 ~ lvl[3]
-      ),
-      alert_status = factor(alert_status, levels = lvl),
-      alert_fill = fill[alert_status],
-      alert_color = clr[alert_status],
-      alert_symbol = shp[alert_status],
-      alert_radius = 5,
-      alert_line = 1
-    )
-}
-
 # SPATIAL DATA ------------------------------------------------------------
 
 get_centroids <- function(sf, id_var) {

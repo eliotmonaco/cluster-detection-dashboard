@@ -7,7 +7,7 @@ library(purrr)
 library(stringr)
 library(setmeup)
 library(sf)
-library(highcharter)
+library(plotly)
 library(reactable)
 library(leaflet)
 library(markdown)
@@ -29,7 +29,7 @@ geodata <- readRDS("data/dashboard/geographic_data.rds")
 ansi <- readRDS("data/dashboard/ansi_state_codes.rds")
 
 # Data suppression level (NULL for no suppression)
-suppr_lvl <- 16
+suppr_lvl <- NULL
 
 # UI ----------------------------------------------------------------------
 
@@ -129,18 +129,18 @@ ui <- page_navbar(
     )
   ),
 
-  # nav_panel(
-  #   "Time series",
-  #   layout_sidebar(
-  #     sidebar = sidebar(
-  #       date = auxdata$date_updated,
-  #       syn_select_ui("ts", auxdata$syn),
-  #       days_select_ui("ts", auxdata$ts)
-  #     ),
-  #     ts_plot_ui("pat", auxdata$tstext$pat),
-  #     ts_plot_ui("hosp", auxdata$tstext$hosp)
-  #   )
-  # ),
+  nav_panel(
+    "Time series",
+    layout_sidebar(
+      sidebar = sidebar(
+        date = auxdata$date_updated,
+        syn_select_ui("ts", auxdata$syn),
+        days_select_ui("ts", auxdata$ts)
+      ),
+      ts_plot_ui("pat", auxdata$tstext$pat),
+      ts_plot_ui("hosp", auxdata$tstext$hosp)
+    )
+  ),
 
   nav_panel(
     "Syndromes",
@@ -175,7 +175,7 @@ server <- function(input, output, session) {
   # Syndrome selection
   syn_select_server("synclust", rv, auxdata$ri_bg)
   syn_select_server("dd", rv, auxdata$ri_bg)
-  # syn_select_server("ts", rv, auxdata$ri_bg)
+  syn_select_server("ts", rv, auxdata$ri_bg)
 
   # Recurrence interval selection
   ri_select_server("smry", rv)
@@ -186,7 +186,7 @@ server <- function(input, output, session) {
   zoom_select_server("synclust", rv)
 
   # Days selection
-  # days_select_server("ts", rv)
+  days_select_server("ts", rv)
 
   # Compact table toggle
   compact_toggle_server("smry", rv)
@@ -208,8 +208,8 @@ server <- function(input, output, session) {
   cluster_timeline_server("hosp", rv, "hospital")
 
   # Time series
-  # ts_plot_server("pat", rv, "patient")
-  # ts_plot_server("hosp", rv, "hospital")
+  ts_plot_server("pat", rv, "patient")
+  ts_plot_server("hosp", rv, "hospital")
 
   # Cluster maps
   cluster_map_server(
