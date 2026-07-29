@@ -21,7 +21,7 @@ ts_plot_server <- function(id, rv, src) {
 
     # Time series plot
     output$tsplot <- plotly::renderPlotly({
-      kcPopsci:::ess_plot_timeseries(
+      kcPopsci::ess_plot_ts(
         data(),
         title = rv$data$syndromes[[rv$syn]]$name1
       )
