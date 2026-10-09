@@ -48,13 +48,13 @@ auxdata$tstext <- list(
 gp <- list(
   study = list(
     name = "Study area",
-    clr = "#aaa", fill = "#aaa", wt = 2,
-    opac1 = 1, opac2 = .1, shp = "square"
+    clr = "#777", fill = "#aaa", wt = 2,
+    opac1 = 1, opac2 = .3, shp = "square"
   ),
   kc = list(
-    name = "KC boundary",
+    name = "Kansas City",
     clr = "#024cbf", fill = "#024cbf", wt = 2,
-    opac1 = 1, opac2 = 0, shp = "square"
+    opac1 = 1, opac2 = .2, shp = "square"
   ),
   clust = list(
     name = "Syndrome cluster",
@@ -64,25 +64,25 @@ gp <- list(
   hosp = list(
     name = "Hospital",
     class = "hosp-icon-legend"
-  ),
-  wc = list(
-    name = "World Cup site",
-    class = "wc-icon-legend"
-  )
+  )#,
+  # wc = list(
+  #   name = "World Cup site",
+  #   class = "wc-icon-legend"
+  # )
 )
 
 auxdata$graph <- list(
   patient = list(
-    study = replace(gp$study, 1, "Study area (ZCTA)"),
+    study = replace(gp$study, 1, "Study areas (ZCTAs)"),
     kc = gp$kc,
-    worldcup = gp$wc,
+    # worldcup = gp$wc,
     clust = gp$clust
   ),
   hospital = list(
-    study = replace(gp$study, 1, "Study area (county)"),
+    study = replace(gp$study, 1, "Study areas (counties)"),
     kc = gp$kc,
     hosp = gp$hosp,
-    worldcup = gp$wc,
+    # worldcup = gp$wc,
     clust = replace(gp$clust, which(names(gp$clust) == "shp"), "circle")
   )
 )
