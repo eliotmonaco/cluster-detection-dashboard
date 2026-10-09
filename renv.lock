@@ -2627,6 +2627,7 @@
       "Roxygen": "list(markdown = TRUE)",
       "Suggests": [
         "ggplot2",
+        "ggtext",
         "knitr",
         "plotly",
         "rmarkdown",
@@ -2653,7 +2654,7 @@
       "RemoteRepo": "kcPopsci",
       "RemoteUsername": "kchd-ophs",
       "RemoteRef": "HEAD",
-      "RemoteSha": "c3f7e73ce0c1ce76c0a0e18446c317321ba0b9d9",
+      "RemoteSha": "665ea359841ead002c96474202c9186b6e9d4760",
       "NeedsCompilation": "no",
       "Author": "Eliot Monaco [aut, cre] (ORCID: <https://orcid.org/0000-0002-5982-5854>), Dylan Knaggs [aut]",
       "Maintainer": "Eliot Monaco <eliotmonaco@gmail.com>"
