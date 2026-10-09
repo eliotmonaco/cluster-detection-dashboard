@@ -6,8 +6,7 @@ t0 <- Sys.time()
 
 # Import syndromes table
 syn <- readxl::read_excel("data/prep/syndromes.xlsx")
-# syn <- syn[c(5, 9, 16, 20, 21), ]
-# syn <- syn[5, ]
+# syn <- syn[1, ]
 
 # Start date = 1 year and 1 day before current date
 start_date <- get_start_date(end_date)
@@ -32,6 +31,9 @@ syn <- syn |>
   ) |>
   rename(name2 = name)
 
+# Counties for hospital data source
+rgn <- c("cass", "clay", "jackson", "platte")
+
 # Data details: Pulled by both patient location and hospital location. Patient
 # locations are ZCTAs intersecting with Cass, Clay, Jackson, or Platte County.
 # Hospitals are any hospital within those counties.
@@ -40,27 +42,35 @@ syn <- syn |>
 flds <- c(
   "Date", "Time", "Age", "AgeGroup", "Sex", "DateOfBirth",
   "ZipCode", "Patient_City", "Patient_State", "Patient_Country", "Travel",
-  "HospitalName", "HospitalState", "VisitNumber", "Patient_ID", "HasBeenE"
+  "HospitalName", "HospitalState", "VisitNumber", "Patient_ID", "HasBeenE",
+  "EssenceID"
 )
 
-# Build URLs
+# Build URLs for data details
 url_dd <- list(
-  patient = build_ess_url(
-    syndrome = syn_api,
+  patient = ess_build_url(
+    data_source = "patient",
+    time_resolution = "daily",
     start = start_date,
     end = end_date,
-    data_source = "patient",
+    syndrome = syn_api,
+    zipcodes = geodata$zctas$GEOID20,
     output = "dd",
     dd_fields = flds,
-    zipcodes = geodata$zctas$GEOID20
+    free_vars = list(hasBeenE = 1),
+    user_id = Sys.getenv("ESSENCE_USER_ID")
   ),
-  hospital = build_ess_url(
-    syndrome = syn_api,
+  hospital = ess_build_url(
+    data_source = "hospital",
+    time_resolution = "daily",
     start = start_date,
     end = end_date,
-    data_source = "hospital",
+    syndrome = syn_api,
+    regions = rgn,
     output = "dd",
-    dd_fields = flds
+    dd_fields = flds,
+    free_vars = list(hasBeenE = 1),
+    user_id = Sys.getenv("ESSENCE_USER_ID")
   )
 )
 
@@ -72,22 +82,29 @@ url_dd <- list(
 # Time series date range
 ts_range <- seq.Date(start_date, end_date, "day")
 
-# Build URLs
+# Build URLs for time series
 url_ts <- list(
-  patient = build_ess_url(
-    syndrome = syn_api,
-    start = start_date,
-    end = end_date,
+  patient = ess_build_url(
     data_source = "patient",
-    output = "ts",
-    zipcodes = kcData::geoid$zcta2020
-  ),
-  hospital = build_ess_url(
-    syndrome = syn_api,
+    time_resolution = "daily",
     start = start_date,
     end = end_date,
+    syndrome = syn_api,
+    zipcodes = geoid$zcta2020$geoid,
+    output = "ts",
+    free_vars = list(hasBeenE = 1),
+    user_id = Sys.getenv("ESSENCE_USER_ID")
+  ),
+  hospital = ess_build_url(
     data_source = "hospital",
-    output = "ts"
+    time_resolution = "daily",
+    start = start_date,
+    end = end_date,
+    syndrome = syn_api,
+    regions = rgn,
+    output = "ts",
+    free_vars = list(hasBeenE = 1),
+    user_id = Sys.getenv("ESSENCE_USER_ID")
   )
 )
 
@@ -97,7 +114,7 @@ t1 <- Sys.time()
 ddraw <- lapply(url_dd, \(x) {
   lapply(x, \(y) {
     tryCatch(
-      capture_message(get_ess_dd(y)),
+      capture_message(ess_get_data(y)),
       error = function (e) e
     )
   })
@@ -106,7 +123,7 @@ ddraw <- lapply(url_dd, \(x) {
 tsraw <- lapply(url_ts, \(x) {
   lapply(x, \(y) {
     tryCatch(
-      capture_message(get_ess_ts(y)),
+      capture_message(ess_get_data(y)),
       error = function (e) e
     )
   })
@@ -189,7 +206,7 @@ ts <- lapply(tsraw, \(ls1) {
   })
 })
 
-# Configure
+# Configure data details
 dd$patient <- lapply(dd$patient, \(df) {
   tryCatch(
     expr = {
@@ -220,6 +237,21 @@ dd$hospital <- lapply(dd$hospital, \(df) {
 
       ls
     },
+    error = function(e) e
+  )
+})
+
+# Configure time series
+ts$patient <- lapply(ts$patient, \(df) {
+  tryCatch(
+    config_ts(df),
+    error = function(e) e
+  )
+})
+
+ts$hospital <- lapply(ts$hospital, \(df) {
+  tryCatch(
+    config_ts(df),
     error = function(e) e
   )
 })

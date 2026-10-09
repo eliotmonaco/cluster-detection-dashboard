@@ -6,6 +6,10 @@ filter_data_details <- function(ls, src = c("hospital", "patient"), syn) {
 
   df <- ls[[src]][[syn]]
 
+  if (is.null(df)) {
+    return(NULL)
+  }
+
   # Convert variables with many possible values to factor here to keep levels
   # specific to this syndrome
   lvl <- sort(unique(df$travel))
@@ -56,7 +60,7 @@ dd_full_summary <- function(df, var, suppr = NULL) {
 
   df |>
     dplyr::mutate(
-      pct = setmeup::pct(suppressWarnings(as.numeric(n)), total)
+      pct = setmeup::pct(suppressWarnings(as.numeric(n)), total, 0)
     ) |>
     dplyr::arrange(.data[[var]])
 }
@@ -88,7 +92,7 @@ assemble_dd_summaries <- function(
   src <- match.arg(src)
 
   # Return NULL if no data
-  if (nrow(data_details) == 0) {
+  if (is.null(data_details) || nrow(data_details) == 0) {
     return(NULL)
   }
 

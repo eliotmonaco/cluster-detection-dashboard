@@ -7,6 +7,8 @@ library(purrr)
 library(stringr)
 library(setmeup)
 library(openxlsx2)
+library(kcPopsci)
+library(kcData)
 
 # Load Essence profile object, needed for `Rnssp::get_api_data()`
 load("data/prep/myProfile.rda")

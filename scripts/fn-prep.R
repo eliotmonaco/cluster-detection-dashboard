@@ -1,122 +1,7 @@
 # ESSENCE DATA ------------------------------------------------------------
 
-# Build URL for Essence API
-build_ess_url <- function(
-    syndrome, # list of syndromes built as in `syndromes.R`
-    start, # start date (YYYY-MM-DD)
-    end = Sys.Date(), # end date (YYYY-MM-DD)
-    data_source = c("hospital", "patient"),
-    output = c("dd", "ts"),
-    dd_fields = NULL,
-    zipcodes = NULL
-) {
-  data_source <- match.arg(data_source)
-  output <- match.arg(output)
-
-  start <- as.Date(start); end <- as.Date(end)
-
-  if (is.na(start) | is.na(end)) {
-    stop("`start` and `end` must be valid dates formatted YYYY-MM-DD")
-  }
-
-  # Output parameters
-  if (output == "dd") {
-    if (is.null(dd_fields)) {
-      params_out <- "aqtTarget=DataDetails"
-    } else {
-      dd_fields <- URLencode(dd_fields)
-
-      dd_fields <- paste0("field=", c(dd_fields, "EssenceID"))
-
-      params_out <- paste(
-        c("aqtTarget=DataDetails", dd_fields),
-        collapse = "&"
-      )
-    }
-
-    op <- "dataDetails/csv?"
-  } else if (output == "ts") {
-    op <- "timeSeries?"
-
-    params_out <- "aqtTarget=TimeSeries"
-  }
-
-  # Data source & geography parameters
-  if (data_source == "hospital") {
-    params_ds <- "datasource=va_hosp"
-
-    params_geo <- paste(
-      "geographySystem=hospitalregion",
-      "geography=mo_cass",
-      "geography=mo_clay",
-      "geography=mo_jackson",
-      "geography=mo_platte",
-      sep = "&"
-    )
-  } else if (data_source == "patient") {
-    params_ds <- "datasource=va_er"
-
-    params_geo <- paste(
-      "geographySystem=zipcode",
-      paste0("geography=", paste(zipcodes, collapse = ",")),
-      sep = "&"
-    )
-  }
-
-  # Additional parameters
-  params_add <- paste(
-    "userId=5809",
-    paste0("startDate=", format(start, "%d%b%Y")),
-    paste0("endDate=", format(end, "%d%b%Y")),
-    "percentParam=noPercent",
-    "detector=probrepswitch",
-    "timeResolution=daily",
-    "hasBeenE=1",
-    sep = "&"
-  )
-
-  params <- paste(
-    params_out,
-    params_ds,
-    params_geo,
-    params_add,
-    sep = "&"
-  )
-
-  endpoint <- "https://moessence.inductivehealth.com/ih_essence/api/"
-
-  paste0(
-    endpoint,
-    op,
-    paste0(params, "&", syndrome)
-  )
-}
-
 get_start_date <- function(end_date) {
   end_date - lubridate::years(1)
-}
-
-# Wrapper for `Rnssp::get_api_data()` to pull data details
-get_ess_dd <- function(url, repair_colnames = TRUE) {
-  Rnssp::get_api_data(
-    url,
-    fromCSV = TRUE,
-    col_types = readr::cols(.default = "c"),
-    name_repair = ifelse(repair_colnames, setmeup::fix_colnames, "unique")
-  )
-}
-
-# Wrapper for `Rnssp::get_api_data()` to pull time series
-get_ess_ts <- function(url) {
-  ls <- Rnssp::get_api_data(url)
-
-  df <- ls$timeSeriesData
-
-  colnames(df) <- setmeup::fix_colnames(colnames(df))
-
-  df$date <- as.Date(df$date)
-
-  df
 }
 
 # Capture both the returned value and the message or error from a function call
@@ -153,7 +38,7 @@ capture_message <- function(expr) {
   output
 }
 
-# Deduplicate data details data
+# Deduplicate data details dataframe
 deduplicate_dd <- function(df, geo_var) {
   df <- df |>
     dplyr::mutate(row_id = dplyr::row_number(), .before = 1)
@@ -262,7 +147,7 @@ deduplicate_dd <- function(df, geo_var) {
   )
 }
 
-# Configure data details data
+# Configure data details dataframe
 config_dd <- function(df, ansi_codes, residence_data) {
   agecat <- c(
     "00-04" = "0-4", "05-17" = "5-17", "18-44" = "18-44",
@@ -310,7 +195,7 @@ config_dd <- function(df, ansi_codes, residence_data) {
       ),
       # Create `residence` variable based on ZIP code, city, and/or state
       residence = case_when(
-        zip_code %in% kcData::geoid$zcta2020 ~ rescat[1],
+        zip_code %in% kcData::geoid$zcta2020$geoid ~ rescat[1],
         grepl("(?i)kansa.? city", patient_city) & patient_state == "M[OI]" ~
           rescat[1],
         zip_code %in% residence_data$kcarea_zctas ~ rescat[2],
@@ -326,6 +211,13 @@ config_dd <- function(df, ansi_codes, residence_data) {
       residence = factor(residence, levels = rescat)
     ) |>
     dplyr::select(-patient_state2)
+}
+
+# Configure time series dataframe
+config_ts <- function(df) {
+  df$date <- as.Date(df$date)
+
+  df
 }
 
 # SPATIAL DATA ------------------------------------------------------------

@@ -2,6 +2,8 @@
 
 # Filter syndrome summary table by RI minimum
 filter_cluster_summary <- function(df, ri_min, compact = FALSE) {
+  df[is.na(df)] <- 0
+
   lvl <- list(
     "very_weak" = 1,
     "weak" = 2,
@@ -23,10 +25,10 @@ filter_cluster_summary <- function(df, ri_min, compact = FALSE) {
   if (compact) {
     df[, vars] |>
       dplyr::mutate(
-        total = rowSums(dplyr::across(dplyr::matches("_pat$|_hosp$")))
+        total_clust = rowSums(dplyr::across(dplyr::matches("_pat$|_hosp$"))),
       ) |>
-      dplyr::filter_out(total == 0) |>
-      dplyr::select(-total)
+      dplyr::filter_out(total_clust == 0) |>
+      dplyr::select(-total_clust)
   } else {
     df[, vars]
   }
